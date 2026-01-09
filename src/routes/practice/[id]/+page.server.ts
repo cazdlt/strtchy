@@ -2,7 +2,7 @@ import { db } from '$lib/db';
 import { practiceLogs, practiceData, routineMovements, routines, movements } from '$lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
-import type { PageData, ActionFailure, RequestEvent } from './$types';
+import type { PageData, RequestEvent } from './$types';
 import { nanoid } from 'nanoid';
 
 // Helper to create practice log from routine ID
@@ -21,7 +21,7 @@ async function _createPracticeLog(routineId: string, userId?: string): Promise<s
 	return practiceId;
 }
 
-export async function load({ params }: { params: { id: string } }): Promise<PageData> {
+export async function load({ params }: { params: { id: string } }) {
 	const practice = await db.query.practiceLogs.findFirst({
 		where: eq(practiceLogs.id, params.id),
 		with: {

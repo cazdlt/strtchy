@@ -3,7 +3,7 @@ import { practiceLogs, practiceData, routineMovements, movements } from '$lib/db
 import { eq, desc } from 'drizzle-orm';
 import type { PageData } from '../$types';
 
-export async function load({ params }: { params: { id: string } }): Promise<PageData> {
+export async function load({ params }: { params: { id: string } }) {
 	const practice = await db.query.practiceLogs.findFirst({
 		where: eq(practiceLogs.id, params.id),
 		with: {

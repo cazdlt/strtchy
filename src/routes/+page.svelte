@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { formatDuration } from '$lib/utils/formatting';
 	import type { PageData } from './$types';
+	import logo from '$lib/assets/logo.svg';
 
 	export let data: PageData;
 </script>
@@ -12,11 +13,11 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
 <header class="p-6 border-b border-gray-800">
 	<div class="max-w-4xl mx-auto flex items-center justify-between">
-		<div>
-			<h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-				Strtchy
-			</h1>
-			<p class="text-gray-400 mt-1">Your recovery companion</p>
+		<div class="flex items-center gap-4">
+			<img src={logo} alt="Strtchy Logo" class="h-10" />
+			<div>
+				<p class="text-gray-400 text-sm">Your recovery companion</p>
+			</div>
 		</div>
 		{#if data.user}
 			<form method="POST" action="?/logout">

@@ -1,11 +1,11 @@
 import { db } from '$lib/db';
 import { routines, routineMovements, practiceLogs } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
-import type { PageData, ActionFailure, RequestEvent } from './$types';
+import type { PageData, ActionsFailure, RequestEvent } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { nanoid } from 'nanoid';
 
-export async function load({ params }: { params: { id: string } }): Promise<PageData> {
+export async function load({ params }: { params: { id: string } }) {
 	const routine = await db.query.routines.findFirst({
 		where: eq(routines.id, params.id),
 		with: {

@@ -74,10 +74,6 @@
 							{/if}
 						</div>
 
-						{#if rm.customMeasurement}
-							<p class="text-xs text-gray-500">Measurement: {rm.customMeasurement}</p>
-						{/if}
-
 						{#if rm.notes}
 							<p class="text-xs text-gray-500 italic">{rm.notes}</p>
 						{/if}

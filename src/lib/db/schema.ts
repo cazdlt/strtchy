@@ -1,18 +1,55 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
-export const users = sqliteTable('users', {
+export const users = sqliteTable('user', {
 	id: text('id').primaryKey(),
-	username: text('username').notNull().unique(),
 	email: text('email').notNull().unique(),
-	passwordHash: text('password_hash').notNull(),
+	emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
+	name: text('name'),
+	username: text('username').notNull().unique(),
+	image: text('image'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+	passwordHash: text('password_hash').notNull(),
 	preferences: text('preferences', { mode: 'json' }).$type<{
 		audioVolume?: number;
 		defaultRestTime?: number;
 		autoAdvance?: boolean;
 		keepAwake?: boolean;
 	}>(),
+});
+
+export const sessions = sqliteTable('session', {
+	id: text('id').primaryKey(),
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+	token: text('token').notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+	ipAddress: text('ip_address'),
+	userAgent: text('user_agent'),
+});
+
+export const accounts = sqliteTable('account', {
+	id: text('id').primaryKey(),
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	providerId: text('provider_id').notNull(),
+	accountId: text('account_id').notNull(),
+	accessToken: text('access_token'),
+	refreshToken: text('refresh_token'),
+	idToken: text('id_token'),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }),
+	password: text('password'),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const verifications = sqliteTable('verification', {
+	id: text('id').primaryKey(),
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	code: text('code').notNull(),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 });
 
 export const movements = sqliteTable('movements', {
@@ -60,13 +97,8 @@ export const routineMovements = sqliteTable('routine_movements', {
 		customTag?: string;
 	}>().notNull(),
 	sets: integer('sets').notNull().default(1),
+	isBilateral: integer('is_bilateral', { mode: 'boolean' }).notNull().default(false),
 	notes: text('notes'),
-});
-
-export const sessions = sqliteTable('sessions', {
-	id: text('id').primaryKey(),
-	userId: text('user_id').references(() => users.id).notNull(),
-	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
 });
 
 export const practiceLogs = sqliteTable('practice_logs', {

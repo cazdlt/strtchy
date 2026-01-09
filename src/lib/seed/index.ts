@@ -10,7 +10,7 @@ const createMovement = (
 	description: string,
 	type: 'timed' | 'reps' | 'count' | 'distance',
 	svg: string,
-	defaultTarget: { type: string; value: number; unit?: string }
+	defaultTarget: { type: 'time' | 'reps' | 'distance'; value: number; unit?: string }
 ): typeof movements.$inferInsert => ({
 	id: nanoid(),
 	name,

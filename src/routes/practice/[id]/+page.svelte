@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { scale } from 'svelte/transition';
 	import { formatDuration, formatTime } from '$lib/utils/formatting';
 	import { enhance } from '$app/forms';
 	import type { PageData } from './$types';
@@ -14,6 +15,8 @@
 	let isResting = false;
 	let elapsedSeconds = 0;
 	let restSeconds = 0;
+	let showSuccess = false;
+	let setCounterTrigger = 0;
 
 	// Wake lock
 	let wakeLock: WakeLockSentinel | null = null;
@@ -56,6 +59,11 @@
 
 	$: isTimedMovement = data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time';
 	$: targetValue = data.allRoutineMovements[currentMovementIndex]?.target?.value || 0;
+	$: currentRoutineMovement = data.allRoutineMovements[currentMovementIndex];
+	$: isBilateral = currentRoutineMovement?.isBilateral ?? false;
+	$: currentSide = isBilateral ? (currentSet % 2 === 1 ? 'Left' : 'Right') : null;
+	$: previousMovement = data.allRoutineMovements[currentMovementIndex - 1]?.movement;
+	$: nextMovement = data.allRoutineMovements[currentMovementIndex + 1]?.movement;
 
 	function startTimer() {
 		if (timer) clearInterval(timer as unknown as number);
@@ -122,11 +130,8 @@
 			if (restSeconds <= 0) {
 				if (restTimer) clearInterval(restTimer as unknown as number);
 				playBeep();
-				if (data.practice.routine.autoAdvance) {
-					moveToNextMovement();
-				} else {
-					isResting = false;
-				}
+				isResting = false;
+				moveToNextMovement();
 			}
 		}, 1000);
 	}
@@ -161,20 +166,32 @@
 		const formData = new FormData();
 		formData.append('routineMovementId', data.allRoutineMovements[currentMovementIndex].id);
 		formData.append('setNumber', currentSet.toString());
-		formData.append('value', '1'); // Default to 1 for reps/count
+		formData.append('value', '1');
 		formData.append('measurementType', 'reps');
+
+		playBeep();
+		showSuccess = true;
+		setCounterTrigger++;
 
 		fetch('?/completeSet', {
 			method: 'POST',
 			body: formData
 		}).then(() => {
-			playBeep();
 			if (currentSet >= data.allRoutineMovements[currentMovementIndex].sets) {
-				moveToNextMovement();
+				setTimeout(() => moveToNextMovement(), 300);
 			} else {
-				currentSet++;
+				setTimeout(() => {
+					currentSet++;
+					showSuccess = false;
+				}, 300);
 			}
 		});
+	}
+
+	function exitPractice() {
+		if (confirm('Exit practice? Your progress so far is saved.')) {
+			window.location.href = '/';
+		}
 	}
 </script>
 
@@ -196,10 +213,40 @@
 				Movement {currentMovementIndex + 1} of {data.allRoutineMovements.length}
 			</p>
 		</div>
-		<div class="text-sm text-gray-400">
-			{data.completedSets} / {data.totalSets} sets
+		<div class="flex items-center gap-4">
+			<div class="text-sm text-gray-400">
+				{data.completedSets} / {data.totalSets} sets
+			</div>
+			<button
+				onclick={exitPractice}
+				class="text-gray-400 hover:text-white transition-colors text-2xl p-2"
+				aria-label="Exit practice"
+			>
+				✕
+			</button>
 		</div>
 	</header>
+
+	<!-- Context bar -->
+	<div class="bg-gray-900/50 border-b border-gray-800 px-4 py-2">
+		<div class="flex justify-between items-center text-sm">
+			<div class="flex-1">
+				{#if previousMovement}
+					<span class="text-gray-500">← {previousMovement.name}</span>
+				{:else}
+					<span class="text-gray-600">Start</span>
+				{/if}
+			</div>
+			<div class="text-gray-400 text-xs px-2">●</div>
+			<div class="flex-1 text-right">
+				{#if nextMovement}
+					<span class="text-gray-500">{nextMovement.name} →</span>
+				{:else}
+					<span class="text-gray-600">Finish</span>
+				{/if}
+			</div>
+		</div>
+	</div>
 
 	<!-- Rest overlay -->
 	{#if isResting}
@@ -207,14 +254,12 @@
 			<div class="text-center">
 				<p class="text-xl text-gray-400 mb-4">Rest</p>
 				<p class="text-8xl font-bold text-blue-400 mb-4">{formatTime(restSeconds)}</p>
-				{#if !data.practice.routine.autoAdvance}
-					<button
-						on:click={moveToNextMovement}
-						class="bg-white text-black px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-all"
-					>
-						Skip Rest
-					</button>
-				{/if}
+				<button
+					onclick={moveToNextMovement}
+					class="bg-white text-black px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-all"
+				>
+					Skip Rest
+				</button>
 			</div>
 		</div>
 	{/if}
@@ -228,9 +273,19 @@
 			<!-- Movement info -->
 			<div class="flex-1 flex flex-col items-center justify-center">
 				<div class="text-center mb-6">
-					<span class="inline-block px-3 py-1 bg-gray-800 rounded-full text-sm text-gray-400 mb-4">
-						Set {currentSet} of {rm.sets}
-					</span>
+					{#if currentSide}
+						<span class="inline-block px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full text-sm mb-4">
+							{currentSide} Side
+						</span>
+					{/if}
+					{#key setCounterTrigger}
+						<span
+							class="inline-block px-3 py-1 bg-gray-800 rounded-full text-sm text-gray-400 mb-4 block"
+							in:scale={{ duration: 200 }}
+						>
+							Set {currentSet} of {rm.sets}
+						</span>
+					{/key}
 					<h2 class="text-3xl font-bold mb-2">{m.name}</h2>
 					<p class="text-gray-400 mb-6">{m.description}</p>
 
@@ -274,15 +329,15 @@
 			<div class="flex gap-3 mt-auto">
 				{#if !isTimedMovement}
 					<button
-						on:click={completeCurrentSet}
-						class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-6 px-8 rounded-xl font-semibold text-xl transition-all"
+						onclick={completeCurrentSet}
+						class="flex-1 bg-gradient-to-r {showSuccess ? 'from-emerald-500 to-emerald-600' : 'from-blue-600 to-purple-600'} hover:from-blue-500 hover:to-purple-500 text-white py-6 px-8 rounded-xl font-semibold text-xl transition-all"
 					>
-						✓ Complete Set
+						{showSuccess ? '✓ Done' : '✓ Complete Set'}
 					</button>
 				{/if}
 
 				<button
-					on:click={() => {
+					onclick={() => {
 						if (confirm('Skip this set?')) {
 							moveToNextMovement();
 						}
@@ -300,7 +355,7 @@
 					<h2 class="text-3xl font-bold mb-4">Practice Complete!</h2>
 					<p class="text-gray-400 mb-6">Great job!</p>
 					<button
-						on:click={completePractice}
+						onclick={completePractice}
 						class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-4 px-8 rounded-xl font-semibold transition-all"
 					>
 						View Summary

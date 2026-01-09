@@ -2,9 +2,10 @@ import { redirect, fail } from '@sveltejs/kit';
 import { db } from '$lib/db';
 import { movements } from '$lib/db/schema';
 import { nanoid } from 'nanoid';
+import type { RequestEvent } from './$types';
 
 	export const actions = {
-		default: async ({ request, locals }) => {
+		default: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();
 
 		const name = formData.get('name');

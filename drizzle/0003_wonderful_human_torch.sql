@@ -1,0 +1,1 @@
+ALTER TABLE `routine_movements` ADD `is_bilateral` integer DEFAULT false NOT NULL;

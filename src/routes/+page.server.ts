@@ -2,8 +2,10 @@ import { db } from '$lib/db';
 import { routines, practiceLogs } from '$lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { formatDuration, getRelativeTime } from '$lib/utils/formatting';
+import { auth } from '$lib/auth';
+import { redirect } from '@sveltejs/kit';
 
-export async function load() {
+export async function load({ locals }: { locals: App.Locals }) {
 	// Get all routines
 	const allRoutines = await db.select().from(routines).orderBy(desc(routines.createdAt));
 
@@ -22,6 +24,7 @@ export async function load() {
 		.limit(5);
 
 	return {
+		user: locals.user,
 		routines: allRoutines,
 		recentPractices: recentPractices.map((p) => ({
 			...p,
@@ -30,3 +33,10 @@ export async function load() {
 		}))
 	};
 }
+
+export const actions = {
+	logout: async ({ cookies }: { cookies: import('@sveltejs/kit').Cookies }) => {
+		cookies.delete('better-auth.session_token', { path: '/' });
+		redirect(302, '/');
+	}
+};
