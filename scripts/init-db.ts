@@ -10,10 +10,7 @@ async function init() {
 	console.log('Initializing database...');
 	
 	try {
-		// Run migrations
-		console.log('Running migrations...');
-		await migrate(db, { migrationsFolder: './drizzle' });
-		console.log('✓ Migrations completed');
+		// Skip migrations - using drizzle-kit push instead
 		
 		// Seed data
 		await seedDatabase();

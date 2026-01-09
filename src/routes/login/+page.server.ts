@@ -22,31 +22,30 @@ export const actions = {
 		}
 
 		try {
-			const session = await auth.api.signInEmail({
+			console.log('Attempting login for:', email);
+			const result = await auth.api.signInEmail({
 				body: {
 					email,
 					password
 				},
-				headers: new Headers({
-					cookie: request.headers.get('cookie') || ''
-				})
+				headers: request.headers
 			});
 
-			if (session) {
-				if (session.token) {
-					cookies.set('better-auth.session_token', session.token, {
-						path: '/',
-						httpOnly: true,
-						sameSite: 'lax',
-						secure: import.meta.env.PROD
-					});
-				}
-				redirect(302, '/');
-			} else {
+			console.log('Sign in result:', result);
+
+			if (!result) {
+				console.log('No session returned');
 				return fail(400, { credentials: true });
 			}
 		} catch (e) {
+			console.error('Login error:', e);
+			// If it's a SvelteKit redirect, let it bubble up
+			if (e && typeof e === 'object' && 'location' in e) {
+				throw e;
+			}
 			return fail(400, { credentials: true });
 		}
+
+		redirect(302, '/');
 	}
 };

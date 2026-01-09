@@ -1,5 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { sveltekitCookies } from 'better-auth/svelte-kit';
+import { getRequestEvent } from '$app/server';
 import { db } from '$lib/db';
 import * as schema from '$lib/db/schema';
 
@@ -12,7 +14,25 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false
-	}
+	},
+	user: {
+		additionalFields: {
+			username: {
+				type: 'string',
+				required: false
+			}
+		}
+	},
+	advanced: {
+		useSecureCookies: false,
+		disableCSRFCheck: true
+	},
+	session: {
+		cookieCache: {
+			enabled: false
+		}
+	},
+	plugins: [sveltekitCookies(getRequestEvent)]
 });
 
 export type Session = typeof auth.$Infer.Session;

@@ -24,6 +24,12 @@
 					</div>
 				{/if}
 
+				{#if form?.error}
+					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+						{form.error}
+					</div>
+				{/if}
+
 				{#if form?.invalid}
 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
 						Invalid input provided
