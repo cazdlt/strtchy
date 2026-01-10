@@ -3,9 +3,9 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let showConfirm = false;
+	let showConfirm = $state(false);
 </script>
 
 <svelte:head>
@@ -15,9 +15,21 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white pb-24">
 	<header class="p-6 border-b border-gray-800">
 		<div class="max-w-4xl mx-auto">
-			<a href="/" class="text-gray-400 hover:text-white text-sm mb-2 inline-block">&larr; Back</a>
-			<h1 class="text-3xl font-bold">{data.routine.name}</h1>
-			<p class="text-gray-400 mt-2">{data.routine.description}</p>
+			<div class="flex items-start justify-between">
+				<div>
+					<a href="/routines" class="text-gray-400 hover:text-white text-sm mb-2 inline-block">&larr; Back to Routines</a>
+					<h1 class="text-3xl font-bold">{data.routine.name}</h1>
+					<p class="text-gray-400 mt-2">{data.routine.description}</p>
+				</div>
+				{#if data.user}
+					<a
+						href="/routine/{data.routine.id}/edit"
+						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+					>
+						Edit
+					</a>
+				{/if}
+			</div>
 
 			<div class="flex gap-4 mt-4 text-sm">
 				{#if data.routine.restBetweenMovements}
@@ -108,7 +120,7 @@
 					<div class="flex gap-3">
 						<button
 							type="button"
-							on:click={() => (showConfirm = false)}
+							onclick={() => (showConfirm = false)}
 							class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-4 px-6 rounded-xl font-semibold transition-all"
 						>
 							Cancel
@@ -123,7 +135,7 @@
 				{:else}
 					<button
 						type="button"
-						on:click={() => (showConfirm = true)}
+						onclick={() => (showConfirm = true)}
 						class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-4 px-6 rounded-xl font-semibold transition-all"
 					>
 						Start Practice

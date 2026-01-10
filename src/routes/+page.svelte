@@ -1,10 +1,9 @@
 <script lang="ts">
-	// TEST MODIFICATION - Can you see this change?
 	import { formatDuration } from '$lib/utils/formatting';
 	import type { PageData } from './$types';
 	import logo from '$lib/assets/logo.svg';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -20,23 +19,31 @@
 				<p class="text-gray-400 text-sm">Your recovery companion</p>
 			</div>
 		</div>
-		{#if data.user}
-			<form method="POST" action="?/logout">
-				<button
-					type="submit"
-					class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
-				>
-					Log out
-				</button>
-			</form>
-		{:else}
+		<div class="flex items-center gap-3">
 			<a
-				href="/login"
-				class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium"
+				href="/routines"
+				class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
 			>
-				Sign in
+				Routines
 			</a>
-		{/if}
+			{#if data.user}
+				<form method="POST" action="?/logout">
+					<button
+						type="submit"
+						class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
+					>
+						Log out
+					</button>
+				</form>
+			{:else}
+				<a
+					href="/login"
+					class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium"
+				>
+					Sign in
+				</a>
+			{/if}
+		</div>
 	</div>
 </header>
 
@@ -83,10 +90,15 @@
 			</div>
 		{/if}
 
- 		<div class="mb-8">
- 			<h2 class="text-xl font-semibold mb-4">Ready Routines</h2>
-			<div class="grid gap-4 md:grid-cols-2">
-				{#each data.routines as routine}
+  		<div class="mb-8">
+  			<div class="flex items-center justify-between mb-4">
+  				<h2 class="text-xl font-semibold">Ready Routines</h2>
+  				<a href="/routines" class="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
+  					View All Routines →
+  				</a>
+  			</div>
+			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{#each data.routines.slice(0, 6) as routine}
 					<a
 						href="/routine/{routine.id}"
 						class="block p-6 bg-gray-800/50 border border-gray-700 rounded-xl hover:border-gray-600 hover:bg-gray-800 transition-all"

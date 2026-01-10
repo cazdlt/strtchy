@@ -1,0 +1,474 @@
+{
+  "movements": [
+    {
+      "name": "Shoulder Rolls",
+      "description": "Roll shoulders backward and forward to release tension.",
+      "type": "timed",
+      "illustrationKey": "shoulderRolls",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Arm Circles",
+      "description": "Make large circles with both arms simultaneously.",
+      "type": "timed",
+      "illustrationKey": "armCircles",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Cross Body Stretch",
+      "description": "Pull arm across chest to stretch the shoulder.",
+      "type": "timed",
+      "illustrationKey": "crossBodyStretch",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "90/90 Hip Switch",
+      "description": "Switch between two seated positions to open hips.",
+      "type": "reps",
+      "illustrationKey": "ninetyNinetyHipSwitch",
+      "defaultTarget": { "type": "reps", "value": 10 }
+    },
+    {
+      "name": "Butterfly Stretch",
+      "description": "Sit with soles together and press knees down.",
+      "type": "timed",
+      "illustrationKey": "butterflyStretch",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Pigeon Pose",
+      "description": "Deep hip stretch on one side, then switch.",
+      "type": "timed",
+      "illustrationKey": "pigeonPose",
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+    },
+    {
+      "name": "Cat-Cow",
+      "description": "Alternate between arching and rounding the spine.",
+      "type": "reps",
+      "illustrationKey": "catCow",
+      "defaultTarget": { "type": "reps", "value": 10 }
+    },
+    {
+      "name": "Child's Pose",
+      "description": "Rest back on heels with arms extended forward.",
+      "type": "timed",
+      "illustrationKey": "childsPose",
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+    },
+    {
+      "name": "Cobra Stretch",
+      "description": "Lift chest while keeping hips on ground.",
+      "type": "timed",
+      "illustrationKey": "cobraStretch",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Downward Dog",
+      "description": "Classic yoga pose for full body stretch.",
+      "type": "timed",
+      "illustrationKey": "downwardDog",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Forward Fold",
+      "description": "Hang from hips to stretch hamstrings and back.",
+      "type": "timed",
+      "illustrationKey": "forwardFold",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Doorway Pec Stretch",
+      "description": "Stretch chest by placing forearms on a doorway and leaning forward.",
+      "type": "timed",
+      "illustrationKey": "doorwayPecStretch",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Standing Lat Stretch",
+      "description": "Reach one arm over head and lean to the opposite side.",
+      "type": "timed",
+      "illustrationKey": "latStretch",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Forearm Stretch",
+      "description": "Extend arm forward, palm up/down, and pull fingers back.",
+      "type": "timed",
+      "illustrationKey": "forearmStretch",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Standing Quad Stretch",
+      "description": "Hold one foot behind you while standing on the other leg.",
+      "type": "timed",
+      "illustrationKey": "quadStretch",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Wall Calf Stretch",
+      "description": "Press hands against wall and lean forward with one heel back.",
+      "type": "timed",
+      "illustrationKey": "calfStretch",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Standing Hamstring Stretch",
+      "description": "Place one heel on a raised surface and lean forward from hips.",
+      "type": "timed",
+      "illustrationKey": "hamstringStretch",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "IT Band Stretch",
+      "description": "Cross one leg behind the other and lean away from the back leg.",
+      "type": "timed",
+      "illustrationKey": "itBandStretch",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Neck Side Stretch",
+      "description": "Gently pull head toward one shoulder.",
+      "type": "timed",
+      "illustrationKey": "neckSideStretch",
+      "defaultTarget": { "type": "time", "value": 20, "unit": "s" }
+    },
+    {
+      "name": "Upper Trap Stretch",
+      "description": "Gently pull head forward and to the side.",
+      "type": "timed",
+      "illustrationKey": "upperTrapStretch",
+      "defaultTarget": { "type": "time", "value": 20, "unit": "s" }
+    },
+    {
+      "name": "Scapular Wall Slides",
+      "description": "Slide arms up and down a wall while keeping contact.",
+      "type": "reps",
+      "illustrationKey": "scapularWallSlides",
+      "defaultTarget": { "type": "reps", "value": 12 }
+    },
+    {
+      "name": "Banded Face Pulls",
+      "description": "Pull a resistance band toward your face, focusing on back of shoulders.",
+      "type": "reps",
+      "illustrationKey": "facePulls",
+      "defaultTarget": { "type": "reps", "value": 15 }
+    },
+    {
+      "name": "Sleeper Stretch",
+      "description": "Lie on side, arm at 90 deg, gently push hand toward floor (Internal Rotation).",
+      "type": "timed",
+      "illustrationKey": "internalRotation",
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+    },
+    {
+      "name": "Banded External Rotation",
+      "description": "Rotate arm outward against a band while keeping elbow at side.",
+      "type": "reps",
+      "illustrationKey": "externalRotation",
+      "defaultTarget": { "type": "reps", "value": 15 }
+    },
+    {
+      "name": "Couch Stretch",
+      "description": "Deep hip flexor stretch with back foot against a wall or couch.",
+      "type": "timed",
+      "illustrationKey": "couchStretch",
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+    },
+    {
+      "name": "Hip Flexor Lunge",
+      "description": "Kneeling lunge, tucking pelvis and leaning forward slightly.",
+      "type": "timed",
+      "illustrationKey": "hipFlexorLunge",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Banded Ankle Distraction",
+      "description": "Place band around ankle, step forward, and lean weight on knee.",
+      "type": "timed",
+      "illustrationKey": "bandedAnkleDistraction",
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+    },
+    {
+      "name": "Thoracic Extension",
+      "description": "Extend upper back over a foam roller or chair back.",
+      "type": "reps",
+      "illustrationKey": "thoracicExtension",
+      "defaultTarget": { "type": "reps", "value": 10 }
+    }
+  ],
+  "routines": [
+    {
+      "name": "Upper Body Gym Recovery",
+      "description": "Perfect after a heavy push or pull day. Focuses on chest, lats, and forearms.",
+      "restBetweenMovements": 15,
+      "restBetweenSets": 10,
+      "autoAdvance": true,
+      "audioEnabled": true,
+      "keepAwake": true
+    },
+    {
+      "name": "Lower Body Gym Recovery",
+      "description": "Relieve tension in quads, glutes, and calves after leg day.",
+      "restBetweenMovements": 15,
+      "restBetweenSets": 10,
+      "autoAdvance": true,
+      "audioEnabled": true,
+      "keepAwake": true
+    },
+    {
+      "name": "Runner's Reset",
+      "description": "Twice-weekly routine for runners. Focuses on hamstrings, IT band, and hip flexors.",
+      "restBetweenMovements": 15,
+      "restBetweenSets": 15,
+      "autoAdvance": true,
+      "audioEnabled": true,
+      "keepAwake": true
+    },
+    {
+      "name": "Cyclist's Recovery",
+      "description": "Sunday special. Focuses on neck, upper traps, and hip flexors to counter the hunched position.",
+      "restBetweenMovements": 15,
+      "restBetweenSets": 10,
+      "autoAdvance": true,
+      "audioEnabled": true,
+      "keepAwake": true
+    },
+    {
+      "name": "Shoulder Health (Impingement & Scapula)",
+      "description": "Corrective exercises for impingement and winged scapula. Focus on stability and rotation.",
+      "restBetweenMovements": 20,
+      "restBetweenSets": 15,
+      "autoAdvance": false,
+      "audioEnabled": true,
+      "keepAwake": true
+    },
+    {
+      "name": "Hip & Ankle Mobility",
+      "description": "Deep work for tight hip flexors and limited ankle rotation.",
+      "restBetweenMovements": 20,
+      "restBetweenSets": 15,
+      "autoAdvance": true,
+      "audioEnabled": true,
+      "keepAwake": true
+    }
+  ],
+  "routineMovements": [
+    {
+      "routineName": "Upper Body Gym Recovery",
+      "movementName": "Doorway Pec Stretch",
+      "order": 1,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "notes": "One side at a time"
+    },
+    {
+      "routineName": "Upper Body Gym Recovery",
+      "movementName": "Standing Lat Stretch",
+      "order": 2,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 2,
+      "notes": "Hold and breathe"
+    },
+    {
+      "routineName": "Upper Body Gym Recovery",
+      "movementName": "Cross Body Stretch",
+      "order": 3,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 2,
+      "notes": "Shoulder capsule stretch"
+    },
+    {
+      "routineName": "Upper Body Gym Recovery",
+      "movementName": "Forearm Stretch",
+      "order": 4,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 2,
+      "notes": "Both palm up and down"
+    },
+    {
+      "routineName": "Upper Body Gym Recovery",
+      "movementName": "Thoracic Extension",
+      "order": 5,
+      "target": { "type": "reps", "value": 10 },
+      "sets": 2,
+      "notes": "Open up the chest"
+    },
+    {
+      "routineName": "Lower Body Gym Recovery",
+      "movementName": "Standing Quad Stretch",
+      "order": 1,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "notes": "Keep knees together"
+    },
+    {
+      "routineName": "Lower Body Gym Recovery",
+      "movementName": "Pigeon Pose",
+      "order": 2,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 2,
+      "notes": "Deep glute stretch"
+    },
+    {
+      "routineName": "Lower Body Gym Recovery",
+      "movementName": "Wall Calf Stretch",
+      "order": 3,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "notes": "Straight leg for gastrocnemius"
+    },
+    {
+      "routineName": "Lower Body Gym Recovery",
+      "movementName": "Butterfly Stretch",
+      "order": 4,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "notes": "Inner thigh focus"
+    },
+    {
+      "routineName": "Runner's Reset",
+      "movementName": "Standing Hamstring Stretch",
+      "order": 1,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "notes": "Keep back straight"
+    },
+    {
+      "routineName": "Runner's Reset",
+      "movementName": "IT Band Stretch",
+      "order": 2,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 2,
+      "notes": "Lean into the back leg"
+    },
+    {
+      "routineName": "Runner's Reset",
+      "movementName": "Hip Flexor Lunge",
+      "order": 3,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "notes": "Tuck pelvis"
+    },
+    {
+      "routineName": "Runner's Reset",
+      "movementName": "Wall Calf Stretch",
+      "order": 4,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "notes": "Crucial for runners"
+    },
+    {
+      "routineName": "Runner's Reset",
+      "movementName": "Downward Dog",
+      "order": 5,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "notes": "Whole posterior chain"
+    },
+    {
+      "routineName": "Cyclist's Recovery",
+      "movementName": "Couch Stretch",
+      "order": 1,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 2,
+      "notes": "The ultimate hip opener"
+    },
+    {
+      "routineName": "Cyclist's Recovery",
+      "movementName": "Neck Side Stretch",
+      "order": 2,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 2,
+      "notes": "Counter \"aero\" position"
+    },
+    {
+      "routineName": "Cyclist's Recovery",
+      "movementName": "Upper Trap Stretch",
+      "order": 3,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 2,
+      "notes": "Release tension"
+    },
+    {
+      "routineName": "Cyclist's Recovery",
+      "movementName": "Cat-Cow",
+      "order": 4,
+      "target": { "type": "reps", "value": 12 },
+      "sets": 2,
+      "notes": "Move the spine"
+    },
+    {
+      "routineName": "Cyclist's Recovery",
+      "movementName": "Doorway Pec Stretch",
+      "order": 5,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "notes": "Open up the chest"
+    },
+    {
+      "routineName": "Shoulder Health (Impingement & Scapula)",
+      "movementName": "Scapular Wall Slides",
+      "order": 1,
+      "target": { "type": "reps", "value": 12 },
+      "sets": 3,
+      "notes": "Focus on scapular control"
+    },
+    {
+      "routineName": "Shoulder Health (Impingement & Scapula)",
+      "movementName": "Banded Face Pulls",
+      "order": 2,
+      "target": { "type": "reps", "value": 15 },
+      "sets": 3,
+      "notes": "External rotation at the end"
+    },
+    {
+      "routineName": "Shoulder Health (Impingement & Scapula)",
+      "movementName": "Sleeper Stretch",
+      "order": 3,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 2,
+      "notes": "Gently for internal rotation"
+    },
+    {
+      "routineName": "Shoulder Health (Impingement & Scapula)",
+      "movementName": "Banded External Rotation",
+      "order": 4,
+      "target": { "type": "reps", "value": 15 },
+      "sets": 3,
+      "notes": "Stability focus"
+    },
+    {
+      "routineName": "Hip & Ankle Mobility",
+      "movementName": "90/90 Hip Switch",
+      "order": 1,
+      "target": { "type": "reps", "value": 12 },
+      "sets": 2,
+      "notes": "Focus on rotation"
+    },
+    {
+      "routineName": "Hip & Ankle Mobility",
+      "movementName": "Couch Stretch",
+      "order": 2,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 2,
+      "notes": "For tight hip flexors"
+    },
+    {
+      "routineName": "Hip & Ankle Mobility",
+      "movementName": "Banded Ankle Distraction",
+      "order": 3,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 2,
+      "notes": "Increase dorsiflexion"
+    },
+    {
+      "routineName": "Hip & Ankle Mobility",
+      "movementName": "Pigeon Pose",
+      "order": 4,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 2,
+      "notes": "Glute and hip mobility"
+    }
+  ]
+}

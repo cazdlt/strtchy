@@ -7,16 +7,19 @@ Strtchy is a SvelteKit app for tracking stretching and recovery routines. It's b
 - **SvelteKit**: Latest with Svelte 5 runes mode
 - **Runtime**: Node.js (server-side rendering)
 - **Database**: SQLite with better-sqlite3 driver
-- **ORM**: Drizzle ORM
-- **Auth**: Lucia v3 (class-based API, requires custom adapter)
+- **ORM**: Drizzle ORM v0.45.1 (stable)
+- **Auth**: BetterAuth v1
 - **Styling**: Tailwind CSS v4 via @tailwindcss/postcss
 - **PWA**: VitePWA plugin
+
+## Important Agent Instructions
+- **NEVER start dev servers automatically** - Only start `npm run dev` if explicitly requested by the user
 
 ## Important Architecture Notes
 
 ### Authentication
-- Custom Drizzle adapter in `src/lib/db/adapter.ts` (official adapter is deprecated)
-- Lucia v3 uses class-based initialization, NOT function-based
+- Custom Drizzle adapter in `src/lib/db/adapter.ts`
+- BetterAuth v1 uses standard initialization
 - Session management in `src/hooks.server.ts`
 - Password hashing uses `@oslojs/crypto/sha2` (sha256)
 
@@ -62,9 +65,59 @@ npm run check        # Type checking with svelte-check
 - Fixed bottom buttons on mobile
 
 ## Database Setup
-- Local dev database: `./local.db` (SQLite)
-- Seed data: 11 movements, 3 built-in routines
-- Run seed script to populate database
+- Local dev database: `./data/dev/local.db` (SQLite)
+- Local prod database: `./data/prod/local.db` (SQLite)
+- Seed data: 28 movements, 6 built-in routines
+
+### Database Scripts (scripts/db/)
+| Script | Purpose |
+|--------|---------|
+| `setup.sh [env]` | Run migrations + seed for dev or prod |
+| `reset.sh [env]` | Delete database and run fresh setup |
+| `backup.sh [env]` | Export database to SQL file |
+| `migrate.ts` | Run migrations only |
+| `generate-migration.ts` | Generate migration from current database state |
+| `seed.ts` | Seed data only |
+
+### Quick Commands
+```bash
+# Fresh dev setup (creates DB, runs migrations, seeds data)
+./scripts/db/setup.sh dev
+
+# Fresh prod setup
+./scripts/db/setup.sh prod
+
+# Reset dev database
+./scripts/db/reset.sh dev
+
+# Backup dev database
+./scripts/db/backup.sh dev
+
+# Sync schema changes to dev database (development workflow)
+npm run db:push
+
+# Generate migration from current database state
+npm run db:generate
+
+# Run migrations
+npm run db:migrate
+```
+
+### Migration Workflow
+**DrizzleKit Generate Issue**: `drizzle-kit generate` fails with `TypeError: Cannot read properties of undefined (reading 'length')`.
+
+**Working Workflow**:
+1. **Development**: Make schema changes in `src/lib/db/schema.ts`
+2. **Sync to dev DB**: Run `npm run db:push` to sync schema changes
+3. **Generate migration**: Run `npm run db:generate` to create migration file
+4. **Deploy**: Run migrations on production with `npm run db:migrate`
+
+**Manual Migration Creation** (alternative):
+1. Make schema changes in `src/lib/db/schema.ts`
+2. Run `npm run db:push` to sync to dev database
+3. Run `drizzle-kit introspect` to update `drizzle/schema.ts`
+4. Run `npm run db:generate` to create migration file in `drizzle/migrations/`
+5. Verify migration file is created in `drizzle/migrations/<timestamp>_<random>.sql`
 
 ## PWA
 - Configured with VitePWA plugin

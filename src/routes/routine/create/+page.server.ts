@@ -1,11 +1,21 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { db } from '$lib/db';
-import { routines, routineMovements } from '$lib/db/schema';
+import { routines, routineMovements, movements } from '$lib/db/schema';
 import { nanoid } from 'nanoid';
-import type { RequestEvent } from './$types';
+import { desc } from 'drizzle-orm';
+import type { PageServerLoad, Actions } from './$types';
 
-	export const actions = {
-		default: async ({ request, locals }: RequestEvent) => {
+export const load: PageServerLoad = async ({ locals }) => {
+	const allMovements = await db.select().from(movements).orderBy(desc(movements.createdAt));
+
+	return {
+		movements: allMovements,
+		user: locals.user
+	};
+};
+
+export const actions: Actions = {
+		default: async ({ request, locals }) => {
 		const formData = await request.formData();
 
 		const name = formData.get('name');
@@ -18,29 +28,35 @@ import type { RequestEvent } from './$types';
 
 		const movementsData = formData.get('movements_data');
 
-		if (!name || !restBetweenMovements || !restBetweenSets || !movementsData) {
-			return fail(400, { missing: true });
+		const missingFields: string[] = [];
+		if (!name) missingFields.push('routine name');
+		if (!restBetweenMovements) missingFields.push('rest between movements');
+		if (!restBetweenSets) missingFields.push('rest between sets');
+		if (!movementsData) missingFields.push('movements');
+
+		if (missingFields.length > 0) {
+			return fail(400, { missing: true, missingFields, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
 		}
 
 		if (typeof name !== 'string' || typeof restBetweenMovements !== 'string' || typeof restBetweenSets !== 'string' || typeof movementsData !== 'string') {
-			return fail(400, { invalid: true });
+			return fail(400, { invalid: true, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
 		}
 
 		const restMovements = parseInt(restBetweenMovements, 10);
 		const restSets = parseInt(restBetweenSets, 10);
 
 		if (isNaN(restMovements) || restMovements < 0 || isNaN(restSets) || restSets < 0) {
-			return fail(400, { invalid_values: true });
+			return fail(400, { invalid_values: true, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
 		}
 
 		let parsedMovements;
 		try {
 			parsedMovements = JSON.parse(movementsData);
 			if (!Array.isArray(parsedMovements) || parsedMovements.length === 0) {
-				return fail(400, { no_movements: true });
+				return fail(400, { no_movements: true, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
 			}
 		} catch {
-			return fail(400, { invalid_movements_data: true });
+			return fail(400, { invalid_movements_data: true, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
 		}
 
 		const routineId = nanoid();

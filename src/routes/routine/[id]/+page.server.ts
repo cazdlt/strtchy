@@ -5,7 +5,7 @@ import type { PageData, ActionsFailure, RequestEvent } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { nanoid } from 'nanoid';
 
-export async function load({ params }: { params: { id: string } }) {
+export async function load({ params, locals }: { params: { id: string }; locals: App.Locals }) {
 	const routine = await db.query.routines.findFirst({
 		where: eq(routines.id, params.id),
 		with: {
@@ -23,7 +23,8 @@ export async function load({ params }: { params: { id: string } }) {
 	}
 
 	return {
-		routine
+		routine,
+		user: locals.user
 	};
 }
 

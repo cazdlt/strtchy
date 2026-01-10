@@ -10,10 +10,10 @@
 	let defaultValue = $state(String(data.movement.metadata?.defaultTarget?.value || ''));
 	let defaultUnit = $state(data.movement.metadata?.defaultTarget?.unit || '');
 	let selectedFile = $state<File | null>(null);
-	let filePreview = $state<string | null>(
-		data.movement.illustrationPath ? data.movement.illustrationPath : null
-	);
+	let filePreview = $state<string | null>(data.movement.illustrationPath || null);
 	let removeIllustration = $state(false);
+
+	const originalIllustration = () => data.movement.illustrationPath || null;
 
 	const movementTypes = [
 		{ value: 'timed', label: 'Timed', placeholder: '30', unit: 'seconds' },
@@ -40,11 +40,7 @@
 
 	function clearFile() {
 		selectedFile = null;
-		if (data.movement.illustrationPath) {
-			filePreview = data.movement.illustrationPath;
-		} else {
-			filePreview = null;
-		}
+		filePreview = originalIllustration();
 		removeIllustration = false;
 		const fileInput = document.getElementById('illustration') as HTMLInputElement;
 		if (fileInput) {

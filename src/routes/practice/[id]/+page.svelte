@@ -5,24 +5,25 @@
 	import { enhance } from '$app/forms';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data } = $props<{ data: PageData }>();
 
 	// Practice state
-	let currentMovementIndex = 0;
-	let currentSet = 1;
-	let timer: ReturnType<typeof setInterval> | null = null;
-	let restTimer: ReturnType<typeof setInterval> | null = null;
-	let isResting = false;
-	let elapsedSeconds = 0;
-	let restSeconds = 0;
-	let showSuccess = false;
-	let setCounterTrigger = 0;
+	let currentMovementIndex = $state(0);
+	let currentSet = $state(1);
+	let timer = $state<ReturnType<typeof setInterval> | null>(null);
+	let restTimer = $state<ReturnType<typeof setInterval> | null>(null);
+	let isResting = $state(false);
+	let elapsedSeconds = $state(0);
+	let restSeconds = $state(0);
+	let showSuccess = $state(false);
+	let setCounterTrigger = $state(0);
+	let practiceDataState = $state(data.practice.practiceData || []);
 
 	// Wake lock
-	let wakeLock: WakeLockSentinel | null = null;
+	let wakeLock = $state<WakeLockSentinel | null>(null);
 
 	// Audio context
-	let audioContext: AudioContext | null = null;
+	let audioContext = $state<AudioContext | null>(null);
 
 	onMount(() => {
 		// Request wake lock
@@ -47,31 +48,37 @@
 
 	onDestroy(() => {
 		if (timer) {
-			clearInterval(timer as unknown as number);
+			clearInterval(timer);
 			timer = null;
 		}
 		if (restTimer) {
-			clearInterval(restTimer as unknown as number);
+			clearInterval(restTimer);
 			restTimer = null;
 		}
 		if (wakeLock) wakeLock.release();
 	});
 
-	$: isTimedMovement = data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time';
-	$: targetValue = data.allRoutineMovements[currentMovementIndex]?.target?.value || 0;
-	$: currentRoutineMovement = data.allRoutineMovements[currentMovementIndex];
-	$: isBilateral = currentRoutineMovement?.isBilateral ?? false;
-	$: currentSide = isBilateral ? (currentSet % 2 === 1 ? 'Left' : 'Right') : null;
-	$: previousMovement = data.allRoutineMovements[currentMovementIndex - 1]?.movement;
-	$: nextMovement = data.allRoutineMovements[currentMovementIndex + 1]?.movement;
+	const isTimedMovement = $derived(data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time');
+	const targetValue = $derived(data.allRoutineMovements[currentMovementIndex]?.target?.value || 0);
+	const currentRoutineMovement = $derived(data.allRoutineMovements[currentMovementIndex]);
+	const isBilateral = $derived(currentRoutineMovement?.isBilateral ?? false);
+	const currentSide = $derived(isBilateral ? (currentSet % 2 === 1 ? 'Left' : 'Right') : null);
+	const previousMovement = $derived(data.allRoutineMovements[currentMovementIndex - 1]?.movement);
+	const nextMovement = $derived(data.allRoutineMovements[currentMovementIndex + 1]?.movement);
+
+	const completedSetsCount = $derived(practiceDataState.length);
+	const currentProgress = $derived(data.totalSets > 0 ? completedSetsCount / data.totalSets : 0);
 
 	function startTimer() {
-		if (timer) clearInterval(timer as unknown as number);
+		if (timer) clearInterval(timer);
 		elapsedSeconds = 0;
 		timer = setInterval(() => {
 			elapsedSeconds++;
 			if (elapsedSeconds >= targetValue) {
-				if (timer) clearInterval(timer as unknown as number);
+				if (timer) {
+					clearInterval(timer);
+					timer = null;
+				}
 				playBeep();
 				// Auto-complete for timed movements
 				completeTimedSet();
@@ -90,7 +97,10 @@
 		fetch('?/completeSet', {
 			method: 'POST',
 			body: formData
-		}).then(() => {
+		}).then(async (response) => {
+			if (response.ok) {
+				practiceDataState = [...practiceDataState, { id: 'temp' }]; // Add temp entry to trigger progress update
+			}
 			if (currentSet >= data.allRoutineMovements[currentMovementIndex].sets) {
 				moveToNextMovement();
 			} else {
@@ -101,17 +111,27 @@
 	}
 
 	function moveToNextMovement() {
+		if (audioContext?.state === 'suspended') {
+			audioContext.resume();
+		}
+
 		if (isResting) {
 			isResting = false;
-			if (restTimer) clearInterval(restTimer);
+			if (restTimer) {
+				clearInterval(restTimer);
+				restTimer = null;
+			}
 			if (isTimedMovement) startTimer();
 		} else if (currentMovementIndex < data.allRoutineMovements.length - 1) {
-			currentMovementIndex++;
-			currentSet = 1;
-			if (data.practice.routine.restBetweenMovements && data.practice.routine.autoAdvance) {
-				startRest(data.practice.routine.restBetweenMovements);
-			} else if (isTimedMovement) {
-				startTimer();
+			const restDuration = data.practice.routine.restBetweenMovements;
+			const shouldRest = restDuration && data.practice.routine.autoAdvance;
+			
+			if (shouldRest) {
+				startRest(restDuration);
+			} else {
+				currentMovementIndex++;
+				currentSet = 1;
+				if (isTimedMovement) startTimer();
 			}
 		} else {
 			// Practice complete
@@ -124,20 +144,28 @@
 		restSeconds = duration;
 		playBeep();
 
-		if (restTimer) clearInterval(restTimer as unknown as number);
+		if (restTimer) clearInterval(restTimer);
 		restTimer = setInterval(() => {
 			restSeconds--;
 			if (restSeconds <= 0) {
-				if (restTimer) clearInterval(restTimer as unknown as number);
+				if (restTimer) {
+					clearInterval(restTimer);
+					restTimer = null;
+				}
 				playBeep();
 				isResting = false;
-				moveToNextMovement();
+				currentMovementIndex++;
+				currentSet = 1;
+				if (isTimedMovement) startTimer();
 			}
 		}, 1000);
 	}
 
 	function playBeep() {
 		if (!audioContext) return;
+		if (audioContext.state === 'suspended') {
+			audioContext.resume();
+		}
 		const oscillator = audioContext.createOscillator();
 		const gainNode = audioContext.createGain();
 		oscillator.connect(gainNode);
@@ -163,6 +191,10 @@
 	}
 
 	function completeCurrentSet() {
+		if (audioContext?.state === 'suspended') {
+			audioContext.resume();
+		}
+
 		const formData = new FormData();
 		formData.append('routineMovementId', data.allRoutineMovements[currentMovementIndex].id);
 		formData.append('setNumber', currentSet.toString());
@@ -176,7 +208,10 @@
 		fetch('?/completeSet', {
 			method: 'POST',
 			body: formData
-		}).then(() => {
+		}).then(async (response) => {
+			if (response.ok) {
+				practiceDataState = [...practiceDataState, { id: 'temp' }]; // Add temp entry to trigger progress update
+			}
 			if (currentSet >= data.allRoutineMovements[currentMovementIndex].sets) {
 				setTimeout(() => moveToNextMovement(), 300);
 			} else {
@@ -202,7 +237,7 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white flex flex-col">
 	<!-- Progress bar -->
 	<div class="h-1 bg-gray-800">
-		<div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300" style="width: {data.progress * 100}%"></div>
+		<div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300" style="width: {currentProgress * 100}%"></div>
 	</div>
 
 	<!-- Header -->
@@ -215,7 +250,7 @@
 		</div>
 		<div class="flex items-center gap-4">
 			<div class="text-sm text-gray-400">
-				{data.completedSets} / {data.totalSets} sets
+				{completedSetsCount} / {data.totalSets} sets
 			</div>
 			<button
 				onclick={exitPractice}

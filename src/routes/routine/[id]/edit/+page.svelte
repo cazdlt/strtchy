@@ -2,13 +2,13 @@
 	import type { PageData, ActionData } from './$types';
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	let name = $state('');
-	let description = $state('');
-	let restBetweenMovements = $state('30');
-	let restBetweenSets = $state('15');
-	let autoAdvance = $state(true);
-	let audioEnabled = $state(true);
-	let keepAwake = $state(true);
+	let name = $state(data.routine.name);
+	let description = $state(data.routine.description || '');
+	let restBetweenMovements = $state(String(data.routine.restBetweenMovements || '30'));
+	let restBetweenSets = $state(String(data.routine.restBetweenSets || '15'));
+	let autoAdvance = $state(data.routine.autoAdvance ?? true);
+	let audioEnabled = $state(data.routine.audioEnabled ?? true);
+	let keepAwake = $state(data.routine.keepAwake ?? true);
 
 	interface SelectedMovement {
 		movementId: string;
@@ -21,37 +21,22 @@
 		notes: string;
 	}
 
-	let selectedMovements = $state<SelectedMovement[]>([]);
+	let selectedMovements = $state<SelectedMovement[]>(
+		data.routine.movements.map((rm) => ({
+			movementId: rm.movementId,
+			name: rm.movement.name,
+			type: rm.movement.type,
+			targetType: rm.target.type,
+			targetValue: rm.target.value,
+			targetUnit: rm.target.unit,
+			sets: rm.sets || 1,
+			notes: rm.notes || ''
+		}))
+	);
 
-		$effect(() => {
-		if (form?.submittedData) {
-			name = (form.submittedData.name as string) || '';
-			description = (form.submittedData.description as string) || '';
-			restBetweenMovements = (form.submittedData.restBetweenMovements as string) || '30';
-			restBetweenSets = (form.submittedData.restBetweenSets as string) || '15';
-			autoAdvance = form.submittedData.autoAdvance ?? true;
-			audioEnabled = form.submittedData.audioEnabled ?? true;
-			keepAwake = form.submittedData.keepAwake ?? true;
-			const movementsData = form.submittedData.movementsData as string;
-			if (movementsData && movementsData.trim() && movementsData !== '[]' && movementsData !== 'null') {
-				try {
-					const parsed = JSON.parse(movementsData);
-					if (Array.isArray(parsed) && parsed.length > 0) {
-						selectedMovements = parsed.map((m: any) => ({
-							movementId: m.movementId,
-							name: data.movements.find((mov: any) => mov.id === m.movementId)?.name || 'Unknown',
-							type: data.movements.find((mov: any) => mov.id === m.movementId)?.type || 'timed',
-							targetType: m.targetType,
-							targetValue: m.targetValue,
-							targetUnit: m.targetUnit,
-							sets: m.sets,
-							notes: m.notes
-						}));
-					}
-				} catch (e) {
-					console.error('Failed to parse movements data:', e);
-				}
-			}
+	$effect(() => {
+		if (form?.missingFields) {
+			console.log('Missing fields:', form.missingFields);
 		}
 	});
 
@@ -135,14 +120,14 @@
 </script>
 
 <svelte:head>
-	<title>Create Routine - Strtchy</title>
+	<title>Edit Routine - Strtchy</title>
 </svelte:head>
 
-	<form id="create-routine-form" method="POST" class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
+	<form id="edit-routine-form" method="POST" class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
 	<header class="p-6 border-b border-gray-800 sticky top-0 bg-gray-950/95 backdrop-blur z-10">
 		<div class="max-w-4xl mx-auto">
-			<a href="/" class="text-gray-400 hover:text-white text-sm mb-2 inline-block">&larr; Back</a>
-			<h1 class="text-3xl font-bold">Create Routine</h1>
+			<a href="/routine/{data.routine.id}" class="text-gray-400 hover:text-white text-sm mb-2 inline-block">&larr; Back</a>
+			<h1 class="text-3xl font-bold">Edit Routine</h1>
 		</div>
 	</header>
 
@@ -162,6 +147,12 @@
 		{#if form?.no_movements}
 			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
 				Please add at least one movement to your routine
+			</div>
+		{/if}
+
+		{#if form?.unauthorized}
+			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+				You must be logged in to edit a routine
 			</div>
 		{/if}
 
@@ -424,7 +415,7 @@
 				disabled={selectedMovements.length === 0}
 				class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-gray-600 disabled:to-gray-600 text-white py-4 px-6 rounded-xl font-semibold transition-all disabled:cursor-not-allowed"
 			>
-				Create Routine
+				Save Changes
 			</button>
 		</div>
 	</div>
