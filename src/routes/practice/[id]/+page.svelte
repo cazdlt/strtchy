@@ -3,30 +3,31 @@
 	import { scale } from 'svelte/transition';
 	import { formatDuration, formatTime } from '$lib/utils/formatting';
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 
 	let { data } = $props<{ data: PageData }>();
 
-	// Practice state
 	let currentMovementIndex = $state(0);
 	let currentSet = $state(1);
+	let currentSide = $state<'left' | 'right'>('left');
 	let timer = $state<ReturnType<typeof setInterval> | null>(null);
 	let restTimer = $state<ReturnType<typeof setInterval> | null>(null);
+	let switchSidesTimer = $state<ReturnType<typeof setInterval> | null>(null);
 	let isResting = $state(false);
+	let isSwitchingSides = $state(false);
 	let elapsedSeconds = $state(0);
 	let restSeconds = $state(0);
+	let switchSidesSeconds = $state(0);
 	let showSuccess = $state(false);
 	let setCounterTrigger = $state(0);
 	let practiceDataState = $state(data.practice.practiceData || []);
 
-	// Wake lock
 	let wakeLock = $state<WakeLockSentinel | null>(null);
-
-	// Audio context
 	let audioContext = $state<AudioContext | null>(null);
 
 	onMount(() => {
-		// Request wake lock
 		if ('wakeLock' in navigator) {
 			navigator.wakeLock.request('screen').then((lock) => {
 				wakeLock = lock;
@@ -35,12 +36,10 @@
 			});
 		}
 
-		// Initialize audio context
 		if ('AudioContext' in window) {
 			audioContext = new AudioContext();
 		}
 
-		// Start timer if needed
 		if (isTimedMovement) {
 			startTimer();
 		}
@@ -55,6 +54,10 @@
 			clearInterval(restTimer);
 			restTimer = null;
 		}
+		if (switchSidesTimer) {
+			clearInterval(switchSidesTimer);
+			switchSidesTimer = null;
+		}
 		if (wakeLock) wakeLock.release();
 	});
 
@@ -62,7 +65,7 @@
 	const targetValue = $derived(data.allRoutineMovements[currentMovementIndex]?.target?.value || 0);
 	const currentRoutineMovement = $derived(data.allRoutineMovements[currentMovementIndex]);
 	const isBilateral = $derived(currentRoutineMovement?.isBilateral ?? false);
-	const currentSide = $derived(isBilateral ? (currentSet % 2 === 1 ? 'Left' : 'Right') : null);
+	const switchSidesDuration = $derived(currentRoutineMovement?.switchSidesDuration ?? 5);
 	const previousMovement = $derived(data.allRoutineMovements[currentMovementIndex - 1]?.movement);
 	const nextMovement = $derived(data.allRoutineMovements[currentMovementIndex + 1]?.movement);
 
@@ -80,39 +83,86 @@
 					timer = null;
 				}
 				playBeep();
-				// Auto-complete for timed movements
 				completeTimedSet();
 			}
 		}, 1000);
 	}
 
 	function completeTimedSet() {
-		// Submit the completed set
 		const formData = new FormData();
 		formData.append('routineMovementId', data.allRoutineMovements[currentMovementIndex].id);
 		formData.append('setNumber', currentSet.toString());
 		formData.append('value', elapsedSeconds.toString());
 		formData.append('measurementType', 'time');
+		formData.append('side', isBilateral ? currentSide : '');
 
 		fetch('?/completeSet', {
 			method: 'POST',
 			body: formData
 		}).then(async (response) => {
 			if (response.ok) {
-				practiceDataState = [...practiceDataState, { id: 'temp' }]; // Add temp entry to trigger progress update
+				practiceDataState = [...practiceDataState, { id: 'temp' }];
+				handleSideCompletion();
+			} else {
+				console.error('Failed to complete set');
 			}
+		}).catch((error) => {
+			console.error('Error completing set:', error);
+		});
+	}
+
+	function handleSideCompletion() {
+		if (isBilateral && currentSide === 'left') {
+			startSwitchSides();
+		} else {
 			if (currentSet >= data.allRoutineMovements[currentMovementIndex].sets) {
 				moveToNextMovement();
 			} else {
 				currentSet++;
-				if (isTimedMovement) startTimer();
+				currentSide = 'left';
+				if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+					startTimer();
+				}
 			}
-		});
+		}
+	}
+
+	function startSwitchSides() {
+		if (switchSidesDuration <= 0) {
+			currentSide = 'right';
+			return;
+		}
+
+		isSwitchingSides = true;
+		switchSidesSeconds = switchSidesDuration;
+		playBeep();
+
+		if (switchSidesTimer) clearInterval(switchSidesTimer);
+		switchSidesTimer = setInterval(() => {
+			switchSidesSeconds--;
+			if (switchSidesSeconds <= 0) {
+				if (switchSidesTimer) {
+					clearInterval(switchSidesTimer);
+					switchSidesTimer = null;
+				}
+				playBeep();
+				isSwitchingSides = false;
+				currentSide = 'right';
+				if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+					startTimer();
+				}
+			}
+		}, 1000);
 	}
 
 	function moveToNextMovement() {
 		if (audioContext?.state === 'suspended') {
 			audioContext.resume();
+		}
+
+		if (timer) {
+			clearInterval(timer);
+			timer = null;
 		}
 
 		if (isResting) {
@@ -121,20 +171,27 @@
 				clearInterval(restTimer);
 				restTimer = null;
 			}
-			if (isTimedMovement) startTimer();
+			currentMovementIndex++;
+			currentSet = 1;
+			currentSide = 'left';
+			if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+				startTimer();
+			}
 		} else if (currentMovementIndex < data.allRoutineMovements.length - 1) {
 			const restDuration = data.practice.routine.restBetweenMovements;
 			const shouldRest = restDuration && data.practice.routine.autoAdvance;
-			
+
 			if (shouldRest) {
 				startRest(restDuration);
 			} else {
 				currentMovementIndex++;
 				currentSet = 1;
-				if (isTimedMovement) startTimer();
+				currentSide = 'left';
+				if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+					startTimer();
+				}
 			}
 		} else {
-			// Practice complete
 			completePractice();
 		}
 	}
@@ -156,7 +213,10 @@
 				isResting = false;
 				currentMovementIndex++;
 				currentSet = 1;
-				if (isTimedMovement) startTimer();
+				currentSide = 'left';
+				if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+					startTimer();
+				}
 			}
 		}, 1000);
 	}
@@ -181,11 +241,16 @@
 	function completePractice() {
 		if (confirm('Are you sure you want to complete this practice?')) {
 			const formData = new FormData();
+			const practiceId = $page.params.id;
 			fetch('?/completePractice', {
 				method: 'POST',
 				body: formData
-			}).then(() => {
-				window.location.href = `/practice/${data.practice.id}/summary`;
+			}).then(async (response) => {
+				if (response.ok) {
+					goto(`/practice/${practiceId}/summary`);
+				}
+			}).catch((error) => {
+				console.error('Error completing practice:', error);
 			});
 		}
 	}
@@ -198,8 +263,9 @@
 		const formData = new FormData();
 		formData.append('routineMovementId', data.allRoutineMovements[currentMovementIndex].id);
 		formData.append('setNumber', currentSet.toString());
-		formData.append('value', '1');
+		formData.append('value', targetValue.toString());
 		formData.append('measurementType', 'reps');
+		formData.append('side', isBilateral ? currentSide : '');
 
 		playBeep();
 		showSuccess = true;
@@ -210,16 +276,14 @@
 			body: formData
 		}).then(async (response) => {
 			if (response.ok) {
-				practiceDataState = [...practiceDataState, { id: 'temp' }]; // Add temp entry to trigger progress update
-			}
-			if (currentSet >= data.allRoutineMovements[currentMovementIndex].sets) {
-				setTimeout(() => moveToNextMovement(), 300);
-			} else {
+				practiceDataState = [...practiceDataState, { id: 'temp' }];
 				setTimeout(() => {
-					currentSet++;
 					showSuccess = false;
+					handleSideCompletion();
 				}, 300);
 			}
+		}).catch((error) => {
+			console.error('Error completing set:', error);
 		});
 	}
 
@@ -235,12 +299,10 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white flex flex-col">
-	<!-- Progress bar -->
 	<div class="h-1 bg-gray-800">
 		<div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300" style="width: {currentProgress * 100}%"></div>
 	</div>
 
-	<!-- Header -->
 	<header class="p-4 border-b border-gray-800 flex justify-between items-center">
 		<div>
 			<h1 class="text-lg font-semibold">{data.practice.routine.name}</h1>
@@ -262,7 +324,6 @@
 		</div>
 	</header>
 
-	<!-- Context bar -->
 	<div class="bg-gray-900/50 border-b border-gray-800 px-4 py-2">
 		<div class="flex justify-between items-center text-sm">
 			<div class="flex-1">
@@ -283,7 +344,6 @@
 		</div>
 	</div>
 
-	<!-- Rest overlay -->
 	{#if isResting}
 		<div class="fixed inset-0 bg-gray-950/95 flex items-center justify-center z-50">
 			<div class="text-center">
@@ -299,18 +359,38 @@
 		</div>
 	{/if}
 
-	<!-- Main content -->
+	{#if isSwitchingSides}
+		<div class="fixed inset-0 bg-gray-950/95 flex items-center justify-center z-50">
+			<div class="text-center">
+				<p class="text-xl text-gray-400 mb-4">Switch Sides</p>
+				<p class="text-8xl font-bold text-blue-400 mb-4">{formatTime(switchSidesSeconds)}</p>
+				<button
+					onclick={() => {
+						if (switchSidesTimer) {
+							clearInterval(switchSidesTimer);
+							switchSidesTimer = null;
+						}
+						isSwitchingSides = false;
+						currentSide = 'right';
+					}}
+					class="bg-white text-black px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-all"
+				>
+					Skip
+				</button>
+			</div>
+		</div>
+	{/if}
+
 	<main class="flex-1 p-4 flex flex-col">
 		{#if data.allRoutineMovements[currentMovementIndex]}
 			{@const rm = data.allRoutineMovements[currentMovementIndex]}
 			{@const m = rm.movement}
 
-			<!-- Movement info -->
 			<div class="flex-1 flex flex-col items-center justify-center">
 				<div class="text-center mb-6">
-					{#if currentSide}
+					{#if isBilateral}
 						<span class="inline-block px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full text-sm mb-4">
-							{currentSide} Side
+							{currentSide === 'left' ? 'Left' : 'Right'} Side
 						</span>
 					{/if}
 					{#key setCounterTrigger}
@@ -324,7 +404,6 @@
 					<h2 class="text-3xl font-bold mb-2">{m.name}</h2>
 					<p class="text-gray-400 mb-6">{m.description}</p>
 
-					<!-- Target info -->
 					<div class="mb-6">
 						{#if rm.target.type === 'time'}
 							<div class="text-center">
@@ -335,8 +414,17 @@
 						{:else if rm.target.type === 'reps'}
 							<div class="text-center">
 								<p class="text-gray-400 text-sm mb-2">Complete</p>
-								<p class="text-6xl font-bold text-blue-400">{rm.target.value}</p>
-								<p class="text-gray-500 text-sm mt-2">reps</p>
+								{#if isBilateral}
+									<p class="text-6xl font-bold text-blue-400">
+										{currentSide === 'left' ? rm.target.value : 0} / {rm.target.value}
+									</p>
+									<p class="text-gray-500 text-sm mt-2">
+										{currentSide === 'left' ? 'Left' : 'Right'}: {rm.target.value} reps
+									</p>
+								{:else}
+									<p class="text-6xl font-bold text-blue-400">{rm.target.value}</p>
+									<p class="text-gray-500 text-sm mt-2">reps</p>
+								{/if}
 							</div>
 						{:else if rm.target.type === 'distance'}
 							<div class="text-center">
@@ -347,7 +435,6 @@
 						{/if}
 					</div>
 
-					<!-- Illustration -->
 					{#if m.illustrationPath}
 						<div class="mb-6 text-gray-600">
 							{#if m.illustrationPath.startsWith('<svg')}
@@ -370,14 +457,13 @@
 				</div>
 			</div>
 
-			<!-- Action buttons -->
 			<div class="flex gap-3 mt-auto">
 				{#if !isTimedMovement}
 					<button
 						onclick={completeCurrentSet}
 						class="flex-1 bg-gradient-to-r {showSuccess ? 'from-emerald-500 to-emerald-600' : 'from-blue-600 to-purple-600'} hover:from-blue-500 hover:to-purple-500 text-white py-6 px-8 rounded-xl font-semibold text-xl transition-all"
 					>
-						{showSuccess ? '✓ Done' : '✓ Complete Set'}
+						{showSuccess ? '✓ Done' : '✓ Complete ' + (isBilateral ? (currentSide === 'left' ? 'Left' : 'Right') + ' Side' : 'Set')}
 					</button>
 				{/if}
 
@@ -393,7 +479,6 @@
 				</button>
 			</div>
 		{:else}
-			<!-- Practice complete -->
 			<div class="flex-1 flex items-center justify-center">
 				<div class="text-center">
 					<div class="text-6xl mb-6">🎉</div>

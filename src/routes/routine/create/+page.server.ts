@@ -88,6 +88,8 @@ export const actions: Actions = {
 					unit: movement.targetUnit
 				},
 				sets: movement.sets || 1,
+				isBilateral: movement.isBilateral ?? false,
+				switchSidesDuration: movement.switchSidesDuration ?? 5,
 				notes: movement.notes || null
 			});
 		}

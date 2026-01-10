@@ -52,8 +52,10 @@ export async function load({ params }: { params: { id: string } }) {
 		orderBy: routineMovements.order
 	});
 
-	// Calculate progress
-	const totalSets = allRoutineMovements.reduce((sum, rm) => sum + rm.sets, 0);
+	// Calculate progress (for bilateral, each set = 2 sides)
+	const totalSets = allRoutineMovements.reduce((sum, rm) => {
+		return sum + (rm.isBilateral ? rm.sets * 2 : rm.sets);
+	}, 0);
 	const completedSets = practice.practiceData.length;
 	const progress = totalSets > 0 ? completedSets / totalSets : 0;
 
@@ -103,6 +105,7 @@ export const actions = {
 		const value = parseInt(formData.get('value') as string);
 		const measurementType = formData.get('measurementType') as 'time' | 'reps' | 'distance' | 'custom';
 		const customMeasurement = formData.get('customMeasurement') as string;
+		const side = formData.get('side') as 'left' | 'right' | null;
 
 		if (!routineMovementId || !setNumber || !value) {
 			return fail(400, { error: 'Missing required fields' });
@@ -114,6 +117,7 @@ export const actions = {
 			practiceLogId: params.id,
 			routineMovementId,
 			setNumber,
+			side,
 			value,
 			measurementType,
 			customMeasurement: customMeasurement || null,

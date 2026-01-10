@@ -109,6 +109,8 @@ export async function seedDatabase() {
           order: rm.order,
           target: rm.target as { type: "time" | "reps" | "distance"; value: number; unit?: string },
           sets: rm.sets,
+          isBilateral: rm.isBilateral ?? false,
+          switchSidesDuration: rm.switchSidesDuration ?? 5,
           notes: rm.notes,
         };
         await db

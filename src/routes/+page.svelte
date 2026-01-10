@@ -126,7 +126,7 @@
 				<div class="space-y-3">
 					{#each data.recentPractices as practice}
 						<a
-							href="/practice/{practice.id}"
+							href="/practice/{practice.id}{practice.duration ? '/summary' : ''}"
 							class="flex items-center justify-between p-4 bg-gray-800/30 border border-gray-800 rounded-lg hover:border-gray-700 transition-all"
 						>
 							<div>

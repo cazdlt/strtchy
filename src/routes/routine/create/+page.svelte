@@ -18,6 +18,8 @@
 		targetValue: number;
 		targetUnit?: string;
 		sets: number;
+		isBilateral: boolean;
+		switchSidesDuration: number;
 		notes: string;
 	}
 
@@ -45,6 +47,8 @@
 							targetValue: m.targetValue,
 							targetUnit: m.targetUnit,
 							sets: m.sets,
+							isBilateral: m.isBilateral ?? false,
+							switchSidesDuration: m.switchSidesDuration ?? 5,
 							notes: m.notes
 						}));
 					}
@@ -78,6 +82,8 @@
 				targetValue: defaultTarget?.value || 30,
 				targetUnit: defaultTarget?.unit,
 				sets: 1,
+				isBilateral: false,
+				switchSidesDuration: 5,
 				notes: ''
 			}
 		];
@@ -128,6 +134,8 @@
 				targetValue: m.targetValue,
 				targetUnit: m.targetUnit,
 				sets: m.sets,
+				isBilateral: m.isBilateral,
+				switchSidesDuration: m.switchSidesDuration,
 				notes: m.notes
 			}))
 		)
@@ -366,6 +374,29 @@
 										placeholder="Focus on form..."
 									/>
 								</div>
+							</div>
+
+							<div class="ml-11 space-y-3">
+								<label class="flex items-center gap-3 cursor-pointer">
+									<input
+										type="checkbox"
+										bind:checked={movement.isBilateral}
+										class="w-5 h-5 rounded border-gray-600 bg-gray-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-gray-900"
+									/>
+									<span class="text-gray-300 text-sm">Bilateral exercise (left/right sides)</span>
+								</label>
+
+								{#if movement.isBilateral}
+									<div>
+										<label class="block text-xs text-gray-400 mb-1">Switch Sides Duration (seconds)</label>
+										<input
+											type="number"
+											min="0"
+											bind:value={movement.switchSidesDuration}
+											class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+										/>
+									</div>
+								{/if}
 							</div>
 						</div>
 					{/each}

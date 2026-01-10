@@ -32,6 +32,7 @@ export const practiceData = sqliteTable("practice_data", {
 	practiceLogId: text("practice_log_id").notNull().references(() => practiceLogs.id, { onDelete: "cascade" } ),
 	routineMovementId: text("routine_movement_id").notNull().references(() => routineMovements.id),
 	setNumber: integer("set_number").notNull(),
+	side: text("side"),
 	value: integer().notNull(),
 	measurementType: text("measurement_type").notNull(),
 	customMeasurement: text("custom_measurement"),
@@ -56,6 +57,7 @@ export const routineMovements = sqliteTable("routine_movements", {
 	target: text().notNull(),
 	sets: integer().default(1).notNull(),
 	isBilateral: integer("is_bilateral").default(false).notNull(),
+	switchSidesDuration: integer("switch_sides_duration").default(5).notNull(),
 	notes: text(),
 });
 

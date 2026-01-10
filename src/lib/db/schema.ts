@@ -105,6 +105,7 @@ export const routineMovements = sqliteTable('routine_movements', {
 	}>().notNull(),
 	sets: integer('sets').notNull().default(1),
 	isBilateral: integer('is_bilateral', { mode: 'boolean' }).notNull().default(false),
+	switchSidesDuration: integer('switch_sides_duration').notNull().default(5),
 	notes: text('notes'),
 });
 
@@ -123,6 +124,7 @@ export const practiceData = sqliteTable('practice_data', {
 	practiceLogId: text('practice_log_id').references(() => practiceLogs.id, { onDelete: 'cascade' }).notNull(),
 	routineMovementId: text('routine_movement_id').references(() => routineMovements.id).notNull(),
 	setNumber: integer('set_number').notNull(),
+	side: text('side', { enum: ['left', 'right'] }),
 	value: integer('value').notNull(), // time in seconds, reps count, or distance
 	measurementType: text('measurement_type', { enum: ['time', 'reps', 'distance', 'custom'] }).notNull(),
 	customMeasurement: text('custom_measurement'), // e.g., band color

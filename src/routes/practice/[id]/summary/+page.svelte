@@ -12,7 +12,7 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
 	<header class="p-6 border-b border-gray-800">
 		<div class="max-w-4xl mx-auto">
-			<a href="/practice/{data.practice.id}" class="text-gray-400 hover:text-white text-sm mb-2 inline-block">&larr; Back to practice</a>
+			<a href="/routine/{data.practice.routineId}" class="text-gray-400 hover:text-white text-sm mb-2 inline-block">&larr; Start Again</a>
 			<h1 class="text-3xl font-bold">Practice Complete! 🎉</h1>
 			<p class="text-gray-400 mt-2">{data.practice.routine.name}</p>
 		</div>
@@ -46,7 +46,14 @@
 					<div class="flex justify-between items-start mb-2">
 						<div>
 							<h3 class="font-semibold">{m.name}</h3>
-							<p class="text-gray-400 text-sm">Set {pd.setNumber}</p>
+							<p class="text-gray-400 text-sm">
+								Set {pd.setNumber}
+								{#if pd.side}
+									<span class="ml-2 px-2 py-0.5 bg-blue-900/50 text-blue-300 rounded text-xs">
+										{pd.side === 'left' ? 'Left' : 'Right'}
+									</span>
+								{/if}
+							</p>
 						</div>
 						<div class="text-right">
 							{#if pd.measurementType === 'time'}
