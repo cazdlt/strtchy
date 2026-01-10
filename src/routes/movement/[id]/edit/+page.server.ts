@@ -1,0 +1,136 @@
+import { redirect, fail } from '@sveltejs/kit';
+import { db } from '$lib/db';
+import { movements } from '$lib/db/schema';
+import { nanoid } from 'nanoid';
+import { writeFile, mkdir, unlink } from 'fs/promises';
+import { join } from 'path';
+import { eq } from 'drizzle-orm';
+import type { PageServerLoad, Actions } from './$types';
+
+export const load: PageServerLoad = async ({ params, locals }) => {
+	const movement = await db.select().from(movements).where(eq(movements.id, params.id)).get();
+
+	if (!movement) {
+		throw redirect(303, '/movements');
+	}
+
+	return {
+		movement,
+		user: locals.user
+	};
+};
+
+export const actions: Actions = {
+	default: async ({ request, locals, params }) => {
+		if (!locals.user) {
+			return fail(401, { unauthorized: true });
+		}
+
+		const movement = await db.select().from(movements).where(eq(movements.id, params.id)).get();
+
+		if (!movement) {
+			return fail(404, { not_found: true });
+		}
+
+		try {
+			const formData = await request.formData();
+
+			const name = formData.get('name');
+			const description = formData.get('description') || null;
+			const type = formData.get('type');
+			const defaultValue = formData.get('default_value');
+			const defaultUnit = formData.get('default_unit') || null;
+			const illustration = formData.get('illustration') as File | null;
+			const removeIllustration = formData.get('remove_illustration') === 'true';
+
+			if (!name || !type || !defaultValue) {
+				return fail(400, { missing: true });
+			}
+
+			if (typeof name !== 'string' || typeof type !== 'string' || typeof defaultValue !== 'string') {
+				return fail(400, { invalid: true });
+			}
+
+			const validTypes = ['timed', 'reps', 'count', 'distance'];
+			if (!validTypes.includes(type)) {
+				return fail(400, { invalid_type: true });
+			}
+
+			const value = parseInt(defaultValue, 10);
+			if (isNaN(value) || value <= 0) {
+				return fail(400, { invalid_value: true });
+			}
+
+			let illustrationPath = movement.illustrationPath;
+
+			if (removeIllustration && illustrationPath) {
+				const filepath = join(process.cwd(), 'static', illustrationPath);
+				try {
+					await unlink(filepath);
+				} catch (e) {
+					console.error('Failed to delete illustration:', e);
+				}
+				illustrationPath = null;
+			}
+
+			if (illustration && illustration.size > 0) {
+				const validTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/webp'];
+				if (!validTypes.includes(illustration.type)) {
+					return fail(400, { invalid_file: true });
+				}
+
+				if (illustrationPath) {
+					const oldFilepath = join(process.cwd(), 'static', illustrationPath);
+					try {
+						await unlink(oldFilepath);
+					} catch (e) {
+						console.error('Failed to delete old illustration:', e);
+					}
+				}
+
+				const ext = illustration.name.split('.').pop()?.toLowerCase() || 'png';
+				const filename = `${nanoid()}.${ext}`;
+				const uploadDir = join(process.cwd(), 'static', 'uploads', 'movements');
+
+				await mkdir(uploadDir, { recursive: true });
+				const filepath = join(uploadDir, filename);
+				const bytes = await illustration.arrayBuffer();
+				await writeFile(filepath, Buffer.from(bytes));
+
+				illustrationPath = `/uploads/movements/${filename}`;
+			}
+
+			const targetTypeMap = {
+				timed: 'time' as const,
+				reps: 'reps' as const,
+				distance: 'distance' as const,
+				count: 'reps' as const
+			};
+
+			await db
+				.update(movements)
+				.set({
+					name: String(name),
+					description: description ? String(description) : null,
+					type: type as 'timed' | 'reps' | 'count' | 'distance',
+					illustrationPath,
+					metadata: {
+						defaultTarget: {
+							type: targetTypeMap[type as keyof typeof targetTypeMap],
+							value,
+							unit: defaultUnit ? String(defaultUnit) : undefined
+						}
+					}
+				})
+				.where(eq(movements.id, params.id));
+
+			throw redirect(303, '/movements');
+		} catch (error) {
+			if (error && typeof error === 'object' && 'status' in error) {
+				throw error;
+			}
+			console.error('Error updating movement:', error);
+			return fail(500, { error: 'Failed to update movement' });
+		}
+	}
+};

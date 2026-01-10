@@ -1,12 +1,19 @@
 <script lang="ts">
-	let { form } = $props();
-	let name = $state('');
-	let description = $state('');
-	let type = $state('timed');
-	let defaultValue = $state('');
-	let defaultUnit = $state('');
+	import type { PageData, ActionData } from './$types';
+	import logo from '$lib/assets/logo.svg';
+
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	let name = $state(data.movement.name);
+	let description = $state(data.movement.description || '');
+	let type = $state(data.movement.type);
+	let defaultValue = $state(String(data.movement.metadata?.defaultTarget?.value || ''));
+	let defaultUnit = $state(data.movement.metadata?.defaultTarget?.unit || '');
 	let selectedFile = $state<File | null>(null);
-	let filePreview = $state<string | null>(null);
+	let filePreview = $state<string | null>(
+		data.movement.illustrationPath ? data.movement.illustrationPath : null
+	);
+	let removeIllustration = $state(false);
 
 	const movementTypes = [
 		{ value: 'timed', label: 'Timed', placeholder: '30', unit: 'seconds' },
@@ -27,47 +34,70 @@
 				filePreview = e.target?.result as string;
 			};
 			reader.readAsDataURL(file);
+			removeIllustration = false;
 		}
 	}
 
 	function clearFile() {
 		selectedFile = null;
-		filePreview = null;
+		if (data.movement.illustrationPath) {
+			filePreview = data.movement.illustrationPath;
+		} else {
+			filePreview = null;
+		}
+		removeIllustration = false;
 		const fileInput = document.getElementById('illustration') as HTMLInputElement;
 		if (fileInput) {
 			fileInput.value = '';
 		}
 	}
+
+	function removeCurrentIllustration() {
+		filePreview = null;
+		removeIllustration = true;
+		const fileInput = document.getElementById('illustration') as HTMLInputElement;
+		if (fileInput) {
+			fileInput.value = '';
+		}
+		selectedFile = null;
+	}
 </script>
 
 <svelte:head>
-	<title>Create Movement - Strtchy</title>
+	<title>Edit Movement - Strtchy</title>
 </svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-900 to-black p-4">
 	<div class="w-full max-w-md">
 		<div class="bg-zinc-800/50 backdrop-blur-sm rounded-2xl p-8 border border-zinc-700">
-			<h1 class="text-3xl font-bold text-white mb-2 text-center">Create Movement</h1>
-			<p class="text-zinc-400 mb-8 text-center">Add a custom movement to your library</p>
+			<div class="flex items-center justify-between mb-6">
+				<h1 class="text-2xl font-bold text-white">Edit Movement</h1>
+				<a
+					href="/movements"
+					class="text-zinc-400 hover:text-zinc-300 transition-colors text-sm"
+				>
+					Cancel
+				</a>
+			</div>
 
- 			<form method="POST" enctype="multipart/form-data" class="space-y-4">
- 				{#if form?.error}
- 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
- 						{form.error}
- 					</div>
- 				{/if}
+			<form method="POST" enctype="multipart/form-data" class="space-y-4">
+				{#if form?.error}
+					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+						{form.error}
+					</div>
+				{/if}
 
- 				{#if form?.unauthorized}
- 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
- 						You must be logged in to create a movement
- 					</div>
- 				{/if}
+				{#if form?.unauthorized}
+					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+						You must be logged in to edit a movement
+					</div>
+				{/if}
 
- 				{#if form?.missing}
- 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
- 						Please fill in all required fields
- 					</div>
- 				{/if}
+				{#if form?.missing}
+					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+						Please fill in all required fields
+					</div>
+				{/if}
 
 				{#if form?.invalid_type}
 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
@@ -113,7 +143,9 @@
 				</div>
 
 				<div>
-					<label for="illustration" class="block text-sm font-medium text-zinc-300 mb-2">Illustration (optional)</label>
+					<label for="illustration" class="block text-sm font-medium text-zinc-300 mb-2">
+						Illustration (optional)
+					</label>
 					<div class="space-y-3">
 						<input
 							id="illustration"
@@ -130,20 +162,30 @@
 									alt="Preview"
 									class="w-32 h-32 object-contain bg-zinc-900/50 rounded-lg border border-zinc-600"
 								/>
-								<button
-									type="button"
-									onclick={clearFile}
-									class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-xs"
-									aria-label="Remove file"
-								>
-									✕
-								</button>
+								<div class="absolute top-1 right-1 flex gap-1">
+									<button
+										type="button"
+										onclick={clearFile}
+										class="bg-zinc-600 hover:bg-zinc-700 text-white rounded-full p-1 text-xs"
+										aria-label="Remove new file"
+									>
+										✕
+									</button>
+									<button
+										type="button"
+										onclick={removeCurrentIllustration}
+										class="bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-xs"
+										aria-label="Remove illustration"
+										title="Remove illustration"
+									>
+										🗑️
+									</button>
+								</div>
 							</div>
 						{:else}
-							<p class="text-xs text-zinc-500">
-								Supported formats: SVG, JPG, PNG, WebP
-							</p>
+							<p class="text-xs text-zinc-500">Supported formats: SVG, JPG, PNG, WebP</p>
 						{/if}
+						<input type="hidden" name="remove_illustration" value={removeIllustration ? 'true' : ''} />
 					</div>
 				</div>
 
@@ -200,13 +242,9 @@
 					type="submit"
 					class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-zinc-800"
 				>
-					Create Movement
+					Save Changes
 				</button>
 			</form>
-
-			<p class="mt-6 text-center text-zinc-400 text-sm">
-				<a href="/" class="text-emerald-400 hover:text-emerald-300 font-medium">Back to Home</a>
-			</p>
 		</div>
 	</div>
 </div>

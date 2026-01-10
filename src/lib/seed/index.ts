@@ -2,22 +2,17 @@ import { nanoid } from 'nanoid';
 import { db } from '../db';
 import * as schema from '../db/schema';
 import type { movements, routines, routineMovements } from '../db/schema';
-import { readdirSync, readFileSync } from 'fs';
+import { readdirSync } from 'fs';
 import { join } from 'path';
 
-const assetsPath = join(process.cwd(), 'src/lib/assets/movements');
+const assetsPath = join(process.cwd(), 'static/assets/movements');
 const files = readdirSync(assetsPath).filter(f => /\.(svg|jpg|jpeg|png|webp)$/i.test(f));
 
 const svgMap: Record<string, string> = {};
 for (const file of files) {
 	const fileName = file.split('.')[0];
 	const camelCase = fileName.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-	const ext = file.split('.').pop()?.toLowerCase();
-	if (ext === 'svg') {
-		svgMap[camelCase] = readFileSync(join(assetsPath, file), 'utf-8');
-	} else {
-		svgMap[camelCase] = `/lib/assets/movements/${file}`;
-	}
+	svgMap[camelCase] = `/assets/movements/${file}`;
 }
 
 const svgs = svgMap as {

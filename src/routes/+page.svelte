@@ -40,7 +40,21 @@
 	</div>
 </header>
 
- 	<main class="max-w-4xl mx-auto p-6">
+  	<main class="max-w-4xl mx-auto p-6">
+		<div class="mb-8">
+			<h2 class="text-xl font-semibold mb-4">Browse</h2>
+			<a
+				href="/movements"
+				class="flex items-center gap-4 p-6 bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-700/50 rounded-xl hover:border-orange-600/50 hover:from-orange-600/30 hover:to-red-600/30 transition-all"
+			>
+				<div class="text-4xl">📚</div>
+				<div>
+					<h3 class="text-lg font-semibold mb-1">View All Movements</h3>
+					<p class="text-gray-400 text-sm">Browse your movement library</p>
+				</div>
+			</a>
+		</div>
+
 		{#if data.user}
 			<div class="mb-8">
 				<h2 class="text-xl font-semibold mb-4">Create</h2>
