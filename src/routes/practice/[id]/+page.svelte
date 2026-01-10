@@ -312,10 +312,20 @@
 						{/if}
 					</div>
 
-					<!-- SVG illustration -->
-					{#if m.svgIllustration}
+					<!-- Illustration -->
+					{#if m.illustrationPath}
 						<div class="mb-6 text-gray-600">
-							{@html m.svgIllustration}
+							{#if m.illustrationPath.startsWith('<svg')}
+								<div class="w-48 h-48 mx-auto">
+									{@html m.illustrationPath}
+								</div>
+							{:else}
+								<img 
+									src={m.illustrationPath} 
+									alt={m.name} 
+									class="w-48 h-48 object-contain mx-auto"
+								/>
+							{/if}
 						</div>
 					{/if}
 

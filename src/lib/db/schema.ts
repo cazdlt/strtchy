@@ -64,7 +64,7 @@ export const movements = sqliteTable('movements', {
 	name: text('name').notNull(),
 	description: text('description'),
 	type: text('type', { enum: ['timed', 'reps', 'count', 'distance'] }).notNull(),
-	svgIllustration: text('svg_illustration'),
+	illustrationPath: text('illustration_path'),
 	isCustom: integer('is_custom', { mode: 'boolean' }).notNull().default(false),
 	userId: text('user_id').references(() => user.id),
 	metadata: text('metadata', { mode: 'json' }).$type<{

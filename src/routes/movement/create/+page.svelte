@@ -5,6 +5,8 @@
 	let type = $state('timed');
 	let defaultValue = $state('');
 	let defaultUnit = $state('');
+	let selectedFile = $state<File | null>(null);
+	let filePreview = $state<string | null>(null);
 
 	const movementTypes = [
 		{ value: 'timed', label: 'Timed', placeholder: '30', unit: 'seconds' },
@@ -14,6 +16,28 @@
 	];
 
 	const selectedType = $derived(movementTypes.find((t) => t.value === type));
+
+	function handleFileSelect(event: Event) {
+		const target = event.target as HTMLInputElement;
+		const file = target.files?.[0];
+		if (file) {
+			selectedFile = file;
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				filePreview = e.target?.result as string;
+			};
+			reader.readAsDataURL(file);
+		}
+	}
+
+	function clearFile() {
+		selectedFile = null;
+		filePreview = null;
+		const fileInput = document.getElementById('illustration') as HTMLInputElement;
+		if (fileInput) {
+			fileInput.value = '';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -26,7 +50,7 @@
 			<h1 class="text-3xl font-bold text-white mb-2 text-center">Create Movement</h1>
 			<p class="text-zinc-400 mb-8 text-center">Add a custom movement to your library</p>
 
-			<form method="POST" class="space-y-4">
+			<form method="POST" enctype="multipart/form-data" class="space-y-4">
 				{#if form?.missing}
 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
 						Please fill in all required fields
@@ -42,6 +66,12 @@
 				{#if form?.invalid_value}
 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
 						Default value must be a positive number
+					</div>
+				{/if}
+
+				{#if form?.invalid_file}
+					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+						Invalid file type. Please upload SVG, JPG, PNG, or WebP.
 					</div>
 				{/if}
 
@@ -68,6 +98,41 @@
 						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
 						placeholder="Brief description of the movement..."
 					></textarea>
+				</div>
+
+				<div>
+					<label for="illustration" class="block text-sm font-medium text-zinc-300 mb-2">Illustration (optional)</label>
+					<div class="space-y-3">
+						<input
+							id="illustration"
+							name="illustration"
+							type="file"
+							accept="image/svg+xml,image/jpeg,image/png,image/webp"
+							oninput={handleFileSelect}
+							class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700"
+						/>
+						{#if filePreview}
+							<div class="relative">
+								<img
+									src={filePreview}
+									alt="Preview"
+									class="w-32 h-32 object-contain bg-zinc-900/50 rounded-lg border border-zinc-600"
+								/>
+								<button
+									type="button"
+									onclick={clearFile}
+									class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-xs"
+									aria-label="Remove file"
+								>
+									✕
+								</button>
+							</div>
+						{:else}
+							<p class="text-xs text-zinc-500">
+								Supported formats: SVG, JPG, PNG, WebP
+							</p>
+						{/if}
+					</div>
 				</div>
 
 				<div>

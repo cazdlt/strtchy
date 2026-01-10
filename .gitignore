@@ -12,6 +12,19 @@ node_modules
 .DS_Store
 Thumbs.db
 
+# Database files
+data/dev/local.db*
+data/prod/local.db*
+
+# Keep directory structure tracked
+!data/dev/.gitkeep
+!data/prod/.gitkeep
+
+# User uploads
+static/uploads/*
+!static/uploads/.gitkeep
+!static/uploads/movements/.gitkeep
+
 # Env
 .env
 .env.*

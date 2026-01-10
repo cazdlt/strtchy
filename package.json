@@ -7,10 +7,14 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"prod": "npm run build && DATABASE_URL=./data/prod/local.db vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"db:seed": "npx tsx scripts/init-db.ts"
+		"db:seed": "DATABASE_URL=./data/dev/local.db npx tsx scripts/init-db.ts",
+		"db:migrate": "DATABASE_URL=./data/dev/local.db npx tsx scripts/migrate.ts",
+		"db:seed:prod": "DATABASE_URL=./data/prod/local.db npx tsx scripts/init-db.ts",
+		"db:migrate:prod": "DATABASE_URL=./data/prod/local.db npx tsx scripts/migrate.ts"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.0",

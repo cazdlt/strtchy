@@ -2,21 +2,68 @@ import { nanoid } from 'nanoid';
 import { db } from '../db';
 import * as schema from '../db/schema';
 import type { movements, routines, routineMovements } from '../db/schema';
-import * as svgs from '../assets/movements';
+import { readdirSync, readFileSync } from 'fs';
+import { join } from 'path';
+
+const assetsPath = join(process.cwd(), 'src/lib/assets/movements');
+const files = readdirSync(assetsPath).filter(f => /\.(svg|jpg|jpeg|png|webp)$/i.test(f));
+
+const svgMap: Record<string, string> = {};
+for (const file of files) {
+	const fileName = file.split('.')[0];
+	const camelCase = fileName.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+	const ext = file.split('.').pop()?.toLowerCase();
+	if (ext === 'svg') {
+		svgMap[camelCase] = readFileSync(join(assetsPath, file), 'utf-8');
+	} else {
+		svgMap[camelCase] = `/lib/assets/movements/${file}`;
+	}
+}
+
+const svgs = svgMap as {
+	shoulderRolls: string;
+	armCircles: string;
+	crossBodyStretch: string;
+	ninetyNinetyHipSwitch: string;
+	butterflyStretch: string;
+	pigeonPose: string;
+	catCow: string;
+	childsPose: string;
+	cobraStretch: string;
+	downwardDog: string;
+	forwardFold: string;
+	doorwayPecStretch: string;
+	latStretch: string;
+	forearmStretch: string;
+	quadStretch: string;
+	calfStretch: string;
+	hamstringStretch: string;
+	itBandStretch: string;
+	neckSideStretch: string;
+	upperTrapStretch: string;
+	scapularWallSlides: string;
+	facePulls: string;
+	internalRotation: string;
+	externalRotation: string;
+	couchStretch: string;
+	hipFlexorLunge: string;
+	bandedAnkleDistraction: string;
+	thoracicExtension: string;
+};
 
 // Helper to create movement objects
 const createMovement = (
 	name: string,
 	description: string,
 	type: 'timed' | 'reps' | 'count' | 'distance',
-	svg: string,
+	illustrationPath: string,
 	defaultTarget: { type: 'time' | 'reps' | 'distance'; value: number; unit?: string }
 ): typeof movements.$inferInsert => ({
 	id: nanoid(),
 	name,
 	description,
 	type,
-	svgIllustration: svg,
+	illustrationPath,
 	isCustom: false,
 	metadata: { defaultTarget },
 	createdAt: new Date()

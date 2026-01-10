@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			description: movements.description,
 			type: movements.type,
 			metadata: movements.metadata,
-			svgIllustration: movements.svgIllustration,
+			illustrationPath: movements.illustrationPath,
 			isCustom: movements.isCustom,
 			userId: movements.userId
 		})

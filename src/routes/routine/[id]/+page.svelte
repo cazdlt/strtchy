@@ -79,10 +79,20 @@
 						{/if}
 					</div>
 
-					<!-- SVG Illustration -->
-					{#if rm.movement.svgIllustration}
+					<!-- Illustration -->
+					{#if rm.movement.illustrationPath}
 						<div class="ml-11 mt-3">
-							{@html rm.movement.svgIllustration}
+							{#if rm.movement.illustrationPath.startsWith('<svg')}
+								<div class="w-32 h-32 text-gray-600">
+									{@html rm.movement.illustrationPath}
+								</div>
+							{:else}
+								<img 
+									src={rm.movement.illustrationPath} 
+									alt={rm.movement.name} 
+									class="w-32 h-32 object-contain"
+								/>
+							{/if}
 						</div>
 					{/if}
 				</div>

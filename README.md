@@ -19,20 +19,52 @@ A stretching and recovery routine tracker inspired by Hevy. Create custom moveme
 - Lucia v3 for authentication
 - Vite PWA
 
-## Getting Started
+## Quick Start
+
+### Development
+```bash
+./scripts/dev.sh
+```
+This script will:
+- Check/create `.env` file
+- Initialize development database if needed (migrations + seeding)
+- Start the development server
+
+### Production
+```bash
+./scripts/prod.sh
+```
+This script will:
+- Check/create `.env.production` file
+- Initialize production database if needed (migrations + seeding)
+- Build the application
+- Start the production preview server
+
+## Database Structure
+
+The app uses separate databases for different environments:
+- **Development**: `./data/dev/local.db`
+- **Production**: `./data/prod/local.db`
+
+Both databases will be automatically initialized with sample movements and routines on first run.
+
+## Manual Database Operations
+
+If you need to manually work with databases:
 
 ```bash
-# Install dependencies
-npm install
+# Seed development database
+npm run db:seed
 
-# Start development server
-npm run dev
+# Seed production database
+npm run db:seed:prod
 
-# Build for production
-npm run build
+# Migrate development database
+npm run db:migrate
+
+# Migrate production database
+npm run db:migrate:prod
 ```
-
-The app will automatically create a local SQLite database (`local.db`) and seed it with sample movements and routines on first run.
 
 ## Usage
 
