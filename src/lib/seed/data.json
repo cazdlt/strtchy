@@ -19,6 +19,8 @@
       "description": "Pull arm across chest to stretch the shoulder.",
       "type": "timed",
       "illustrationKey": "crossBodyStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
     },
     {
@@ -26,6 +28,8 @@
       "description": "Switch between two seated positions to open hips.",
       "type": "reps",
       "illustrationKey": "ninetyNinetyHipSwitch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "reps", "value": 10 }
     },
     {
@@ -40,6 +44,8 @@
       "description": "Deep hip stretch on one side, then switch.",
       "type": "timed",
       "illustrationKey": "pigeonPose",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
     },
     {
@@ -82,6 +88,8 @@
       "description": "Stretch chest by placing forearms on a doorway and leaning forward.",
       "type": "timed",
       "illustrationKey": "doorwayPecStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
     },
     {
@@ -89,6 +97,8 @@
       "description": "Reach one arm over head and lean to the opposite side.",
       "type": "timed",
       "illustrationKey": "latStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
     },
     {
@@ -103,6 +113,8 @@
       "description": "Hold one foot behind you while standing on the other leg.",
       "type": "timed",
       "illustrationKey": "quadStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
     },
     {
@@ -110,6 +122,8 @@
       "description": "Press hands against wall and lean forward with one heel back.",
       "type": "timed",
       "illustrationKey": "calfStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
     },
     {
@@ -117,6 +131,8 @@
       "description": "Place one heel on a raised surface and lean forward from hips.",
       "type": "timed",
       "illustrationKey": "hamstringStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
     },
     {
@@ -124,6 +140,8 @@
       "description": "Cross one leg behind the other and lean away from the back leg.",
       "type": "timed",
       "illustrationKey": "itBandStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
     },
     {
@@ -131,6 +149,8 @@
       "description": "Gently pull head toward one shoulder.",
       "type": "timed",
       "illustrationKey": "neckSideStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 20, "unit": "s" }
     },
     {
@@ -138,6 +158,8 @@
       "description": "Gently pull head forward and to the side.",
       "type": "timed",
       "illustrationKey": "upperTrapStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 20, "unit": "s" }
     },
     {
@@ -150,7 +172,8 @@
     {
       "name": "Banded Face Pulls",
       "description": "Pull a resistance band toward your face, focusing on back of shoulders.",
-      "type": "reps",
+      "type": "resistance",
+      "weightUnit": "bodyweight",
       "illustrationKey": "facePulls",
       "defaultTarget": { "type": "reps", "value": 15 }
     },
@@ -159,12 +182,17 @@
       "description": "Lie on side, arm at 90 deg, gently push hand toward floor (Internal Rotation).",
       "type": "timed",
       "illustrationKey": "internalRotation",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
     },
     {
       "name": "Banded External Rotation",
       "description": "Rotate arm outward against a band while keeping elbow at side.",
-      "type": "reps",
+      "type": "resistance",
+      "weightUnit": "bodyweight",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "illustrationKey": "externalRotation",
       "defaultTarget": { "type": "reps", "value": 15 }
     },
@@ -173,6 +201,8 @@
       "description": "Deep hip flexor stretch with back foot against a wall or couch.",
       "type": "timed",
       "illustrationKey": "couchStretch",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
     },
     {
@@ -180,6 +210,8 @@
       "description": "Kneeling lunge, tucking pelvis and leaning forward slightly.",
       "type": "timed",
       "illustrationKey": "hipFlexorLunge",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
     },
     {
@@ -187,14 +219,74 @@
       "description": "Place band around ankle, step forward, and lean weight on knee.",
       "type": "timed",
       "illustrationKey": "bandedAnkleDistraction",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
     },
     {
       "name": "Thoracic Extension",
       "description": "Extend upper back over a foam roller or chair back.",
-      "type": "reps",
+      "type": "timed",
       "illustrationKey": "thoracicExtension",
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Dumbbell Shoulder Press",
+      "description": "Press dumbbells overhead from shoulder level.",
+      "type": "weighted",
+      "weightUnit": "lbs",
+      "illustrationKey": "shoulderPress",
+      "defaultTarget": { "type": "reps", "value": 12 }
+    },
+    {
+      "name": "Goblet Squats",
+      "description": "Hold weight at chest and squat down.",
+      "type": "weighted",
+      "weightUnit": "lbs",
+      "illustrationKey": "gobletSquat",
+      "defaultTarget": { "type": "reps", "value": 12 }
+    },
+    {
+      "name": "Banded Pull-Apart",
+      "description": "Hold a band with both arms at shoulder height and pull apart.",
+      "type": "resistance",
+      "weightUnit": "bodyweight",
+      "illustrationKey": "facePulls",
+      "defaultTarget": { "type": "reps", "value": 15 }
+    },
+    {
+      "name": "Banded Lateral Raise",
+      "description": "Stand on band and raise arms to sides to shoulder height.",
+      "type": "resistance",
+      "weightUnit": "bodyweight",
+      "isBilateral": true,
+      "switchSidesDuration": 5,
+      "illustrationKey": "shoulderPress",
+      "defaultTarget": { "type": "reps", "value": 12 }
+    },
+    {
+      "name": "Dumbbell Row",
+      "description": "Pull dumbbell to hip while hinged forward.",
+      "type": "weighted",
+      "weightUnit": "lbs",
+      "illustrationKey": "shoulderPress",
+      "defaultTarget": { "type": "reps", "value": 12 }
+    },
+    {
+      "name": "Kettlebell Deadlift",
+      "description": "Hinge at hips and lift weight to standing.",
+      "type": "weighted",
+      "weightUnit": "lbs",
+      "illustrationKey": "gobletSquat",
       "defaultTarget": { "type": "reps", "value": 10 }
+    },
+    {
+      "name": "Banded Squat",
+      "description": "Stand on band, hold handles at shoulders, and squat.",
+      "type": "resistance",
+      "weightUnit": "bodyweight",
+      "illustrationKey": "gobletSquat",
+      "defaultTarget": { "type": "reps", "value": 12 }
     }
   ],
   "routines": [
@@ -270,6 +362,8 @@
       "order": 2,
       "target": { "type": "time", "value": 30, "unit": "s" },
       "sets": 2,
+      "isBilateral": true,
+      "switchSidesDuration": 5,
       "notes": "Hold and breathe"
     },
     {
@@ -294,9 +388,19 @@
       "routineName": "Upper Body Gym Recovery",
       "movementName": "Thoracic Extension",
       "order": 5,
-      "target": { "type": "reps", "value": 10 },
+      "target": { "type": "time", "value": 45, "unit": "s" },
       "sets": 2,
       "notes": "Open up the chest"
+    },
+    {
+      "routineName": "Upper Body Gym Recovery",
+      "movementName": "Dumbbell Row",
+      "order": 6,
+      "target": { "type": "reps", "value": 12 },
+      "sets": 3,
+      "weight": 15,
+      "weightUnit": "lbs",
+      "notes": "Build back strength"
     },
     {
       "routineName": "Lower Body Gym Recovery",
@@ -335,6 +439,16 @@
       "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1,
       "notes": "Inner thigh focus"
+    },
+    {
+      "routineName": "Lower Body Gym Recovery",
+      "movementName": "Kettlebell Deadlift",
+      "order": 5,
+      "target": { "type": "reps", "value": 10 },
+      "sets": 3,
+      "weight": 25,
+      "weightUnit": "lbs",
+      "notes": "Strengthen posterior chain"
     },
     {
       "routineName": "Runner's Reset",
@@ -465,6 +579,26 @@
       "isBilateral": true,
       "switchSidesDuration": 5,
       "notes": "Stability focus"
+    },
+    {
+      "routineName": "Shoulder Health (Impingement & Scapula)",
+      "movementName": "Banded Pull-Apart",
+      "order": 5,
+      "target": { "type": "reps", "value": 15 },
+      "sets": 3,
+      "weightUnit": "bodyweight",
+      "notes": "Rear delts and scapula"
+    },
+    {
+      "routineName": "Shoulder Health (Impingement & Scapula)",
+      "movementName": "Banded Lateral Raise",
+      "order": 6,
+      "target": { "type": "reps", "value": 12 },
+      "sets": 3,
+      "isBilateral": true,
+      "switchSidesDuration": 5,
+      "weightUnit": "bodyweight",
+      "notes": "Lateral delts"
     },
     {
       "routineName": "Hip & Ankle Mobility",

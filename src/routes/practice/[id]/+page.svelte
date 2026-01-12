@@ -24,6 +24,11 @@
 	let setCounterTrigger = $state(0);
 	let practiceDataState = $state(data.practice.practiceData || []);
 
+	let currentWeight = $state<number | undefined>(undefined);
+	let showRatingModal = $state(false);
+	let currentRating = $state(5);
+	let movementPracticeDataCount = $state<Record<number, number>>({});
+
 	let wakeLock = $state<WakeLockSentinel | null>(null);
 	let audioContext = $state<AudioContext | null>(null);
 
@@ -43,6 +48,19 @@
 		if (isTimedMovement) {
 			startTimer();
 		}
+	});
+
+	$effect(() => {
+		const rm = data.allRoutineMovements[currentMovementIndex];
+		if (rm) {
+			currentWeight = rm.weight || undefined;
+		}
+	});
+
+	$effect(() => {
+		movementPracticeDataCount[currentMovementIndex] = practiceDataState.filter(
+			(pd: any) => pd.routineMovementId === data.allRoutineMovements[currentMovementIndex]?.id
+		).length;
 	});
 
 	onDestroy(() => {
@@ -68,6 +86,12 @@
 	const switchSidesDuration = $derived(currentRoutineMovement?.switchSidesDuration ?? 5);
 	const previousMovement = $derived(data.allRoutineMovements[currentMovementIndex - 1]?.movement);
 	const nextMovement = $derived(data.allRoutineMovements[currentMovementIndex + 1]?.movement);
+	const isWeightedOrResistance = $derived(
+		currentRoutineMovement?.movement.type === 'weighted' || currentRoutineMovement?.movement.type === 'resistance'
+	);
+	const movementSetsCompleted = $derived(movementPracticeDataCount[currentMovementIndex] || 0);
+	const totalMovementSets = $derived(currentRoutineMovement?.sets || 1);
+	const allMovementSetsCompleted = $derived(movementSetsCompleted >= totalMovementSets);
 
 	const completedSetsCount = $derived(practiceDataState.length);
 	const currentProgress = $derived(data.totalSets > 0 ? completedSetsCount / data.totalSets : 0);
@@ -115,8 +139,8 @@
 		if (isBilateral && currentSide === 'left') {
 			startSwitchSides();
 		} else {
-			if (currentSet >= data.allRoutineMovements[currentMovementIndex].sets) {
-				moveToNextMovement();
+			if (allMovementSetsCompleted) {
+				showRatingModal = true;
 			} else {
 				currentSet++;
 				currentSide = 'left';
@@ -267,6 +291,14 @@
 		formData.append('measurementType', 'reps');
 		formData.append('side', isBilateral ? currentSide : '');
 
+		if (isWeightedOrResistance && currentWeight) {
+			formData.append('weight', currentWeight.toString());
+			const rm = data.allRoutineMovements[currentMovementIndex];
+			if (rm.weightUnit) {
+				formData.append('weightUnit', rm.weightUnit);
+			}
+		}
+
 		playBeep();
 		showSuccess = true;
 		setCounterTrigger++;
@@ -291,6 +323,29 @@
 		if (confirm('Exit practice? Your progress so far is saved.')) {
 			window.location.href = '/';
 		}
+	}
+
+	function submitRating() {
+		const formData = new FormData();
+		formData.append('routineMovementId', data.allRoutineMovements[currentMovementIndex].id);
+		formData.append('rating', currentRating.toString());
+
+		fetch('?/submitRating', {
+			method: 'POST',
+			body: formData
+		}).then((response) => {
+			if (response.ok) {
+				showRatingModal = false;
+				moveToNextMovement();
+			}
+		}).catch((error) => {
+			console.error('Error submitting rating:', error);
+		});
+	}
+
+	function skipRating() {
+		showRatingModal = false;
+		moveToNextMovement();
 	}
 </script>
 
@@ -426,11 +481,42 @@
 									<p class="text-gray-500 text-sm mt-2">reps</p>
 								{/if}
 							</div>
-						{:else if rm.target.type === 'distance'}
-							<div class="text-center">
-								<p class="text-gray-400 text-sm mb-2">Complete</p>
-								<p class="text-6xl font-bold text-blue-400">{rm.target.value}</p>
-								<p class="text-gray-500 text-sm mt-2">{rm.target.unit || 'meters'}</p>
+						{/if}
+
+						{#if isWeightedOrResistance}
+							<div class="mt-4 bg-gray-800/50 rounded-lg p-4">
+								<p class="text-gray-400 text-sm mb-2">Weight</p>
+								<div class="flex items-center justify-center gap-3">
+									<button
+										onclick={() => {
+											if (currentWeight !== undefined) {
+												currentWeight = Math.max(0, currentWeight - 5);
+											}
+										}}
+										class="bg-gray-700 hover:bg-gray-600 text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold"
+									>
+										-
+									</button>
+									<input
+										type="number"
+										bind:value={currentWeight}
+										min="0"
+										class="w-24 text-center bg-gray-900 border border-gray-600 rounded-lg text-white text-xl font-bold py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+									/>
+									<button
+										onclick={() => {
+											if (currentWeight !== undefined) {
+												currentWeight += 5;
+											}
+										}}
+										class="bg-gray-700 hover:bg-gray-600 text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold"
+									>
+										+
+									</button>
+									{#if rm.weightUnit}
+										<span class="text-gray-400 text-xl">{rm.weightUnit}</span>
+									{/if}
+								</div>
 							</div>
 						{/if}
 					</div>
@@ -494,7 +580,57 @@
 			</div>
 		{/if}
 	</main>
+
+	{#if showRatingModal}
+		{@const movementType = currentRoutineMovement?.movement.type}
+		<div class="fixed inset-0 bg-gray-950/95 flex items-center justify-center z-50 p-4">
+			<div class="bg-gray-800 rounded-2xl p-6 max-w-md w-full border border-gray-700">
+				<div class="text-center">
+					<h2 class="text-2xl font-bold mb-2">How was it?</h2>
+					<p class="text-gray-400 mb-6">
+						{#if movementType === 'timed'}
+							How flexible does it feel? (1 = stiff, 10 = very loose)
+						{:else}
+							How hard was effort? (1 = easy, 10 = maximal)
+						{/if}
+					</p>
+
+					<div class="mb-6">
+						<div class="flex justify-between text-sm text-gray-400 mb-2">
+							<span>1 = Easy</span>
+							<span>10 = Hard</span>
+						</div>
+						<input
+							type="range"
+							bind:value={currentRating}
+							min="1"
+							max="10"
+							step="1"
+							class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+						/>
+						<p class="text-4xl font-bold text-blue-400 mt-4">{currentRating}</p>
+					</div>
+
+					<div class="flex gap-3">
+						<button
+							onclick={skipRating}
+							class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold transition-all"
+						>
+							Skip
+						</button>
+						<button
+							onclick={submitRating}
+							class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 px-6 rounded-xl font-semibold transition-all"
+						>
+							Submit
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
+
 
 <style>
 	:global(body) {

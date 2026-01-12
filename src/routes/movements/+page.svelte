@@ -90,7 +90,16 @@
 						{/if}
 
 						<div class="flex items-start justify-between mb-3 pr-16">
-							<h3 class="text-lg font-semibold">{movement.name}</h3>
+							<div class="flex items-center gap-2">
+								<a href="/movement/{movement.id}" class="font-semibold hover:text-emerald-400 transition">
+									{movement.name}
+								</a>
+								{#if movement.isBilateral}
+									<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/30 text-blue-400">
+										L/R
+									</span>
+								{/if}
+							</div>
 							{#if movement.isCustom}
 								<span
 									class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-900/30 text-purple-400"

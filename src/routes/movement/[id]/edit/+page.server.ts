@@ -40,6 +40,8 @@ export const actions: Actions = {
 			const type = formData.get('type');
 			const defaultValue = formData.get('default_value');
 			const defaultUnit = formData.get('default_unit') || null;
+			const isBilateral = formData.get('is_bilateral') === 'on';
+			const switchSidesDuration = formData.get('switch_sides_duration');
 			const illustration = formData.get('illustration') as File | null;
 			const removeIllustration = formData.get('remove_illustration') === 'true';
 
@@ -51,7 +53,7 @@ export const actions: Actions = {
 				return fail(400, { invalid: true });
 			}
 
-			const validTypes = ['timed', 'reps', 'count', 'distance'];
+			const validTypes = ['timed', 'reps', 'weighted', 'resistance'];
 			if (!validTypes.includes(type)) {
 				return fail(400, { invalid_type: true });
 			}
@@ -59,6 +61,11 @@ export const actions: Actions = {
 			const value = parseInt(defaultValue, 10);
 			if (isNaN(value) || value <= 0) {
 				return fail(400, { invalid_value: true });
+			}
+
+			const switchSidesDur = switchSidesDuration ? parseInt(String(switchSidesDuration), 10) : 5;
+			if (isNaN(switchSidesDur) || switchSidesDur < 0) {
+				return fail(400, { invalid_switch_sides_duration: true });
 			}
 
 			let illustrationPath = movement.illustrationPath;
@@ -103,8 +110,8 @@ export const actions: Actions = {
 			const targetTypeMap = {
 				timed: 'time' as const,
 				reps: 'reps' as const,
-				distance: 'distance' as const,
-				count: 'reps' as const
+				weighted: 'reps' as const,
+				resistance: 'reps' as const
 			};
 
 			await db
@@ -112,13 +119,16 @@ export const actions: Actions = {
 				.set({
 					name: String(name),
 					description: description ? String(description) : null,
-					type: type as 'timed' | 'reps' | 'count' | 'distance',
+					type: type as 'timed' | 'reps' | 'weighted' | 'resistance',
 					illustrationPath,
+					weightUnit: (type === 'weighted' || type === 'resistance') && defaultUnit ? (defaultUnit as 'lbs' | 'kg' | 'bodyweight') : null,
+					isBilateral,
+					switchSidesDuration: switchSidesDur,
 					metadata: {
 						defaultTarget: {
 							type: targetTypeMap[type as keyof typeof targetTypeMap],
 							value,
-							unit: defaultUnit ? String(defaultUnit) : undefined
+							unit: undefined
 						}
 					}
 				})

@@ -63,13 +63,16 @@ export const movements = sqliteTable('movements', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
 	description: text('description'),
-	type: text('type', { enum: ['timed', 'reps', 'count', 'distance'] }).notNull(),
+	type: text('type', { enum: ['timed', 'reps', 'weighted', 'resistance'] }).notNull(),
 	illustrationPath: text('illustration_path'),
 	isCustom: integer('is_custom', { mode: 'boolean' }).notNull().default(false),
 	userId: text('user_id').references(() => user.id),
+	weightUnit: text('weight_unit', { enum: ['lbs', 'kg', 'bodyweight'] }),
+	isBilateral: integer('is_bilateral', { mode: 'boolean' }).notNull().default(false),
+	switchSidesDuration: integer('switch_sides_duration').notNull().default(5),
 	metadata: text('metadata', { mode: 'json' }).$type<{
 		defaultTarget?: {
-			type: 'time' | 'reps' | 'distance';
+			type: 'time' | 'reps';
 			value: number;
 			unit?: string;
 		};
@@ -98,7 +101,7 @@ export const routineMovements = sqliteTable('routine_movements', {
 	movementId: text('movement_id').references(() => movements.id).notNull(),
 	order: integer('order').notNull(),
 	target: text('target', { mode: 'json' }).$type<{
-		type: 'time' | 'reps' | 'distance';
+		type: 'time' | 'reps';
 		value: number;
 		unit?: string;
 		customTag?: string;
@@ -106,6 +109,8 @@ export const routineMovements = sqliteTable('routine_movements', {
 	sets: integer('sets').notNull().default(1),
 	isBilateral: integer('is_bilateral', { mode: 'boolean' }).notNull().default(false),
 	switchSidesDuration: integer('switch_sides_duration').notNull().default(5),
+	weight: integer('weight'), // default weight for weighted/resistance exercises
+	weightUnit: text('weight_unit', { enum: ['lbs', 'kg', 'bodyweight'] }),
 	notes: text('notes'),
 });
 
@@ -125,9 +130,12 @@ export const practiceData = sqliteTable('practice_data', {
 	routineMovementId: text('routine_movement_id').references(() => routineMovements.id).notNull(),
 	setNumber: integer('set_number').notNull(),
 	side: text('side', { enum: ['left', 'right'] }),
-	value: integer('value').notNull(), // time in seconds, reps count, or distance
-	measurementType: text('measurement_type', { enum: ['time', 'reps', 'distance', 'custom'] }).notNull(),
+	value: integer('value').notNull(), // time in seconds or reps count
+	measurementType: text('measurement_type', { enum: ['time', 'reps'] }).notNull(),
+	weight: integer('weight'), // weight value used for weighted/resistance exercises
+	weightUnit: text('weight_unit', { enum: ['lbs', 'kg', 'bodyweight'] }),
 	customMeasurement: text('custom_measurement'), // e.g., band color
+	rating: integer('rating'), // 1-10 rating after completing movement
 	completedAt: integer('completed_at', { mode: 'timestamp' }).notNull(),
 });
 

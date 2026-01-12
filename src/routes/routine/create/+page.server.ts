@@ -90,6 +90,8 @@ export const actions: Actions = {
 				sets: movement.sets || 1,
 				isBilateral: movement.isBilateral ?? false,
 				switchSidesDuration: movement.switchSidesDuration ?? 5,
+				weight: movement.weight ? parseInt(String(movement.weight)) : null,
+				weightUnit: movement.weightUnit as 'lbs' | 'kg' | 'bodyweight' || null,
 				notes: movement.notes || null
 			});
 		}

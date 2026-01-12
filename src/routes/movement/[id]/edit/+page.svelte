@@ -8,7 +8,9 @@
 	let description = $state(data.movement.description || '');
 	let type = $state(data.movement.type);
 	let defaultValue = $state(String(data.movement.metadata?.defaultTarget?.value || ''));
-	let defaultUnit = $state(data.movement.metadata?.defaultTarget?.unit || '');
+	let defaultUnit = $state(data.movement.weightUnit || '');
+	let isBilateral = $state(data.movement.isBilateral ?? false);
+	let switchSidesDuration = $state(data.movement.switchSidesDuration ?? 5);
 	let selectedFile = $state<File | null>(null);
 	let filePreview = $state<string | null>(data.movement.illustrationPath || null);
 	let removeIllustration = $state(false);
@@ -18,8 +20,8 @@
 	const movementTypes = [
 		{ value: 'timed', label: 'Timed', placeholder: '30', unit: 'seconds' },
 		{ value: 'reps', label: 'Repetitions', placeholder: '10', unit: null },
-		{ value: 'count', label: 'Count', placeholder: '10', unit: null },
-		{ value: 'distance', label: 'Distance', placeholder: '100', unit: 'meters' }
+		{ value: 'weighted', label: 'Weighted', placeholder: '10', unit: 'reps' },
+		{ value: 'resistance', label: 'Resistance', placeholder: '10', unit: 'reps' }
 	];
 
 	const selectedType = $derived(movementTypes.find((t) => t.value === type));
@@ -218,21 +220,59 @@
 					/>
 				</div>
 
-				{#if type === 'distance'}
+				{#if type === 'weighted' || type === 'resistance'}
 					<div>
-						<label for="default_unit" class="block text-sm font-medium text-zinc-300 mb-2">
-							Unit
+						<label for="weight_unit" class="block text-sm font-medium text-zinc-300 mb-2">
+							Default Weight Unit *
 						</label>
-						<input
-							id="default_unit"
-							name="default_unit"
-							type="text"
+						<select
+							id="weight_unit"
+							name="weight_unit"
 							bind:value={defaultUnit}
-							class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-							placeholder="meters"
-						/>
+							class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+							required
+						>
+							<option value="">Select unit</option>
+							<option value="lbs">lbs</option>
+							<option value="kg">kg</option>
+							<option value="bodyweight">Bodyweight</option>
+						</select>
 					</div>
 				{/if}
+
+				<div class="border-t border-zinc-700 pt-4 mt-4">
+					<h3 class="text-lg font-semibold text-white mb-3">Bilateral Settings</h3>
+					<p class="text-sm text-zinc-400 mb-4">
+						Mark this as bilateral if the exercise requires switching between left and right sides.
+					</p>
+					<div class="space-y-4">
+						<label class="flex items-center gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								name="is_bilateral"
+								bind:checked={isBilateral}
+								class="w-5 h-5 rounded border-zinc-600 bg-zinc-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-800"
+							/>
+							<span class="text-zinc-300">This is a bilateral exercise</span>
+						</label>
+
+						{#if isBilateral}
+							<div>
+								<label for="switch_sides_duration" class="block text-sm font-medium text-zinc-300 mb-2">
+									Switch Sides Duration (seconds)
+								</label>
+								<input
+									id="switch_sides_duration"
+									name="switch_sides_duration"
+									type="number"
+									bind:value={switchSidesDuration}
+									min="0"
+									class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+								/>
+							</div>
+						{/if}
+					</div>
+				</div>
 
 				<button
 					type="submit"

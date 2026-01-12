@@ -57,10 +57,17 @@
 							<span class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm font-semibold">
 								{index + 1}
 							</span>
-							<div>
-								<h3 class="font-semibold">{rm.movement.name}</h3>
-								<p class="text-gray-400 text-sm">{rm.movement.description}</p>
+							<div class="flex items-center gap-2">
+								<a href="/movement/{rm.movement.id}" class="font-semibold hover:text-emerald-400 transition">
+									{rm.movement.name}
+								</a>
+								{#if rm.isBilateral}
+									<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/30 text-blue-400">
+										L/R
+									</span>
+								{/if}
 							</div>
+							<p class="text-gray-400 text-sm">{rm.movement.description}</p>
 						</div>
 					</div>
 
@@ -69,7 +76,6 @@
 							{#if rm.target.type === 'time'}
 								<span class="bg-gray-700 px-2 py-1 rounded">
 									Hold for {formatDuration(rm.target.value)}
-									{rm.target.unit}
 								</span>
 							{:else if rm.target.type === 'reps'}
 								<span class="bg-gray-700 px-2 py-1 rounded">

@@ -14,9 +14,11 @@
 		movementId: string;
 		name: string;
 		type: string;
-		targetType: 'time' | 'reps' | 'distance';
+		targetType: 'time' | 'reps';
 		targetValue: number;
 		targetUnit?: string;
+		weight?: number;
+		weightUnit?: 'lbs' | 'kg' | 'bodyweight';
 		sets: number;
 		isBilateral: boolean;
 		switchSidesDuration: number;
@@ -31,6 +33,8 @@
 			targetType: rm.target.type,
 			targetValue: rm.target.value,
 			targetUnit: rm.target.unit,
+			weight: rm.weight || undefined,
+			weightUnit: rm.weightUnit || undefined,
 			sets: rm.sets || 1,
 			isBilateral: rm.isBilateral ?? false,
 			switchSidesDuration: rm.switchSidesDuration ?? 5,
@@ -51,8 +55,8 @@
 		const targetTypeMap = {
 			timed: 'time' as const,
 			reps: 'reps' as const,
-			count: 'reps' as const,
-			distance: 'distance' as const
+			weighted: 'reps' as const,
+			resistance: 'reps' as const
 		};
 
 		const defaultTarget = movement.metadata?.defaultTarget;
@@ -66,9 +70,11 @@
 				targetType: targetTypeMap[movement.type as keyof typeof targetTypeMap],
 				targetValue: defaultTarget?.value || 30,
 				targetUnit: defaultTarget?.unit,
+				weight: undefined,
+				weightUnit: movement.weightUnit || undefined,
 				sets: 1,
-				isBilateral: false,
-				switchSidesDuration: 5,
+				isBilateral: movement.isBilateral ?? false,
+				switchSidesDuration: movement.switchSidesDuration ?? 5,
 				notes: ''
 			}
 		];
@@ -97,15 +103,15 @@
 		const groups: Record<string, any[]> = {
 			Timed: [],
 			Repetitions: [],
-			Count: [],
-			Distance: []
+			Weighted: [],
+			Resistance: []
 		};
 
 		for (const movement of data.movements) {
 			if (movement.type === 'timed') groups.Timed.push(movement);
 			else if (movement.type === 'reps') groups.Repetitions.push(movement);
-			else if (movement.type === 'count') groups.Count.push(movement);
-			else if (movement.type === 'distance') groups.Distance.push(movement);
+			else if (movement.type === 'weighted') groups.Weighted.push(movement);
+			else if (movement.type === 'resistance') groups.Resistance.push(movement);
 		}
 
 		return groups;
@@ -118,6 +124,8 @@
 				targetType: m.targetType,
 				targetValue: m.targetValue,
 				targetUnit: m.targetUnit,
+				weight: m.weight,
+				weightUnit: m.weightUnit,
 				sets: m.sets,
 				isBilateral: m.isBilateral,
 				switchSidesDuration: m.switchSidesDuration,
@@ -320,7 +328,6 @@
 									>
 										<option value="time">Time</option>
 										<option value="reps">Repetitions</option>
-										<option value="distance">Distance</option>
 									</select>
 								</div>
 
@@ -344,6 +351,34 @@
 									/>
 								</div>
 							</div>
+
+							{#if movement.type === 'weighted' || movement.type === 'resistance'}
+								<div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-11">
+									<div>
+										<label class="block text-xs text-gray-400 mb-1">Default Weight</label>
+										<input
+											type="number"
+											min="0"
+											bind:value={movement.weight}
+											class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+											placeholder="0"
+										/>
+									</div>
+
+									<div>
+										<label class="block text-xs text-gray-400 mb-1">Weight Unit</label>
+										<select
+											bind:value={movement.weightUnit}
+											class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+										>
+											<option value="">Select unit</option>
+											<option value="lbs">lbs</option>
+											<option value="kg">kg</option>
+											<option value="bodyweight">Bodyweight</option>
+										</select>
+									</div>
+								</div>
+							{/if}
 
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-11">
 								<div>

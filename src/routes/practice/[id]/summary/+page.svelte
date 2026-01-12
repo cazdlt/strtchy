@@ -42,7 +42,7 @@
 				{@const rm = pd.routineMovement}
 				{@const m = rm.movement}
 
-				<div class="p-4 bg-gray-800/50 border border-gray-700 rounded-lg">
+					<div class="p-4 bg-gray-800/50 border border-gray-700 rounded-lg">
 					<div class="flex justify-between items-start mb-2">
 						<div>
 							<h3 class="font-semibold">{m.name}</h3>
@@ -60,17 +60,27 @@
 								<p class="text-2xl font-bold text-blue-400">{formatDuration(pd.value)}</p>
 							{:else if pd.measurementType === 'reps'}
 								<p class="text-2xl font-bold text-blue-400">{pd.value} reps</p>
-							{:else if pd.measurementType === 'distance'}
-								<p class="text-2xl font-bold text-blue-400">{pd.value} m</p>
 							{:else}
 								<p class="text-2xl font-bold text-blue-400">{pd.value}</p>
 							{/if}
 						</div>
 					</div>
 
+					{#if pd.weight}
+						<p class="text-sm text-gray-500 mt-2">
+							Weight: <span class="text-white">{pd.weight} {pd.weightUnit || ''}</span>
+						</p>
+					{/if}
+
 					{#if pd.customMeasurement}
 						<p class="text-sm text-gray-500 mt-2">
 							Measurement: <span class="text-white">{pd.customMeasurement}</span>
+						</p>
+					{/if}
+
+					{#if pd.rating}
+						<p class="text-sm text-emerald-400 mt-2">
+							Rating: <span class="text-white">{pd.rating}/10</span>
 						</p>
 					{/if}
 

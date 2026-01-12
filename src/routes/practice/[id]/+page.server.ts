@@ -103,9 +103,11 @@ export const actions = {
 		const routineMovementId = formData.get('routineMovementId') as string;
 		const setNumber = parseInt(formData.get('setNumber') as string);
 		const value = parseInt(formData.get('value') as string);
-		const measurementType = formData.get('measurementType') as 'time' | 'reps' | 'distance' | 'custom';
+		const measurementType = formData.get('measurementType') as 'time' | 'reps';
 		const customMeasurement = formData.get('customMeasurement') as string;
 		const side = formData.get('side') as 'left' | 'right' | null;
+		const weight = formData.get('weight');
+		const weightUnit = formData.get('weightUnit') as 'lbs' | 'kg' | 'bodyweight' | null;
 
 		if (!routineMovementId || !setNumber || !value) {
 			return fail(400, { error: 'Missing required fields' });
@@ -121,8 +123,28 @@ export const actions = {
 			value,
 			measurementType,
 			customMeasurement: customMeasurement || null,
+			weight: weight ? parseInt(String(weight)) : null,
+			weightUnit,
 			completedAt: new Date()
 		});
+
+		return { success: true };
+	},
+
+	submitRating: async ({ request, params }: RequestEvent) => {
+		const formData = await request.formData();
+		const routineMovementId = formData.get('routineMovementId') as string;
+		const rating = parseInt(formData.get('rating') as string);
+
+		if (!routineMovementId || isNaN(rating)) {
+			return fail(400, { error: 'Missing required fields' });
+		}
+
+		// Update all practice data entries for this movement with the rating
+		await db
+			.update(practiceData)
+			.set({ rating })
+			.where(eq(practiceData.routineMovementId, routineMovementId));
 
 		return { success: true };
 	}

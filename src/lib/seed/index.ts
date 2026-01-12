@@ -68,10 +68,13 @@ export async function seedDatabase() {
         id: nanoid(),
         name: m.name,
         description: m.description,
-        type: m.type as "timed" | "reps" | "count" | "distance",
+        type: m.type as "timed" | "reps" | "weighted" | "resistance",
         illustrationPath: svgMap[m.illustrationKey as keyof typeof svgMap],
         isCustom: false,
-        metadata: { defaultTarget: m.defaultTarget as { type: "time" | "reps" | "distance"; value: number; unit?: string } },
+        weightUnit: m.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,
+        isBilateral: m.isBilateral ?? false,
+        switchSidesDuration: m.switchSidesDuration ?? 5,
+        metadata: { defaultTarget: m.defaultTarget as { type: "time" | "reps"; value: number; unit?: string } },
         createdAt: new Date(),
       };
       await db.insert(schema.movements).values(movement).onConflictDoNothing();
@@ -102,16 +105,19 @@ export async function seedDatabase() {
       const movementId = movementIdMap.get(rm.movementName);
       const routineId = routineIdMap.get(rm.routineName);
       if (movementId && routineId) {
+        const movement = seedData.movements.find((m) => m.name === rm.movementName);
         const routineMovement: typeof routineMovements.$inferInsert = {
           id: nanoid(),
           routineId,
           movementId,
           order: rm.order,
-          target: rm.target as { type: "time" | "reps" | "distance"; value: number; unit?: string },
+          target: rm.target as { type: "time" | "reps"; value: number; unit?: string },
           sets: rm.sets,
-          isBilateral: rm.isBilateral ?? false,
-          switchSidesDuration: rm.switchSidesDuration ?? 5,
+          isBilateral: rm.isBilateral ?? movement?.isBilateral ?? false,
+          switchSidesDuration: rm.switchSidesDuration ?? movement?.switchSidesDuration ?? 5,
           notes: rm.notes,
+          weight: rm.weight,
+          weightUnit: rm.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,
         };
         await db
           .insert(schema.routineMovements)
