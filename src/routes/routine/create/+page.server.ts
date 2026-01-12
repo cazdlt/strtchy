@@ -3,6 +3,7 @@ import { db } from '$lib/db';
 import { routines, routineMovements, movements } from '$lib/db/schema';
 import { nanoid } from 'nanoid';
 import { desc } from 'drizzle-orm';
+import { generateRoutineId, generateRoutineMovementId } from '$lib/utils/id';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -42,6 +43,14 @@ export const actions: Actions = {
 			return fail(400, { invalid: true, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
 		}
 
+		const existingRoutine = await db.query.routines.findFirst({
+			where: (routine, { eq }) => eq(routine.name, String(name))
+		});
+
+		if (existingRoutine) {
+			return fail(409, { duplicate_name: true, existing_name: existingRoutine.name, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
+		}
+
 		const restMovements = parseInt(restBetweenMovements, 10);
 		const restSets = parseInt(restBetweenSets, 10);
 
@@ -59,7 +68,7 @@ export const actions: Actions = {
 			return fail(400, { invalid_movements_data: true, submittedData: { name, description, restBetweenMovements, restBetweenSets, autoAdvance, audioEnabled, keepAwake, movementsData: String(movementsData || '[]') } });
 		}
 
-		const routineId = nanoid();
+		const routineId = generateRoutineId(String(name));
 
 		await db.insert(routines).values({
 			id: routineId,
@@ -77,8 +86,13 @@ export const actions: Actions = {
 
 		for (let i = 0; i < parsedMovements.length; i++) {
 			const movement = parsedMovements[i];
+			const movementRecord = await db.query.movements.findFirst({
+				where: (m, { eq }) => eq(m.id, movement.movementId)
+			});
+			const movementName = movementRecord?.name || 'unknown';
+			const id = generateRoutineMovementId(String(name), movementName, i);
 			await db.insert(routineMovements).values({
-				id: nanoid(),
+				id,
 				routineId,
 				movementId: movement.movementId,
 				order: i,

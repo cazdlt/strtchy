@@ -1,4 +1,3 @@
-import { nanoid } from "nanoid";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import type { movements, routines, routineMovements } from "../db/schema";
@@ -6,6 +5,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { generateMovementId, generateRoutineId, generateRoutineMovementId } from "../utils/id";
 import seedData from "./data.json";
 
 const auth = betterAuth({
@@ -39,6 +39,42 @@ for (const file of files) {
   svgMap[camelCase] = `/assets/movements/${file}`;
 }
 
+interface SeedMovement {
+  name: string;
+  description: string;
+  type: string;
+  illustrationKey: string;
+  equipment?: string[];
+  defaultTarget?: { type: string; value: number; unit?: string };
+  isBilateral?: boolean;
+  switchSidesDuration?: number;
+  weightUnit?: string;
+}
+
+interface SeedRoutine {
+  name: string;
+  description: string;
+  restBetweenMovements: number;
+  restBetweenSets: number;
+  autoAdvance: boolean;
+  audioEnabled: boolean;
+  keepAwake: boolean;
+}
+
+interface SeedRoutineMovement {
+  routineName: string;
+  movementName: string;
+  order: number;
+  target: { type: string; value: number; unit?: string };
+  sets: number;
+  isBilateral?: boolean;
+  switchSidesDuration?: number;
+  restBetweenSets?: number;
+  notes?: string;
+  weight?: number;
+  weightUnit?: string;
+}
+
 export async function seedDatabase() {
   try {
     console.log("Starting database seed...");
@@ -63,29 +99,32 @@ export async function seedDatabase() {
     }
 
     const movementIdMap = new Map<string, string>();
-    for (const m of seedData.movements) {
+    for (const m of seedData.movements as SeedMovement[]) {
+      const id = generateMovementId(m.name);
       const movement: typeof movements.$inferInsert = {
-        id: nanoid(),
+        id,
         name: m.name,
         description: m.description,
         type: m.type as "timed" | "reps" | "weighted" | "resistance",
-        illustrationPath: svgMap[m.illustrationKey as keyof typeof svgMap],
+        illustrationPath: svgMap[m.illustrationKey as keyof typeof svgMap] || null,
         isCustom: false,
         weightUnit: m.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,
         isBilateral: m.isBilateral ?? false,
         switchSidesDuration: m.switchSidesDuration ?? 5,
+        equipment: m.equipment ?? null,
         metadata: { defaultTarget: m.defaultTarget as { type: "time" | "reps"; value: number; unit?: string } },
         createdAt: new Date(),
       };
       await db.insert(schema.movements).values(movement).onConflictDoNothing();
-      movementIdMap.set(m.name, movement.id);
+      movementIdMap.set(m.name, id);
     }
     console.log(`✓ Seeded ${seedData.movements.length} movements`);
 
     const routineIdMap = new Map<string, string>();
-    for (const r of seedData.routines) {
+    for (const r of seedData.routines as SeedRoutine[]) {
+      const id = generateRoutineId(r.name);
       const routine: typeof routines.$inferInsert = {
-        id: nanoid(),
+        id,
         name: r.name,
         description: r.description,
         restBetweenMovements: r.restBetweenMovements,
@@ -97,24 +136,30 @@ export async function seedDatabase() {
         createdAt: new Date(),
       };
       await db.insert(schema.routines).values(routine).onConflictDoNothing();
-      routineIdMap.set(r.name, routine.id);
+      routineIdMap.set(r.name, id);
     }
     console.log(`✓ Seeded ${seedData.routines.length} routines`);
 
-    for (const rm of seedData.routineMovements) {
+    for (const rm of seedData.routineMovements as SeedRoutineMovement[]) {
       const movementId = movementIdMap.get(rm.movementName);
       const routineId = routineIdMap.get(rm.routineName);
       if (movementId && routineId) {
-        const movement = seedData.movements.find((m) => m.name === rm.movementName);
+        const movement = seedData.movements.find((m: any) => m.name === rm.movementName);
+        const routine = seedData.routines.find((r: any) => r.name === rm.routineName);
+        const id = generateRoutineMovementId(
+          routine?.name || 'unknown',
+          movement?.name || 'unknown',
+          rm.order
+        );
         const routineMovement: typeof routineMovements.$inferInsert = {
-          id: nanoid(),
+          id,
           routineId,
           movementId,
           order: rm.order,
           target: rm.target as { type: "time" | "reps"; value: number; unit?: string },
           sets: rm.sets,
-          isBilateral: rm.isBilateral ?? movement?.isBilateral ?? false,
-          switchSidesDuration: rm.switchSidesDuration ?? movement?.switchSidesDuration ?? 5,
+          isBilateral: rm.isBilateral ?? (movement as SeedMovement)?.isBilateral ?? false,
+          switchSidesDuration: rm.switchSidesDuration ?? (movement as SeedMovement)?.switchSidesDuration ?? 5,
           notes: rm.notes,
           weight: rm.weight,
           weightUnit: rm.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,

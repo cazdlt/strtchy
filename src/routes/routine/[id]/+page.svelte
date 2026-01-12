@@ -32,6 +32,11 @@
 			</div>
 
 			<div class="flex gap-4 mt-4 text-sm">
+				{#if data.estimatedDuration}
+					<span class="bg-gray-800 px-3 py-1 rounded-full">
+						⏱️ ~{data.estimatedDuration >= 60 ? Math.round(data.estimatedDuration / 60) + 'm' : data.estimatedDuration + 's'}
+					</span>
+				{/if}
 				{#if data.routine.restBetweenMovements}
 					<span class="bg-gray-800 px-3 py-1 rounded-full">
 						Rest: {data.routine.restBetweenMovements}s
@@ -44,6 +49,15 @@
 					<span class="bg-purple-900/30 text-purple-400 px-3 py-1 rounded-full">Audio</span>
 				{/if}
 			</div>
+			{#if data.equipment && data.equipment.length > 0}
+				<div class="flex flex-wrap gap-2 mt-4">
+					{#each data.equipment as item}
+						<span class="px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full text-xs font-medium">
+							{item}
+						</span>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</header>
 

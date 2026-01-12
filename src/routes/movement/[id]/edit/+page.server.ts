@@ -44,6 +44,12 @@ export const actions: Actions = {
 			const switchSidesDuration = formData.get('switch_sides_duration');
 			const illustration = formData.get('illustration') as File | null;
 			const removeIllustration = formData.get('remove_illustration') === 'true';
+			const equipmentRaw = formData.get('equipment') || '';
+
+			let equipment: string[] = [];
+			if (typeof equipmentRaw === 'string' && equipmentRaw.trim()) {
+				equipment = equipmentRaw.split(',').map(e => e.trim()).filter(Boolean);
+			}
 
 			if (!name || !type || !defaultValue) {
 				return fail(400, { missing: true });
@@ -81,8 +87,8 @@ export const actions: Actions = {
 			}
 
 			if (illustration && illustration.size > 0) {
-				const validTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/webp'];
-				if (!validTypes.includes(illustration.type)) {
+				const validTypesImg = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/webp'];
+				if (!validTypesImg.includes(illustration.type)) {
 					return fail(400, { invalid_file: true });
 				}
 
@@ -124,6 +130,7 @@ export const actions: Actions = {
 					weightUnit: (type === 'weighted' || type === 'resistance') && defaultUnit ? (defaultUnit as 'lbs' | 'kg' | 'bodyweight') : null,
 					isBilateral,
 					switchSidesDuration: switchSidesDur,
+					equipment,
 					metadata: {
 						defaultTarget: {
 							type: targetTypeMap[type as keyof typeof targetTypeMap],

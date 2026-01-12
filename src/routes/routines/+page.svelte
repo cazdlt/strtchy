@@ -109,6 +109,9 @@
 						</a>
 
 						<div class="flex flex-wrap gap-2 text-xs text-gray-500 mt-3">
+							{#if routine.estimatedDuration}
+								<span class="px-2 py-1 bg-gray-700/50 rounded">⏱️ ~{routine.estimatedDuration >= 60 ? Math.round(routine.estimatedDuration / 60) + 'm' : routine.estimatedDuration + 's'}</span>
+							{/if}
 							<span class="px-2 py-1 bg-gray-700/50 rounded">{routine.movementsCount} movements</span>
 							{#if routine.restBetweenMovements}
 								<span class="px-2 py-1 bg-gray-700/50 rounded"

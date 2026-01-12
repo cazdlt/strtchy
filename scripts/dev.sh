@@ -5,7 +5,5 @@ NC='\033[0m'
 
 echo -e "${GREEN}🚀 Starting Development Environment${NC}"
 
-scripts/db/setup.sh dev
-
 echo -e "${GREEN}→ Starting server...${NC}"
 DATABASE_URL="./data/dev/local.db" npm run dev

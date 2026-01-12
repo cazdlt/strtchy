@@ -6,6 +6,7 @@
 
 	let name = $state(data.movement.name);
 	let description = $state(data.movement.description || '');
+	let equipment = $state(data.movement.equipment?.join(', ') || '');
 	let type = $state(data.movement.type);
 	let defaultValue = $state(String(data.movement.metadata?.defaultTarget?.value || ''));
 	let defaultUnit = $state(data.movement.weightUnit || '');
@@ -138,6 +139,18 @@
 						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
 						placeholder="Brief description of the movement..."
 					></textarea>
+				</div>
+
+				<div>
+					<label for="equipment" class="block text-sm font-medium text-zinc-300 mb-2">Equipment (comma separated)</label>
+					<input
+						id="equipment"
+						name="equipment"
+						type="text"
+						bind:value={equipment}
+						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+						placeholder="Banda, Pelota, Rodillo..."
+					/>
 				</div>
 
 				<div>

@@ -1,345 +1,237 @@
 {
   "movements": [
     {
-      "name": "Shoulder Rolls",
-      "description": "Roll shoulders backward and forward to release tension.",
+      "name": "Liberación Plantar con Pelota",
+      "description": "De pie, coloca la pelota debajo de la planta del pie. Aplica presión rodando desde el talón hasta los dedos, buscando puntos de tensión.",
       "type": "timed",
-      "illustrationKey": "shoulderRolls",
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Arm Circles",
-      "description": "Make large circles with both arms simultaneously.",
-      "type": "timed",
-      "illustrationKey": "armCircles",
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Cross Body Stretch",
-      "description": "Pull arm across chest to stretch the shoulder.",
-      "type": "timed",
-      "illustrationKey": "crossBodyStretch",
+      "illustrationKey": "generic",
+      "equipment": ["Pelota pequeña"],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Estiramiento de Pantorrilla en Bloque",
+      "description": "Coloca la mitad delantero del pie sobre el bloque y el talón en el suelo. Fase A: Mantén la pierna totalmente recta (gemelo). Fase B: Flexiona ligeramente la rodilla (sóleo).",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": ["Bloque de yoga"],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 10
+    },
+    {
+      "name": "Estiramiento de Isquiotibiales de Pie",
+      "description": "De pie, pies al ancho de hombros. Inclina el torso hacia adelante desde la cadera (no doblando la cintura), manteniendo la espalda lo más recta posible.",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Inversión/Eversión con Banda",
+      "description": "Siéntate en el suelo con las piernas estiradas. Coloca una banda alrededor del pie. Para inversión: cruza la banda y jálala hacia adentro. Para eversión: sostén la banda hacia el lado y mueve el pie hacia afuera. El talón actúa como pivote fijo.",
+      "type": "reps",
+      "illustrationKey": "generic",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 20 },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Elevación de Arco con Banda",
+      "description": "De pie, coloca una banda elástica cerrada alrededor de ambos tobillos. Separa los pies para tensar la banda. Lucha contra ella empujando los bordes externos de los pies contra el suelo y elevando el arco plantar. Mantén los dedos en el suelo.",
+      "type": "reps",
+      "illustrationKey": "generic",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 10 }
+    },
+    {
+      "name": "Puente de Glúteo a Una Pierna",
+      "description": "Acostado boca arriba, una pierna flexionada apoyada en el suelo, la otra estirada al aire. Eleva la cadera empujando con el talón apoyada.",
+      "type": "reps",
+      "illustrationKey": "generic",
+      "equipment": [],
+      "defaultTarget": { "type": "reps", "value": 10 },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Liberación de Cuádriceps con Rodillo",
+      "description": "Boca abajo, coloca el rodillo bajo los muslos. Rueda desde la cadera hasta justo encima de la rodilla. Si encuentras un punto doloroso, detente y flexiona/estira la rodilla un par de veces.",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": ["Rodillo de espuma"],
+      "defaultTarget": { "type": "time", "value": 90, "unit": "s" }
+    },
+    {
+      "name": "Couch Stretch",
+      "description": "Coloca una rodilla lo más pegada posible a la esquina entre la pared y el suelo. La espinilla debe estar vertical contra la pared. La otra pierna adelante en posición de estocada. Intenta erguir el torso lentamente hasta pegar la espalda a la pared.",
+      "type": "timed",
+      "illustrationKey": "couchStretch",
+      "equipment": ["Pelota"],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
     },
     {
       "name": "90/90 Hip Switch",
-      "description": "Switch between two seated positions to open hips.",
+      "description": "Sentado en el suelo, una pierna delante flexionada a 90º y la otra detrás flexionada a 90º. Sin usar las manos (si es posible), rota las caderas para llevar las rodillas al otro lado, invirtiendo la posición de las piernas.",
       "type": "reps",
       "illustrationKey": "ninetyNinetyHipSwitch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
+      "equipment": [],
       "defaultTarget": { "type": "reps", "value": 10 }
     },
     {
       "name": "Butterfly Stretch",
-      "description": "Sit with soles together and press knees down.",
+      "description": "Sentado, junta las plantas de los pies y deja caer las rodillas hacia los lados. Sujeta los pies y mantén la espalda recta.",
       "type": "timed",
       "illustrationKey": "butterflyStretch",
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 90, "unit": "s" }
     },
     {
       "name": "Pigeon Pose",
-      "description": "Deep hip stretch on one side, then switch.",
+      "description": "Desde una posición de plancha o cuadrupedia, lleva la rodilla derecha hacia la muñeca derecha y el pie derecho hacia la muñeca izquierda. Desliza la pierna izquierda hacia atrás. Baja el torso hacia el suelo si la flexibilidad lo permite.",
       "type": "timed",
       "illustrationKey": "pigeonPose",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+      "switchSidesDuration": 5
     },
     {
-      "name": "Cat-Cow",
-      "description": "Alternate between arching and rounding the spine.",
+      "name": "Lunge con Rotación Torácica",
+      "description": "Posición de estocada profunda (pierna derecha adelante). Apoya la mano izquierda en el suelo junto al pie derecho. Gira el torso y eleva el brazo derecho hacia el techo, siguiendo la mano con la mirada.",
       "type": "reps",
-      "illustrationKey": "catCow",
+      "illustrationKey": "generic",
+      "equipment": [],
+      "defaultTarget": { "type": "reps", "value": 8 },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Dead Bug",
+      "description": "Boca arriba, brazos y piernas a 90º. Extiende brazo y pierna contraria sin arquear la lumbar. Mantén la posición de los extremos.",
+      "type": "reps",
+      "illustrationKey": "generic",
+      "equipment": [],
       "defaultTarget": { "type": "reps", "value": 10 }
     },
     {
-      "name": "Child's Pose",
-      "description": "Rest back on heels with arms extended forward.",
+      "name": "Plancha Lateral",
+      "description": "Apoyo en antebrazo y pies, cuerpo en línea recta. Contrae el abdomen y mantén los hombros alineados con los codos.",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Child's Pose Bilateral",
+      "description": "Arrodillado, siéntate sobre los talones y estira los brazos hacia adelante por el suelo. Baja el pecho hacia el piso, enfocándote en estirar la zona de las axilas y dorsales.",
       "type": "timed",
       "illustrationKey": "childsPose",
+      "equipment": [],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
     },
     {
-      "name": "Cobra Stretch",
-      "description": "Lift chest while keeping hips on ground.",
-      "type": "timed",
-      "illustrationKey": "cobraStretch",
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "Downward Dog",
-      "description": "Classic yoga pose for full body stretch.",
-      "type": "timed",
-      "illustrationKey": "downwardDog",
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Forward Fold",
-      "description": "Hang from hips to stretch hamstrings and back.",
-      "type": "timed",
-      "illustrationKey": "forwardFold",
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Doorway Pec Stretch",
-      "description": "Stretch chest by placing forearms on a doorway and leaning forward.",
-      "type": "timed",
-      "illustrationKey": "doorwayPecStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "Standing Lat Stretch",
-      "description": "Reach one arm over head and lean to the opposite side.",
-      "type": "timed",
-      "illustrationKey": "latStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Forearm Stretch",
-      "description": "Extend arm forward, palm up/down, and pull fingers back.",
-      "type": "timed",
-      "illustrationKey": "forearmStretch",
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Standing Quad Stretch",
-      "description": "Hold one foot behind you while standing on the other leg.",
-      "type": "timed",
-      "illustrationKey": "quadStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "Wall Calf Stretch",
-      "description": "Press hands against wall and lean forward with one heel back.",
-      "type": "timed",
-      "illustrationKey": "calfStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "Standing Hamstring Stretch",
-      "description": "Place one heel on a raised surface and lean forward from hips.",
-      "type": "timed",
-      "illustrationKey": "hamstringStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "IT Band Stretch",
-      "description": "Cross one leg behind the other and lean away from the back leg.",
-      "type": "timed",
-      "illustrationKey": "itBandStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Neck Side Stretch",
-      "description": "Gently pull head toward one shoulder.",
-      "type": "timed",
-      "illustrationKey": "neckSideStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 20, "unit": "s" }
-    },
-    {
-      "name": "Upper Trap Stretch",
-      "description": "Gently pull head forward and to the side.",
-      "type": "timed",
-      "illustrationKey": "upperTrapStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 20, "unit": "s" }
-    },
-    {
-      "name": "Scapular Wall Slides",
-      "description": "Slide arms up and down a wall while keeping contact.",
+      "name": "Extensiones Torácicas con Rodillo",
+      "description": "Coloca el rodillo en la espalda media/alta (omóplatos). Manos detrás de la nuca. Toma aire y arquea la espalda hacia atrás sobre el rodillo, exhala al regresar. No muevas la espalda baja.",
       "type": "reps",
-      "illustrationKey": "scapularWallSlides",
-      "defaultTarget": { "type": "reps", "value": 12 }
-    },
-    {
-      "name": "Banded Face Pulls",
-      "description": "Pull a resistance band toward your face, focusing on back of shoulders.",
-      "type": "resistance",
-      "weightUnit": "bodyweight",
-      "illustrationKey": "facePulls",
-      "defaultTarget": { "type": "reps", "value": 15 }
-    },
-    {
-      "name": "Sleeper Stretch",
-      "description": "Lie on side, arm at 90 deg, gently push hand toward floor (Internal Rotation).",
-      "type": "timed",
-      "illustrationKey": "internalRotation",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Banded External Rotation",
-      "description": "Rotate arm outward against a band while keeping elbow at side.",
-      "type": "resistance",
-      "weightUnit": "bodyweight",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "illustrationKey": "externalRotation",
-      "defaultTarget": { "type": "reps", "value": 15 }
-    },
-    {
-      "name": "Couch Stretch",
-      "description": "Deep hip flexor stretch with back foot against a wall or couch.",
-      "type": "timed",
-      "illustrationKey": "couchStretch",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
-    },
-    {
-      "name": "Hip Flexor Lunge",
-      "description": "Kneeling lunge, tucking pelvis and leaning forward slightly.",
-      "type": "timed",
-      "illustrationKey": "hipFlexorLunge",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "Banded Ankle Distraction",
-      "description": "Place band around ankle, step forward, and lean weight on knee.",
-      "type": "timed",
-      "illustrationKey": "bandedAnkleDistraction",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
-    },
-    {
-      "name": "Thoracic Extension",
-      "description": "Extend upper back over a foam roller or chair back.",
-      "type": "timed",
       "illustrationKey": "thoracicExtension",
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "Dumbbell Shoulder Press",
-      "description": "Press dumbbells overhead from shoulder level.",
-      "type": "weighted",
-      "weightUnit": "lbs",
-      "illustrationKey": "shoulderPress",
-      "defaultTarget": { "type": "reps", "value": 12 }
-    },
-    {
-      "name": "Goblet Squats",
-      "description": "Hold weight at chest and squat down.",
-      "type": "weighted",
-      "weightUnit": "lbs",
-      "illustrationKey": "gobletSquat",
-      "defaultTarget": { "type": "reps", "value": 12 }
-    },
-    {
-      "name": "Banded Pull-Apart",
-      "description": "Hold a band with both arms at shoulder height and pull apart.",
-      "type": "resistance",
-      "weightUnit": "bodyweight",
-      "illustrationKey": "facePulls",
-      "defaultTarget": { "type": "reps", "value": 15 }
-    },
-    {
-      "name": "Banded Lateral Raise",
-      "description": "Stand on band and raise arms to sides to shoulder height.",
-      "type": "resistance",
-      "weightUnit": "bodyweight",
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "illustrationKey": "shoulderPress",
-      "defaultTarget": { "type": "reps", "value": 12 }
-    },
-    {
-      "name": "Dumbbell Row",
-      "description": "Pull dumbbell to hip while hinged forward.",
-      "type": "weighted",
-      "weightUnit": "lbs",
-      "illustrationKey": "shoulderPress",
-      "defaultTarget": { "type": "reps", "value": 12 }
-    },
-    {
-      "name": "Kettlebell Deadlift",
-      "description": "Hinge at hips and lift weight to standing.",
-      "type": "weighted",
-      "weightUnit": "lbs",
-      "illustrationKey": "gobletSquat",
+      "equipment": ["Rodillo de espuma"],
       "defaultTarget": { "type": "reps", "value": 10 }
     },
     {
-      "name": "Banded Squat",
-      "description": "Stand on band, hold handles at shoulders, and squat.",
-      "type": "resistance",
-      "weightUnit": "bodyweight",
-      "illustrationKey": "gobletSquat",
+      "name": "Liberación de Trapecio con Pelota",
+      "description": "De pie o contra una pared, coloca la pelota en el trapecio superior (la zona carnosa entre cuello y hombro). Presiona y mueve el brazo ligeramente o simplemente sostén la presión.",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": ["Pelota pequeña"],
+      "defaultTarget": { "type": "time", "value": 90, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Estiramiento Pectoral Menor en Marco",
+      "description": "Apoya el antebrazo en el marco de una puerta, con el codo ligeramente por encima de la altura del hombro. Da un paso adelante y gira el torso levemente hacia el lado opuesto.",
+      "type": "timed",
+      "illustrationKey": "doorwayPecStretch",
+      "equipment": ["Marco de puerta"],
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Extensiones de Hombro con Banda",
+      "description": "Sostén una banda por detrás de la espalda con las palmas hacia atrás. Separa las manos tensando la banda y eleva los brazos lejos del cuerpo sin inclinar el torso hacia adelante.",
+      "type": "reps",
+      "illustrationKey": "facePulls",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 15 }
+    },
+    {
+      "name": "Wall Slides con Banda",
+      "description": "Coloca una banda pequeña alrededor de los antebrazos (cerca de los codos). Párate frente a una pared con los antebrazos apoyados en ella. Desliza los brazos hacia arriba mientras presionas hacia afuera (contra la banda) y hacia la pared.",
+      "type": "reps",
+      "illustrationKey": "scapularWallSlides",
+      "equipment": ["Banda elástica", "Pared"],
       "defaultTarget": { "type": "reps", "value": 12 }
+    },
+    {
+      "name": "Y-Raises con Mancuernas",
+      "description": "De pie, inclina el torso hacia adelante (45-90º) con la espalda recta. Levanta los brazos en forma de 'Y' con los pulgares apuntando al techo. Pausa un segundo arriba.",
+      "type": "reps",
+      "illustrationKey": "generic",
+      "equipment": ["Mancuernas ligeras"],
+      "defaultTarget": { "type": "reps", "value": 12 },
+      "weightUnit": "lbs"
+    },
+    {
+      "name": "Plancha Frontal",
+      "description": "Apoyo en antebrazos y puntas de pie. Contrae glúteos y abdomen. Empuja el suelo con los codos para separar los omóplatos (protracción).",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Face Pulls",
+      "description": "Con una banda anclada a altura media/alta, jala hacia la cara separando las manos y rotando los hombros hacia atrás (pose de doble bíceps).",
+      "type": "reps",
+      "illustrationKey": "facePulls",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 15 }
     }
   ],
   "routines": [
     {
-      "name": "Upper Body Gym Recovery",
-      "description": "Perfect after a heavy push or pull day. Focuses on chest, lats, and forearms.",
+      "name": "Cimientos y Cadena Posterior",
+      "description": "Foco: Pies, tobillos, isquiotibiales y espalda baja. Equipo: Pelota pequeña, Bloque de yoga, Banda elástica.",
       "restBetweenMovements": 15,
-      "restBetweenSets": 10,
+      "restBetweenSets": 30,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true
     },
     {
-      "name": "Lower Body Gym Recovery",
-      "description": "Relieve tension in quads, glutes, and calves after leg day.",
+      "name": "Desbloqueo de Cadera",
+      "description": "Foco: Flexores, cuádriceps, aductores y core. Equipo: Rodillo de espuma (Foam Roller).",
       "restBetweenMovements": 15,
-      "restBetweenSets": 10,
+      "restBetweenSets": 30,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true
     },
     {
-      "name": "Runner's Reset",
-      "description": "Twice-weekly routine for runners. Focuses on hamstrings, IT band, and hip flexors.",
+      "name": "Hombros Blindados",
+      "description": "Foco: Hombros, escápula, dorsales y tórax. Equipo: Rodillo, Pelota, Banda elástica, Mancuernas ligeras.",
       "restBetweenMovements": 15,
-      "restBetweenSets": 15,
-      "autoAdvance": true,
-      "audioEnabled": true,
-      "keepAwake": true
-    },
-    {
-      "name": "Cyclist's Recovery",
-      "description": "Sunday special. Focuses on neck, upper traps, and hip flexors to counter the hunched position.",
-      "restBetweenMovements": 15,
-      "restBetweenSets": 10,
-      "autoAdvance": true,
-      "audioEnabled": true,
-      "keepAwake": true
-    },
-    {
-      "name": "Shoulder Health (Impingement & Scapula)",
-      "description": "Corrective exercises for impingement and winged scapula. Focus on stability and rotation.",
-      "restBetweenMovements": 20,
-      "restBetweenSets": 15,
-      "autoAdvance": false,
-      "audioEnabled": true,
-      "keepAwake": true
-    },
-    {
-      "name": "Hip & Ankle Mobility",
-      "description": "Deep work for tight hip flexors and limited ankle rotation.",
-      "restBetweenMovements": 20,
-      "restBetweenSets": 15,
+      "restBetweenSets": 45,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true
@@ -347,296 +239,202 @@
   ],
   "routineMovements": [
     {
-      "routineName": "Upper Body Gym Recovery",
-      "movementName": "Doorway Pec Stretch",
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Liberación Plantar con Pelota",
       "order": 1,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "One side at a time"
-    },
-    {
-      "routineName": "Upper Body Gym Recovery",
-      "movementName": "Standing Lat Stretch",
-      "order": 2,
-      "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Hold and breathe"
-    },
-    {
-      "routineName": "Upper Body Gym Recovery",
-      "movementName": "Cross Body Stretch",
-      "order": 3,
-      "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Shoulder capsule stretch"
-    },
-    {
-      "routineName": "Upper Body Gym Recovery",
-      "movementName": "Forearm Stretch",
-      "order": 4,
-      "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 2,
-      "notes": "Both palm up and down"
-    },
-    {
-      "routineName": "Upper Body Gym Recovery",
-      "movementName": "Thoracic Extension",
-      "order": 5,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 2,
-      "notes": "Open up the chest"
-    },
-    {
-      "routineName": "Upper Body Gym Recovery",
-      "movementName": "Dumbbell Row",
-      "order": 6,
-      "target": { "type": "reps", "value": 12 },
-      "sets": 3,
-      "weight": 15,
-      "weightUnit": "lbs",
-      "notes": "Build back strength"
-    },
-    {
-      "routineName": "Lower Body Gym Recovery",
-      "movementName": "Standing Quad Stretch",
-      "order": 1,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Keep knees together"
-    },
-    {
-      "routineName": "Lower Body Gym Recovery",
-      "movementName": "Pigeon Pose",
-      "order": 2,
-      "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Deep glute stretch"
-    },
-    {
-      "routineName": "Lower Body Gym Recovery",
-      "movementName": "Wall Calf Stretch",
-      "order": 3,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Straight leg for gastrocnemius"
-    },
-    {
-      "routineName": "Lower Body Gym Recovery",
-      "movementName": "Butterfly Stretch",
-      "order": 4,
       "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1,
-      "notes": "Inner thigh focus"
+      "isBilateral": true,
+      "switchSidesDuration": 5,
+      "notes": "1 minuto por pie"
     },
     {
-      "routineName": "Lower Body Gym Recovery",
-      "movementName": "Kettlebell Deadlift",
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Estiramiento de Pantorrilla en Bloque",
+      "order": 2,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 10,
+      "notes": "30 segundos pierna recta, 30 segundos flexionada"
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Estiramiento de Isquiotibiales de Pie",
+      "order": 3,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Inversión/Eversión con Banda",
+      "order": 4,
+      "target": { "type": "reps", "value": 20 },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5,
+      "notes": "10 repeticiones por dirección"
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Elevación de Arco con Banda",
       "order": 5,
       "target": { "type": "reps", "value": 10 },
       "sets": 3,
-      "weight": 25,
-      "weightUnit": "lbs",
-      "notes": "Strengthen posterior chain"
+      "restBetweenSets": 30,
+      "notes": "Mantén 3 segundos arriba"
     },
     {
-      "routineName": "Runner's Reset",
-      "movementName": "Standing Hamstring Stretch",
-      "order": 1,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Keep back straight"
-    },
-    {
-      "routineName": "Runner's Reset",
-      "movementName": "IT Band Stretch",
-      "order": 2,
-      "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Lean into the back leg"
-    },
-    {
-      "routineName": "Runner's Reset",
-      "movementName": "Hip Flexor Lunge",
-      "order": 3,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Tuck pelvis"
-    },
-    {
-      "routineName": "Runner's Reset",
-      "movementName": "Wall Calf Stretch",
-      "order": 4,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Crucial for runners"
-    },
-    {
-      "routineName": "Runner's Reset",
-      "movementName": "Downward Dog",
-      "order": 5,
-      "target": { "type": "time", "value": 45, "unit": "s" },
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Puente de Glúteo a Una Pierna",
+      "order": 6,
+      "target": { "type": "reps", "value": 10 },
       "sets": 1,
-      "notes": "Whole posterior chain"
+      "isBilateral": true,
+      "switchSidesDuration": 5,
+      "notes": "Pausa de 2 segundos arriba"
     },
     {
-      "routineName": "Cyclist's Recovery",
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "Liberación de Cuádriceps con Rodillo",
+      "order": 1,
+      "target": { "type": "time", "value": 90, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
       "movementName": "Couch Stretch",
+      "order": 2,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "90/90 Hip Switch",
+      "order": 3,
+      "target": { "type": "reps", "value": 10 },
+      "sets": 1,
+      "notes": "8-10 cambios por lado"
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "Butterfly Stretch",
+      "order": 4,
+      "target": { "type": "time", "value": 90, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "Pigeon Pose",
+      "order": 5,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "Lunge con Rotación Torácica",
+      "order": 6,
+      "target": { "type": "reps", "value": 8 },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "Dead Bug",
+      "order": 7,
+      "target": { "type": "reps", "value": 10 },
+      "sets": 3,
+      "restBetweenSets": 30
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "Plancha Lateral",
+      "order": 8,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "routineName": "Hombros Blindados",
+      "movementName": "Child's Pose Bilateral",
       "order": 1,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "The ultimate hip opener"
+      "sets": 1
     },
     {
-      "routineName": "Cyclist's Recovery",
-      "movementName": "Neck Side Stretch",
+      "routineName": "Hombros Blindados",
+      "movementName": "Extensiones Torácicas con Rodillo",
       "order": 2,
-      "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Counter \"aero\" position"
+      "target": { "type": "reps", "value": 10 },
+      "sets": 1
     },
     {
-      "routineName": "Cyclist's Recovery",
-      "movementName": "Upper Trap Stretch",
+      "routineName": "Hombros Blindados",
+      "movementName": "Liberación de Trapecio con Pelota",
       "order": 3,
-      "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 2,
+      "target": { "type": "time", "value": 90, "unit": "s" },
+      "sets": 1,
       "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Release tension"
+      "switchSidesDuration": 5
     },
     {
-      "routineName": "Cyclist's Recovery",
-      "movementName": "Cat-Cow",
+      "routineName": "Hombros Blindados",
+      "movementName": "Estiramiento Pectoral Menor en Marco",
       "order": 4,
-      "target": { "type": "reps", "value": 12 },
-      "sets": 2,
-      "notes": "Move the spine"
-    },
-    {
-      "routineName": "Cyclist's Recovery",
-      "movementName": "Doorway Pec Stretch",
-      "order": 5,
       "target": { "type": "time", "value": 45, "unit": "s" },
       "sets": 1,
-      "notes": "Open up the chest"
-    },
-    {
-      "routineName": "Shoulder Health (Impingement & Scapula)",
-      "movementName": "Scapular Wall Slides",
-      "order": 1,
-      "target": { "type": "reps", "value": 12 },
-      "sets": 3,
-      "notes": "Focus on scapular control"
-    },
-    {
-      "routineName": "Shoulder Health (Impingement & Scapula)",
-      "movementName": "Banded Face Pulls",
-      "order": 2,
-      "target": { "type": "reps", "value": 15 },
-      "sets": 3,
-      "notes": "External rotation at the end"
-    },
-    {
-      "routineName": "Shoulder Health (Impingement & Scapula)",
-      "movementName": "Sleeper Stretch",
-      "order": 3,
-      "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 2,
       "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Gently for internal rotation"
+      "switchSidesDuration": 5
     },
     {
-      "routineName": "Shoulder Health (Impingement & Scapula)",
-      "movementName": "Banded External Rotation",
-      "order": 4,
-      "target": { "type": "reps", "value": 15 },
-      "sets": 3,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Stability focus"
-    },
-    {
-      "routineName": "Shoulder Health (Impingement & Scapula)",
-      "movementName": "Banded Pull-Apart",
+      "routineName": "Hombros Blindados",
+      "movementName": "Extensiones de Hombro con Banda",
       "order": 5,
       "target": { "type": "reps", "value": 15 },
-      "sets": 3,
-      "weightUnit": "bodyweight",
-      "notes": "Rear delts and scapula"
+      "sets": 1
     },
     {
-      "routineName": "Shoulder Health (Impingement & Scapula)",
-      "movementName": "Banded Lateral Raise",
+      "routineName": "Hombros Blindados",
+      "movementName": "Wall Slides con Banda",
       "order": 6,
       "target": { "type": "reps", "value": 12 },
       "sets": 3,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "weightUnit": "bodyweight",
-      "notes": "Lateral delts"
+      "restBetweenSets": 45
     },
     {
-      "routineName": "Hip & Ankle Mobility",
-      "movementName": "90/90 Hip Switch",
-      "order": 1,
+      "routineName": "Hombros Blindados",
+      "movementName": "Y-Raises con Mancuernas",
+      "order": 7,
       "target": { "type": "reps", "value": 12 },
-      "sets": 2,
-      "notes": "Focus on rotation"
+      "sets": 3,
+      "restBetweenSets": 45,
+      "weight": 5,
+      "weightUnit": "lbs"
     },
     {
-      "routineName": "Hip & Ankle Mobility",
-      "movementName": "Couch Stretch",
-      "order": 2,
-      "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "For tight hip flexors"
+      "routineName": "Hombros Blindados",
+      "movementName": "Plancha Frontal",
+      "order": 8,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 3,
+      "restBetweenSets": 45
     },
     {
-      "routineName": "Hip & Ankle Mobility",
-      "movementName": "Banded Ankle Distraction",
-      "order": 3,
-      "target": { "type": "time", "value": 60, "unit": "s" },
+      "routineName": "Hombros Blindados",
+      "movementName": "Face Pulls",
+      "order": 9,
+      "target": { "type": "reps", "value": 15 },
       "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Increase dorsiflexion"
-    },
-    {
-      "routineName": "Hip & Ankle Mobility",
-      "movementName": "Pigeon Pose",
-      "order": 4,
-      "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "Glute and hip mobility"
+      "restBetweenSets": 30,
+      "notes": "Opcional"
     }
   ]
 }

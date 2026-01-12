@@ -121,6 +121,11 @@
 									{movement.metadata.defaultTarget.unit || ''}</span
 								>
 							{/if}
+							{#if movement.equipment && movement.equipment.length > 0}
+								{#each movement.equipment as item}
+									<span class="px-2 py-1 bg-blue-900/30 text-blue-400 rounded">{item}</span>
+								{/each}
+							{/if}
 						</div>
 					</div>
 				{/each}

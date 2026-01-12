@@ -65,11 +65,17 @@
  					</div>
  				{/if}
 
- 				{#if form?.missing}
- 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
- 						Please fill in all required fields
- 					</div>
- 				{/if}
+  				{#if form?.missing}
+  					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+  						Please fill in all required fields
+  					</div>
+  				{/if}
+
+				{#if form?.duplicate_name}
+					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+						A movement with the name "{form?.existing_name}" already exists
+					</div>
+				{/if}
 
 				{#if form?.invalid_type}
 					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
@@ -112,6 +118,17 @@
 						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
 						placeholder="Brief description of the movement..."
 					></textarea>
+				</div>
+
+				<div>
+					<label for="equipment" class="block text-sm font-medium text-zinc-300 mb-2">Equipment (comma separated)</label>
+					<input
+						id="equipment"
+						name="equipment"
+						type="text"
+						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+						placeholder="Banda, Pelota, Rodillo..."
+					/>
 				</div>
 
 				<div>

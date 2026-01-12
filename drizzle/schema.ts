@@ -21,8 +21,12 @@ export const movements = sqliteTable("movements", {
 	description: text(),
 	type: text().notNull(),
 	illustrationPath: text("illustration_path"),
-	isCustom: integer("is_custom").default(false).notNull(),
+	isCustom: integer("is_custom", { mode: "boolean" }).default(sql`1`).notNull(),
 	userId: text("user_id").references(() => user.id),
+	weightUnit: text("weight_unit"),
+	isBilateral: integer("is_bilateral", { mode: "boolean" }).default(sql`0`).notNull(),
+	switchSidesDuration: integer("switch_sides_duration").default(sql`5`).notNull(),
+	equipment: text("equipment"),
 	metadata: text(),
 	createdAt: integer("created_at").notNull(),
 });
@@ -55,10 +59,12 @@ export const routineMovements = sqliteTable("routine_movements", {
 	movementId: text("movement_id").notNull().references(() => movements.id),
 	order: integer().notNull(),
 	target: text().notNull(),
-	sets: integer().default(1).notNull(),
-	isBilateral: integer("is_bilateral").default(false).notNull(),
-	switchSidesDuration: integer("switch_sides_duration").default(5).notNull(),
+	sets: integer().default(sql`1`).notNull(),
+	isBilateral: integer("is_bilateral", { mode: "boolean" }).default(sql`0`).notNull(),
+	switchSidesDuration: integer("switch_sides_duration").default(sql`5`).notNull(),
 	notes: text(),
+	weight: integer("weight"),
+	weightUnit: text("weight_unit"),
 });
 
 export const routines = sqliteTable("routines", {
@@ -66,12 +72,12 @@ export const routines = sqliteTable("routines", {
 	name: text().notNull(),
 	description: text(),
 	userId: text("user_id").references(() => user.id),
-	restBetweenMovements: integer("rest_between_movements").default(30).notNull(),
-	restBetweenSets: integer("rest_between_sets").default(15).notNull(),
-	autoAdvance: integer("auto_advance").default(true).notNull(),
-	audioEnabled: integer("audio_enabled").default(true).notNull(),
-	keepAwake: integer("keep_awake").default(true).notNull(),
-	isCustom: integer("is_custom").default(false).notNull(),
+	restBetweenMovements: integer("rest_between_movements").default(sql`30`).notNull(),
+	restBetweenSets: integer("rest_between_sets").default(sql`15`).notNull(),
+	autoAdvance: integer("auto_advance", { mode: "boolean" }).default(sql`1`).notNull(),
+	audioEnabled: integer("audio_enabled", { mode: "boolean" }).default(sql`1`).notNull(),
+	keepAwake: integer("keep_awake", { mode: "boolean" }).default(sql`1`).notNull(),
+	isCustom: integer("is_custom", { mode: "boolean" }).default(sql`0`).notNull(),
 	createdAt: integer("created_at").notNull(),
 });
 
@@ -89,7 +95,7 @@ export const session = sqliteTable("session", {
 export const user = sqliteTable("user", {
 	id: text().primaryKey().notNull(),
 	email: text().notNull(),
-	emailVerified: integer("email_verified").default(false).notNull(),
+	emailVerified: integer("email_verified", { mode: "boolean" }).default(sql`0`).notNull(),
 	name: text(),
 	username: text(),
 	image: text(),

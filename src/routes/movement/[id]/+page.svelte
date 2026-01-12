@@ -70,6 +70,17 @@
 					<dd class="font-medium capitalize">{data.movement.type}</dd>
 				</div>
 
+				{#if data.movement.equipment && data.movement.equipment.length > 0}
+					<div>
+						<dt class="text-gray-400 mb-2">Equipment</dt>
+						<dd class="flex flex-wrap gap-2">
+							{#each data.movement.equipment as item}
+								<span class="px-3 py-1 bg-blue-900/30 text-blue-400 rounded-full text-sm">{item}</span>
+							{/each}
+						</dd>
+					</div>
+				{/if}
+
 				{#if data.movement.metadata?.defaultTarget}
 					<div class="flex justify-between">
 						<dt class="text-gray-400">Default Target</dt>

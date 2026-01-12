@@ -169,6 +169,12 @@
 			</div>
 		{/if}
 
+		{#if form?.duplicate_name}
+			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+				A routine with the name "{form?.existing_name}" already exists
+			</div>
+		{/if}
+
 		{#if form?.invalid_values}
 			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
 				Rest times must be positive numbers

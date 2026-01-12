@@ -70,6 +70,7 @@ export const movements = sqliteTable('movements', {
 	weightUnit: text('weight_unit', { enum: ['lbs', 'kg', 'bodyweight'] }),
 	isBilateral: integer('is_bilateral', { mode: 'boolean' }).notNull().default(false),
 	switchSidesDuration: integer('switch_sides_duration').notNull().default(5),
+	equipment: text('equipment', { mode: 'json' }).$type<string[]>(),
 	metadata: text('metadata', { mode: 'json' }).$type<{
 		defaultTarget?: {
 			type: 'time' | 'reps';
