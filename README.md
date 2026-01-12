@@ -5,8 +5,13 @@ A stretching and recovery routine tracker inspired by Hevy. Create custom moveme
 ## Features
 
 - Create custom stretching and recovery movements
-- Build personalized routines with movements and settings
-- Practice player with timers, audio cues, and rest periods
+- Build personalized routines with movements, ordering, targets, and sets
+- Practice player with:
+  - Timed and rep-based exercises
+  - Bilateral exercise handling (left/right side completion)
+  - Rest periods between exercises and sets
+  - Initial "Get Ready" rest at practice start
+  - Audio cues and visual feedback
 - Track practice history and session summaries
 - User accounts for personalized content
 - PWA support for offline use
@@ -16,7 +21,7 @@ A stretching and recovery routine tracker inspired by Hevy. Create custom moveme
 - SvelteKit (Svelte 5 with runes)
 - SQLite + Drizzle ORM
 - Tailwind CSS v4
-- Lucia v3 for authentication
+- BetterAuth v1 for authentication
 - Vite PWA
 
 ## Quick Start
@@ -46,24 +51,29 @@ The app uses separate databases for different environments:
 - **Development**: `./data/dev/local.db`
 - **Production**: `./data/prod/local.db`
 
-Both databases will be automatically initialized with sample movements and routines on first run.
+Both databases are automatically initialized with seed data on first run (27 movements, 3 built-in routines).
 
 ## Manual Database Operations
 
 If you need to manually work with databases:
 
 ```bash
-# Seed development database
-npm run db:seed
+# Database Setup
+npm run db:setup          # Setup dev database (migrations + seed)
+npm run db:setup:prod     # Setup prod database
 
-# Seed production database
-npm run db:seed:prod
+# Database Reset
+npm run db:reset          # Reset dev database (delete and reinitialize)
+npm run db:reset:prod     # Reset prod database
 
-# Migrate development database
-npm run db:migrate
+# Database Backup
+npm run db:backup         # Backup dev database to SQL file
+npm run db:backup:prod    # Backup prod database
 
-# Migrate production database
-npm run db:migrate:prod
+# Schema Management (Development Workflow)
+npm run db:push           # Push schema changes to dev DB
+npm run db:generate       # Generate migration from dev DB
+npm run db:migrate        # Run migrations
 ```
 
 ## Usage
