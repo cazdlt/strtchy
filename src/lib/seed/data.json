@@ -30,16 +30,7 @@
       "isBilateral": true,
       "switchSidesDuration": 5
     },
-    {
-      "name": "Inversión/Eversión con Banda",
-      "description": "Siéntate en el suelo con las piernas estiradas. Coloca una banda alrededor del pie. Para inversión: cruza la banda y jálala hacia adentro. Para eversión: sostén la banda hacia el lado y mueve el pie hacia afuera. El talón actúa como pivote fijo.",
-      "type": "reps",
-      "illustrationKey": "generic",
-      "equipment": ["Banda elástica"],
-      "defaultTarget": { "type": "reps", "value": 20 },
-      "isBilateral": true,
-      "switchSidesDuration": 5
-    },
+
     {
       "name": "Elevación de Arco con Banda",
       "description": "De pie, coloca una banda elástica cerrada alrededor de ambos tobillos. Separa los pies para tensar la banda. Lucha contra ella empujando los bordes externos de los pies contra el suelo y elevando el arco plantar. Mantén los dedos en el suelo.",
@@ -59,6 +50,50 @@
       "switchSidesDuration": 5
     },
     {
+      "name": "Equilibrio a una pierna (Reloj)",
+      "description": "Sobre una pierna (descalzo). Mueve la pierna libre adelante, al lado y atrás sin tocar el suelo ni rotar el tronco.",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Pancake Stretch (Sentado en V)",
+      "description": "Sentado con piernas abiertas al máximo y rodillas estiradas. Inclina el torso hacia adelante desde la pelvis.",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 120, "unit": "s" }
+    },
+    {
+      "name": "Cobra",
+      "description": "Boca abajo, extiende brazos levantando el pecho. Mantén pelvis pegada al suelo y glúteos relajados.",
+      "type": "timed",
+      "illustrationKey": "cobra-stretch",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+    },
+    {
+      "name": "Dead Hang (Colgado pasivo)",
+      "description": "Cuélgate de una barra relajando hombros y columna, dejando que el peso traccione las vértebras.",
+      "type": "timed",
+      "illustrationKey": "generic",
+      "equipment": ["Barra"],
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+    },
+    {
+      "name": "Caminata Lateral con Banda (Monster Walks)",
+      "description": "Banda gruesa en tobillos o sobre rodillas. Posición de media sentadilla, da pasos laterales manteniendo tensión y rodillas alineadas.",
+      "type": "reps",
+      "illustrationKey": "generic",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 15 },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
       "name": "Liberación de Cuádriceps con Rodillo",
       "description": "Boca abajo, coloca el rodillo bajo los muslos. Rueda desde la cadera hasta justo encima de la rodilla. Si encuentras un punto doloroso, detente y flexiona/estira la rodilla un par de veces.",
       "type": "timed",
@@ -71,7 +106,7 @@
       "description": "Coloca una rodilla lo más pegada posible a la esquina entre la pared y el suelo. La espinilla debe estar vertical contra la pared. La otra pierna adelante en posición de estocada. Intenta erguir el torso lentamente hasta pegar la espalda a la pared.",
       "type": "timed",
       "illustrationKey": "couchStretch",
-      "equipment": ["Pelota"],
+      "equipment": [],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
       "switchSidesDuration": 5
@@ -256,11 +291,11 @@
       "sets": 1,
       "isBilateral": true,
       "switchSidesDuration": 10,
-      "notes": "30 segundos pierna recta, 30 segundos flexionada"
+      "notes": "30s pierna recta, 30s flexionada"
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Estiramiento de Isquiotibiales de Pie",
+      "movementName": "Equilibrio a una pierna (Reloj)",
       "order": 3,
       "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1,
@@ -269,44 +304,73 @@
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Inversión/Eversión con Banda",
-      "order": 4,
-      "target": { "type": "reps", "value": 20 },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "notes": "10 repeticiones por dirección"
-    },
-    {
-      "routineName": "Cimientos y Cadena Posterior",
       "movementName": "Elevación de Arco con Banda",
-      "order": 5,
+      "order": 4,
       "target": { "type": "reps", "value": 10 },
       "sets": 3,
       "restBetweenSets": 30,
-      "notes": "Mantén 3 segundos arriba"
+      "notes": "3 retenciones de 3 segundos"
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Estiramiento de Isquiotibiales de Pie",
+      "order": 5,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Pancake Stretch (Sentado en V)",
+      "order": 6,
+      "target": { "type": "time", "value": 120, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Cobra",
+      "order": 7,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Dead Hang (Colgado pasivo)",
+      "order": 8,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
       "movementName": "Puente de Glúteo a Una Pierna",
-      "order": 6,
+      "order": 9,
       "target": { "type": "reps", "value": 10 },
       "sets": 1,
       "isBilateral": true,
       "switchSidesDuration": 5,
-      "notes": "Pausa de 2 segundos arriba"
+      "notes": "Pausa de 2s arriba"
+    },
+    {
+      "routineName": "Desbloqueo de Cadera",
+      "movementName": "Caminata Lateral con Banda (Monster Walks)",
+      "order": 1,
+      "target": { "type": "reps", "value": 15 },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 5
     },
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Liberación de Cuádriceps con Rodillo",
-      "order": 1,
+      "order": 2,
       "target": { "type": "time", "value": 90, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Couch Stretch",
-      "order": 2,
+      "order": 3,
       "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1,
       "isBilateral": true,
@@ -315,22 +379,24 @@
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "90/90 Hip Switch",
-      "order": 3,
+      "order": 4,
       "target": { "type": "reps", "value": 10 },
       "sets": 1,
-      "notes": "8-10 cambios por lado"
+      "isBilateral": true,
+      "switchSidesDuration": 5,
+      "notes": "10 cambios por lado"
     },
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Butterfly Stretch",
-      "order": 4,
+      "order": 5,
       "target": { "type": "time", "value": 90, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Pigeon Pose",
-      "order": 5,
+      "order": 6,
       "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1,
       "isBilateral": true,
@@ -339,7 +405,7 @@
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Lunge con Rotación Torácica",
-      "order": 6,
+      "order": 7,
       "target": { "type": "reps", "value": 8 },
       "sets": 1,
       "isBilateral": true,
@@ -348,7 +414,7 @@
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Dead Bug",
-      "order": 7,
+      "order": 8,
       "target": { "type": "reps", "value": 10 },
       "sets": 3,
       "restBetweenSets": 30
@@ -356,8 +422,8 @@
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Plancha Lateral",
-      "order": 8,
-      "target": { "type": "time", "value": 30, "unit": "s" },
+      "order": 9,
+      "target": { "type": "time", "value": 45, "unit": "s" },
       "sets": 1,
       "isBilateral": true,
       "switchSidesDuration": 5
@@ -423,9 +489,8 @@
       "routineName": "Hombros Blindados",
       "movementName": "Plancha Frontal",
       "order": 8,
-      "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 3,
-      "restBetweenSets": 45
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
     },
     {
       "routineName": "Hombros Blindados",

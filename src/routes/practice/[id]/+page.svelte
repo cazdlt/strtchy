@@ -31,6 +31,8 @@
 
 	let wakeLock = $state<WakeLockSentinel | null>(null);
 	let audioContext = $state<AudioContext | null>(null);
+	let practiceStarted = $state(false);
+	let restType = $state<'initial' | 'between-movements' | 'between-sets' | null>(null);
 
 	onMount(() => {
 		if ('wakeLock' in navigator) {
@@ -45,7 +47,15 @@
 			audioContext = new AudioContext();
 		}
 
-		if (isTimedMovement) {
+		if (!practiceStarted) {
+			practiceStarted = true;
+			const initialRest = data.practice.routine.restBetweenMovements;
+			if (initialRest > 0 && data.practice.routine.autoAdvance) {
+				startRest(initialRest, true, false);
+			} else if (isTimedMovement) {
+				startTimer();
+			}
+		} else if (isTimedMovement) {
 			startTimer();
 		}
 	});
@@ -89,12 +99,55 @@
 	const isWeightedOrResistance = $derived(
 		currentRoutineMovement?.movement.type === 'weighted' || currentRoutineMovement?.movement.type === 'resistance'
 	);
-	const movementSetsCompleted = $derived(movementPracticeDataCount[currentMovementIndex] || 0);
+	const movementSetsCompleted = $derived(isBilateral 
+		? Math.floor((movementPracticeDataCount[currentMovementIndex] || 0) / 2)
+		: (movementPracticeDataCount[currentMovementIndex] || 0)
+	);
 	const totalMovementSets = $derived(currentRoutineMovement?.sets || 1);
 	const allMovementSetsCompleted = $derived(movementSetsCompleted >= totalMovementSets);
 
 	const completedSetsCount = $derived(practiceDataState.length);
 	const currentProgress = $derived(data.totalSets > 0 ? completedSetsCount / data.totalSets : 0);
+
+	const restInfo = $derived(() => {
+		if (!isResting || !restType) return null;
+		
+		if (restType === 'between-movements') {
+			const next = data.allRoutineMovements[currentMovementIndex + 1];
+			if (next) {
+				return {
+					title: 'Rest',
+					nextName: next.movement.name,
+					nextTarget: next.target.type === 'time' 
+						? formatTime(next.target.value) 
+						: `${next.target.value} reps`
+				};
+			}
+		} else if (restType === 'between-sets') {
+			const current = data.allRoutineMovements[currentMovementIndex];
+			if (current) {
+				const nextSetNumber = currentSet + 1;
+				return {
+					title: 'Rest',
+					nextName: current.movement.name,
+					nextTarget: `Set ${nextSetNumber}`
+				};
+			}
+		} else if (restType === 'initial') {
+			const first = data.allRoutineMovements[currentMovementIndex];
+			if (first) {
+				return {
+					title: 'Get Ready',
+					nextName: first.movement.name,
+					nextTarget: first.target.type === 'time' 
+						? formatTime(first.target.value) 
+						: `${first.target.value} reps`
+				};
+			}
+		}
+		
+		return { title: 'Rest' };
+	});
 
 	function startTimer() {
 		if (timer) clearInterval(timer);
@@ -137,16 +190,32 @@
 
 	function handleSideCompletion() {
 		if (isBilateral && currentSide === 'left') {
-			startSwitchSides();
+			if (isTimedMovement) {
+				startSwitchSides();
+			} else {
+				currentSide = 'right';
+			}
 		} else {
+			const nextSetNumber = currentSet + 1;
+			const hasMoreSets = nextSetNumber <= totalMovementSets;
+			
 			if (allMovementSetsCompleted) {
 				showRatingModal = true;
 			} else {
+				const restDuration = data.practice.routine.restBetweenSets;
+				const shouldRest = restDuration > 0 && data.practice.routine.autoAdvance;
+				
+			if (shouldRest && hasMoreSets) {
+				startRest(restDuration, false, true);
+			} else if (hasMoreSets) {
 				currentSet++;
 				currentSide = 'left';
 				if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
 					startTimer();
 				}
+			} else {
+				showRatingModal = true;
+			}
 			}
 		}
 	}
@@ -220,9 +289,10 @@
 		}
 	}
 
-	function startRest(duration: number) {
+	function startRest(duration: number, isInitialRest = false, isBetweenSets = false) {
 		isResting = true;
 		restSeconds = duration;
+		restType = isInitialRest ? 'initial' : (isBetweenSets ? 'between-sets' : 'between-movements');
 		playBeep();
 
 		if (restTimer) clearInterval(restTimer);
@@ -235,11 +305,25 @@
 				}
 				playBeep();
 				isResting = false;
-				currentMovementIndex++;
-				currentSet = 1;
-				currentSide = 'left';
-				if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
-					startTimer();
+				restType = null;
+				
+				if (isInitialRest) {
+					if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+						startTimer();
+					}
+				} else if (isBetweenSets) {
+					currentSet++;
+					currentSide = 'left';
+					if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+						startTimer();
+					}
+				} else {
+					currentMovementIndex++;
+					currentSet = 1;
+					currentSide = 'left';
+					if (data.allRoutineMovements[currentMovementIndex]?.target?.type === 'time') {
+						startTimer();
+					}
 				}
 			}
 		}, 1000);
@@ -400,10 +484,17 @@
 	</div>
 
 	{#if isResting}
+		{@const info = restInfo()}
 		<div class="fixed inset-0 bg-gray-950/95 flex items-center justify-center z-50">
 			<div class="text-center">
-				<p class="text-xl text-gray-400 mb-4">Rest</p>
+				<p class="text-xl text-gray-400 mb-2">{info?.title || 'Rest'}</p>
 				<p class="text-8xl font-bold text-blue-400 mb-4">{formatTime(restSeconds)}</p>
+				
+				{#if info?.nextName}
+					<p class="text-gray-300 text-lg mb-1">Next: {info.nextName}</p>
+					<p class="text-gray-400 text-sm mb-6">{info.nextTarget}</p>
+				{/if}
+				
 				<button
 					onclick={moveToNextMovement}
 					class="bg-white text-black px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-all"
