@@ -16,6 +16,7 @@ export const user = sqliteTable('user', {
 		audioVolume?: number;
 		defaultRestTime?: number;
 		autoAdvance?: boolean;
+		audioEnabled?: boolean;
 		keepAwake?: boolean;
 	}>(),
 });

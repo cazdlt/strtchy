@@ -14,6 +14,7 @@ Strtchy is a SvelteKit app for tracking stretching and recovery routines. It's b
 
 ## Important Agent Instructions
 - **NEVER start dev servers automatically** - Only start `npm run dev` if explicitly requested by the user
+- **NEVER run any server commands** - Assume dev server is already running, do not run any npm run dev commands
 
 ## Important Architecture Notes
 
