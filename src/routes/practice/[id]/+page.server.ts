@@ -100,12 +100,14 @@ export async function load({ params, locals }: { params: { id: string }; locals:
 		}
 	}
 
-	// Calculate progress (for bilateral, each set = 2 sides)
+	// Calculate sets with overrides
+	const overrides = practice.setOverrides || {};
 	const totalSets = allRoutineMovements.reduce((sum, rm) => {
-		return sum + (rm.isBilateral ? rm.sets * 2 : rm.sets);
+		const sets = overrides[rm.id] ?? rm.sets;
+		return sum + (rm.isBilateral ? sets * 2 : sets);
 	}, 0);
-	const completedSets = practice.practiceData.length;
-	const progress = totalSets > 0 ? completedSets / totalSets : 0;
+	const completedSetsCount = practice.practiceData.length;
+	const progress = totalSets > 0 ? completedSetsCount / totalSets : 0;
 
 	return {
 		practice,
@@ -115,7 +117,8 @@ export async function load({ params, locals }: { params: { id: string }; locals:
 		isReadOnly,
 		progress,
 		totalSets,
-		completedSets
+		completedSets: completedSetsCount,
+		setOverrides: overrides
 	};
 }
 
@@ -269,5 +272,66 @@ export const actions = {
 		}
 
 		return { success: true };
+	},
+
+	adjustSets: async ({ request, params }: RequestEvent) => {
+		const formData = await request.formData();
+		const routineMovementId = formData.get('routineMovementId') as string;
+		const direction = formData.get('direction') as 'up' | 'down';
+
+		if (!routineMovementId || !direction) {
+			return fail(400, { error: 'Missing required fields' });
+		}
+
+		const practice = await db.query.practiceLogs.findFirst({
+			where: eq(practiceLogs.id, params.id)
+		});
+
+		if (!practice) {
+			return fail(404, { error: 'Practice not found' });
+		}
+
+		const overrides = practice.setOverrides || {};
+		
+		// Find current base sets
+		const rm = await db.query.routineMovements.findFirst({
+			where: eq(routineMovements.id, routineMovementId)
+		});
+		
+		if (!rm) return fail(404, { error: 'Movement not found' });
+
+		const currentSets = overrides[routineMovementId] ?? rm.sets;
+		
+		if (direction === 'down') {
+			// Check if we have more completed sets than the new total
+			const completed = await db.query.practiceData.findMany({
+				where: and(
+					eq(practiceData.practiceLogId, params.id),
+					eq(practiceData.routineMovementId, routineMovementId)
+				)
+			});
+
+			// If bilateral, completed count is sides, but sets is pairs
+			const completedSetNumbers = new Set(completed.map(pd => pd.setNumber));
+			const maxCompletedSet = completedSetNumbers.size > 0 ? Math.max(...completedSetNumbers) : 0;
+
+			if (currentSets <= 1 || maxCompletedSet >= currentSets) {
+				return fail(400, { error: 'Cannot remove a set that is already completed or if only 1 remains' });
+			}
+		}
+
+		const newSets = direction === 'up' ? currentSets + 1 : currentSets - 1;
+
+		await db
+			.update(practiceLogs)
+			.set({
+				setOverrides: {
+					...overrides,
+					[routineMovementId]: newSets
+				}
+			})
+			.where(eq(practiceLogs.id, params.id));
+
+		return { success: true, newSets };
 	}
 };

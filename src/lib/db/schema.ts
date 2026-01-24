@@ -124,6 +124,7 @@ export const practiceLogs = sqliteTable('practice_logs', {
 	completedAt: integer('completed_at', { mode: 'timestamp' }),
 	duration: integer('duration'), // in seconds
 	notes: text('notes'),
+	setOverrides: text('set_overrides', { mode: 'json' }).$type<Record<string, number>>(), // Map of routineMovementId to set count override
 });
 
 export const practiceData = sqliteTable('practice_data', {

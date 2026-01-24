@@ -52,6 +52,7 @@
 	let isAutoCompletingSet = $state(false);
 	let currentActiveSetKey = $state<string | null>(null);
 	let isAutoAdvancing = $state(false);
+	let setOverrides = $state<Record<string, number>>(data.setOverrides || {});
 
 	// UI state
 	let showSettings = $state(false);
@@ -61,6 +62,7 @@
 	let isCompletingSet = $state(false);
 	let isSavingNotes = $state(false);
 	let isCompletingWorkout = $state(false);
+	let isAdjustingSets = $state<Record<string, boolean>>({});
 
 	// Audio context
 	let audioContext = $state<AudioContext | null>(null);
@@ -124,7 +126,8 @@
 
 	const totalSets = $derived(
 		data.allRoutineMovements.reduce((sum: number, rm: any) => {
-			return sum + (rm.isBilateral ? rm.sets * 2 : rm.sets);
+			const sets = setOverrides[rm.id] ?? rm.sets;
+			return sum + (rm.isBilateral ? sets * 2 : sets);
 		}, 0)
 	);
 
@@ -534,6 +537,44 @@
 		}
 	}
 
+	function resetActiveSetTimer() {
+		if (activeSetTimerInterval && activeSetTimerDuration > 0) {
+			activeSetTimer = activeSetTimerDuration;
+			activeSetTimerPaused = false;
+		}
+	}
+
+	async function handleAdjustSets(routineMovementId: string, direction: 'up' | 'down') {
+		isAdjustingSets[routineMovementId] = true;
+		
+		const formData = new FormData();
+		formData.append('routineMovementId', routineMovementId);
+		formData.append('direction', direction);
+
+		const response = await fetch('?/adjustSets', {
+			method: 'POST',
+			body: formData
+		});
+
+		const result = await response.json();
+		// SvelteKit actions return a JSON with a 'type' and 'data' (if success) or 'errors'
+		// But since we are using fetch with a form action, it returns a special format
+		// Actually, simpler to check response.ok and then use the data
+		
+		if (response.ok) {
+			const rm = data.allRoutineMovements.find((m: any) => m.id === routineMovementId);
+			if (rm) {
+				const current = setOverrides[routineMovementId] ?? rm.sets;
+				setOverrides[routineMovementId] = direction === 'up' ? current + 1 : Math.max(1, current - 1);
+			}
+		} else {
+			const errorData = JSON.parse(result.data);
+			alert(errorData.error || 'Failed to adjust sets');
+		}
+
+		isAdjustingSets[routineMovementId] = false;
+	}
+
 	function handleExit() {
 		if (confirm('Exit practice? Your progress so far is saved.')) {
 			if (isReadOnly) {
@@ -648,7 +689,7 @@
 				movementType={rm.movement.type}
 				description={rm.movement.description}
 				targetValue={rm.target.value}
-				sets={rm.sets}
+				sets={setOverrides[rm.id] ?? rm.sets}
 				isBilateral={rm.isBilateral}
 				switchSidesDuration={rm.switchSidesDuration}
 				weight={rm.weight}
@@ -660,10 +701,13 @@
 				activeSetTimer={activeSetTimer}
 				activeSetTimerPaused={activeSetTimerPaused}
 				onToggleTimerPaused={toggleActiveSetTimerPaused}
+				onResetTimer={resetActiveSetTimer}
 				isSavingNotes={isSavingNotes}
 				isCompletingSet={isCompletingSet}
 				onSetComplete={handleSetComplete}
 				onNotesChange={(notes: string) => handleNotesChange(rm.id, notes)}
+				onAdjustSets={(direction) => handleAdjustSets(rm.id, direction)}
+				isAdjustingSets={isAdjustingSets[rm.id]}
 				
 				activeRestType={restingMovementIndex === index && restType !== 'between-movements' ? restType : null}
 				activeRestSetNumber={restingMovementIndex === index ? activeRestSetNumber : null}

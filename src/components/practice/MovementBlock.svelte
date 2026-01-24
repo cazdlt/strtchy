@@ -23,9 +23,12 @@
 		activeSetTimer = 0,
 		activeSetTimerPaused = false,
 		onToggleTimerPaused,
+		onResetTimer,
 		isSavingNotes = false,
 		isCompletingSet = false,
 		isPreview = false,
+		onAdjustSets,
+		isAdjustingSets = false,
 		// Rest State
 		activeRestType = null,
 		activeRestSetNumber = null,
@@ -54,9 +57,12 @@
 		activeSetTimer?: number;
 		activeSetTimerPaused?: boolean;
 		onToggleTimerPaused?: () => void;
+		onResetTimer?: () => void;
 		isSavingNotes?: boolean;
 		isCompletingSet?: boolean;
 		isPreview?: boolean;
+		onAdjustSets?: (direction: 'up' | 'down') => void;
+		isAdjustingSets?: boolean;
 		// Rest State
 		activeRestType?: 'between-sets' | 'switch-sides' | null;
 		activeRestSetNumber?: number | null;
@@ -275,6 +281,36 @@
 				</div>
 			{/if}
 
+			<!-- Set Controller (Adjust Sets) -->
+			{#if !isPreview && isActive}
+				<div class="px-2 pb-2 mb-2 flex items-center justify-between border-b border-gray-700/50">
+					<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Adjust Sets</span>
+					<div class="flex items-center gap-3">
+						<button
+							onclick={() => onAdjustSets?.('down')}
+							disabled={isAdjustingSets || sets <= 1}
+							class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
+							aria-label="Remove set"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+							</svg>
+						</button>
+						<span class="text-sm font-bold text-blue-400 min-w-[3rem] text-center">{sets} Sets</span>
+						<button
+							onclick={() => onAdjustSets?.('up')}
+							disabled={isAdjustingSets}
+							class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
+							aria-label="Add set"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+							</svg>
+						</button>
+					</div>
+				</div>
+			{/if}
+
 			{#each items as item (item.key)}
 				{#if item.type === 'set'}
 					{@const isCompleted = isSetCompleted(item.setNumber!, item.side!)}
@@ -296,6 +332,7 @@
 						activeSetTimer={showTimer ? activeSetTimer : 0}
 						activeSetTimerPaused={activeSetTimerPaused}
 						onToggleTimerPaused={showTimer ? onToggleTimerPaused : undefined}
+						onResetTimer={showTimer ? onResetTimer : undefined}
 						isCompleting={isCompletingSet}
 						onComplete={(data) => handleSetComplete(data, item.setNumber!, item.side!)}
 					/>
