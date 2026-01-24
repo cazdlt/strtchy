@@ -27,29 +27,34 @@ export function calculateRoutineDuration(
 	restBetweenSets: number
 ): number {
 	let totalSeconds = 0;
-	let totalSets = 0;
 
-	for (const rm of movements) {
-		if (rm.target.type === 'time') {
-			totalSeconds += rm.target.value * rm.sets;
-		} else {
-			totalSeconds += rm.target.value * 4 * rm.sets;
-		}
+	// Initial "Get Ready" rest
+	if (movements.length > 0) {
+		totalSeconds += restBetweenMovements;
+	}
 
+	for (let i = 0; i < movements.length; i++) {
+		const rm = movements[i];
+		const sideMultiplier = rm.isBilateral ? 2 : 1;
+		const executionTime = rm.target.type === 'time' ? rm.target.value : rm.target.value * 4;
+
+		// Time spent exercising (both sides if bilateral)
+		totalSeconds += executionTime * sideMultiplier * rm.sets;
+
+		// Time spent switching sides
 		if (rm.isBilateral) {
 			totalSeconds += rm.switchSidesDuration * rm.sets;
 		}
 
-		totalSets += rm.sets;
-	}
+		// Time spent resting between sets
+		if (rm.sets > 1) {
+			totalSeconds += restBetweenSets * (rm.sets - 1);
+		}
 
-	if (movements.length > 1) {
-		totalSeconds += restBetweenMovements * (movements.length - 1);
-	}
-
-	const setsWithoutFirstPerMovement = totalSets - movements.length;
-	if (setsWithoutFirstPerMovement > 0) {
-		totalSeconds += restBetweenSets * setsWithoutFirstPerMovement;
+		// Time spent resting between movements (if not the last movement)
+		if (i < movements.length - 1) {
+			totalSeconds += restBetweenMovements;
+		}
 	}
 
 	return totalSeconds;
