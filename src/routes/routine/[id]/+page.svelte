@@ -126,6 +126,7 @@
 					onSetComplete={() => {}}
 					onNotesChange={() => {}}
 					restBetweenSetsDuration={data.routine.restBetweenSets}
+					previousStats={data.previousStatsMap?.[rm.id]}
 				/>
 			{/each}
 		</div>

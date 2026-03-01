@@ -325,7 +325,9 @@
 						{weightUnit}
 						{isBilateral}
 						side={item.side!}
-						previousStats={previousStats}
+						previousStats={Array.isArray(previousStats) 
+							? previousStats.find(ps => ps.setNumber === item.setNumber && (ps.side || null) === (item.side || null)) 
+							: previousStats}
 						isActive={active}
 						isCompleted={isCompleted}
 						{isPreview}
