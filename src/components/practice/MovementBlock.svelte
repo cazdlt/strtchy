@@ -28,6 +28,7 @@
 		isCompletingSet = false,
 		isPreview = false,
 		onAdjustSets,
+		onSkipSet,
 		isAdjustingSets = false,
 		// Rest State
 		activeRestType = null,
@@ -62,6 +63,7 @@
 		isCompletingSet?: boolean;
 		isPreview?: boolean;
 		onAdjustSets?: (direction: 'up' | 'down') => void;
+		onSkipSet?: () => void;
 		isAdjustingSets?: boolean;
 		// Rest State
 		activeRestType?: 'between-sets' | 'switch-sides' | null;
@@ -337,6 +339,7 @@
 						onResetTimer={showTimer ? onResetTimer : undefined}
 						isCompleting={isCompletingSet}
 						onComplete={(data) => handleSetComplete(data, item.setNumber!, item.side!)}
+						onSkip={active ? onSkipSet : undefined}
 					/>
 				{:else}
 					{@const active = isRestActive(item)}

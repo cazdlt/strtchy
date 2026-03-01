@@ -708,6 +708,7 @@
 				onNotesChange={(notes: string) => handleNotesChange(rm.id, notes)}
 				onAdjustSets={(direction) => handleAdjustSets(rm.id, direction)}
 				isAdjustingSets={isAdjustingSets[rm.id]}
+				onSkipSet={settings.autoPlay ? handleSkipSet : undefined}
 				
 				activeRestType={restingMovementIndex === index && restType !== 'between-movements' ? restType : null}
 				activeRestSetNumber={restingMovementIndex === index ? activeRestSetNumber : null}

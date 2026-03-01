@@ -27,14 +27,6 @@
 		</div>
 
 		<div class="flex gap-3">
-			{#if onSkipSet}
-				<button
-					onclick={onSkipSet}
-					class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-4 px-6 rounded-xl font-semibold transition-all"
-				>
-					Skip Set
-				</button>
-			{/if}
 
 			<button
 				onclick={onCompleteWorkout}

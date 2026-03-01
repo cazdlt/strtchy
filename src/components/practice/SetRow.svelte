@@ -14,6 +14,7 @@
 		isCompleted = false,
 		isPreview = false,
 		onComplete,
+		onSkip,
 		onValueChange,
 		activeSetTimer = 0,
 		activeSetTimerPaused = false,
@@ -34,6 +35,7 @@
 		isCompleted?: boolean;
 		isPreview?: boolean;
 		onComplete?: (data: any) => void;
+		onSkip?: () => void;
 		onValueChange?: (value: number, weight?: number) => void;
 		activeSetTimer?: number;
 		activeSetTimerPaused?: boolean;
@@ -242,37 +244,43 @@
 	</div>
 
 	{#if !isPreview}
-		<button
-			onclick={handleComplete}
-			disabled={isCompleting || isCompleted}
-			class="w-11 h-11 rounded-lg flex items-center justify-center border-2 transition-all {isCompleted
-				? 'bg-emerald-500 border-emerald-500 text-white'
-				: isActive
-				? 'border-blue-500 hover:border-blue-400 text-blue-500 animate-pulse'
-				: 'border-gray-600 hover:border-gray-500 text-gray-500'} disabled:opacity-50 disabled:cursor-not-allowed"
-			aria-label="Complete set {setNumber}"
-		>
-			{#if isCompleting}
-				<svg class="animate-spin h-6 w-6 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-				</svg>
-			{:else if isCompleted}
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke-width="3"
-					stroke="currentColor"
-					class="w-6 h-6"
+		<div class="flex flex-col gap-2">
+			{#if isActive && onSkip}
+				<button
+					onclick={onSkip}
+					disabled={isCompleting}
+					class="text-xs font-semibold py-1 px-3 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors text-gray-300 w-full text-center"
 				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M4.5 12.75l6 6 9-13.5"
-					/>
-				</svg>
+					Skip
+				</button>
 			{/if}
-		</button>
-	{/if}
+			<button
+				onclick={handleComplete}
+				disabled={isCompleting || isCompleted}
+				class="px-4 h-11 rounded-lg flex items-center justify-center font-semibold transition-all shadow-sm {isCompleted
+					? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+					: isActive
+					? 'bg-blue-600 hover:bg-blue-500 text-white'
+					: 'bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-400'} disabled:opacity-50 disabled:cursor-not-allowed"
+				aria-label="Complete set {setNumber}"
+			>
+				{#if isCompleting}
+					<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
+				{:else if isCompleted}
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 mr-1.5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+					</svg>
+					Done
+				{:else}
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5 opacity-70">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+					</svg>
+					Complete
+				{/if}
+			</button>
+		</div>
+{/if}
 </div>
