@@ -9,7 +9,7 @@ import {
 } from "$lib/db/schema";
 import { eq, desc, and, sql, isNotNull, ne } from "drizzle-orm";
 import { fail, redirect } from "@sveltejs/kit";
-import type { PageData, RequestEvent } from "./$types";
+import type { PageData, PageServerLoad, RequestEvent } from "./$types";
 import { nanoid } from "nanoid";
 
 // Helper to get previous workout stats for a movement
@@ -60,13 +60,7 @@ async function getPreviousStats(movementId: string, userId: string, currentPract
   return stats;
 }
 
-export async function load({
-  params,
-  locals,
-}: {
-  params: { id: string };
-  locals: App.Locals;
-}) {
+export const load: PageServerLoad = async ({ params, locals }) => {
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, params.id),
     with: {
@@ -132,6 +126,9 @@ export async function load({
   const completedSetsCount = practice.practiceData.length;
   const progress = totalSets > 0 ? completedSetsCount / totalSets : 0;
 
+  // Get all available movements for the add modal
+  const allMovements = await db.select().from(movements).orderBy(movements.name);
+
   return {
     practice,
     allRoutineMovements,
@@ -142,8 +139,9 @@ export async function load({
     totalSets,
     completedSets: completedSetsCount,
     setOverrides: overrides,
+    allMovements,
   };
-}
+};
 
 export const actions = {
   completePractice: async ({ request, params }: RequestEvent) => {
@@ -192,6 +190,7 @@ export const actions = {
       | "bodyweight"
       | null;
     const rating = formData.get("rating");
+    const status = (formData.get("status") as "completed" | "skipped") || "completed";
 
     if (!routineMovementId || !setNumber || !value) {
       return fail(400, { error: "Missing required fields" });
@@ -210,6 +209,7 @@ export const actions = {
       weight: weight ? parseInt(String(weight)) : null,
       weightUnit,
       rating: rating ? parseInt(String(rating)) : null,
+      status,
       completedAt: new Date(),
     });
 
@@ -251,59 +251,84 @@ export const actions = {
     return { success: true };
   },
 
-  updatePracticeSettings: async ({ request, locals }: RequestEvent) => {
-    const formData = await request.formData();
-    const autoPlay = formData.get("autoPlay") === "true";
-    const audioEnabled = formData.get("audioEnabled") === "true";
-    const keepAwake = formData.get("keepAwake") === "true";
-    const practiceId = formData.get("practiceId") as string;
+	updatePracticeSettings: async ({ request, locals }: RequestEvent) => {
+		const formData = await request.formData();
+		const autoPlay = formData.get('autoPlay') === 'true';
+		const audioEnabled = formData.get('audioEnabled') === 'true';
+		const keepAwake = formData.get('keepAwake') === 'true';
+		const practiceId = formData.get('practiceId') as string;
 
-    if (!practiceId) {
-      return fail(400, { error: "Missing practiceId" });
-    }
+		if (!practiceId) {
+			return fail(400, { error: 'Missing practiceId' });
+		}
 
-    const practice = await db.query.practiceLogs.findFirst({
-      where: eq(practiceLogs.id, practiceId),
-      with: { routine: true },
-    });
+		const practice = await db.query.practiceLogs.findFirst({
+			where: eq(practiceLogs.id, practiceId),
+			with: { routine: true }
+		});
 
-    if (!practice) {
-      return fail(404, { error: "Practice not found" });
-    }
+		if (!practice) {
+			return fail(404, { error: 'Practice not found' });
+		}
 
-    await db
-      .update(routines)
-      .set({
-        autoAdvance: autoPlay,
-        audioEnabled,
-        keepAwake,
-      })
-      .where(eq(routines.id, practice.routineId));
+		await db
+			.update(routines)
+			.set({
+				autoAdvance: autoPlay,
+				audioEnabled,
+				keepAwake
+			})
+			.where(eq(routines.id, practice.routineId));
 
-    if (locals.user?.id) {
-      const userData = await db.query.user.findFirst({
-        where: eq(user.id, locals.user.id),
-        columns: { preferences: true },
-      });
+		if (locals.user?.id) {
+			const userData = await db.query.user.findFirst({
+				where: eq(user.id, locals.user.id),
+				columns: { preferences: true }
+			});
 
-      const currentPrefs = userData?.preferences || {};
-      await db
-        .update(user)
-        .set({
-          preferences: {
-            ...currentPrefs,
-            autoAdvance: autoPlay,
-            audioEnabled,
-            keepAwake,
-          },
-        })
-        .where(eq(user.id, locals.user.id));
-    }
+			const currentPrefs = userData?.preferences || {};
+			await db
+				.update(user)
+				.set({
+					preferences: {
+						...currentPrefs,
+						autoAdvance: autoPlay,
+						audioEnabled,
+						keepAwake
+					}
+				})
+				.where(eq(user.id, locals.user.id));
+		}
 
-    return { success: true };
-  },
+		return { success: true };
+	},
 
-  adjustSets: async ({ request, params }: RequestEvent) => {
+	uncompleteSet: async ({ request, params }: RequestEvent) => {
+		const formData = await request.formData();
+		const routineMovementId = formData.get('routineMovementId') as string;
+		const setNumber = parseInt(formData.get('setNumber') as string);
+		const side = formData.get('side') as 'left' | 'right' | null;
+
+		if (!routineMovementId || isNaN(setNumber)) {
+			return fail(400, { error: 'Missing required fields' });
+		}
+
+		// Delete the practice data entry
+		await db
+			.delete(practiceData)
+			.where(
+				and(
+					eq(practiceData.practiceLogId, params.id),
+					eq(practiceData.routineMovementId, routineMovementId),
+					eq(practiceData.setNumber, setNumber),
+					side ? eq(practiceData.side, side) : sql`${practiceData.side} IS NULL`
+				)
+			);
+
+		return { success: true };
+	},
+
+	adjustSets: async ({ request, params }: RequestEvent) => {
     const formData = await request.formData();
     const routineMovementId = formData.get("routineMovementId") as string;
     const direction = formData.get("direction") as "up" | "down";
@@ -366,5 +391,127 @@ export const actions = {
       .where(eq(practiceLogs.id, params.id));
 
     return { success: true, newSets };
+  },
+
+  reorderMovement: async ({ request, params }: RequestEvent) => {
+    const formData = await request.formData();
+    const routineMovementId = formData.get("routineMovementId") as string;
+    const direction = formData.get("direction") as "up" | "down";
+
+    if (!routineMovementId || !direction) {
+      return fail(400, { error: "Missing required fields" });
+    }
+
+    const practice = await db.query.practiceLogs.findFirst({
+      where: eq(practiceLogs.id, params.id),
+    });
+
+    if (!practice) {
+      return fail(404, { error: "Practice not found" });
+    }
+
+    const allMovements = await db.query.routineMovements.findMany({
+      where: eq(routineMovements.routineId, practice.routineId),
+      orderBy: routineMovements.order,
+    });
+
+    const currentIndex = allMovements.findIndex(m => m.id === routineMovementId);
+    if (currentIndex === -1) {
+      return fail(404, { error: "Movement not found in routine" });
+    }
+
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= allMovements.length) {
+      return fail(400, { error: "Cannot move in this direction" });
+    }
+
+    const currentOrder = allMovements[currentIndex].order;
+    const targetOrder = allMovements[newIndex].order;
+
+    await db.update(routineMovements)
+      .set({ order: targetOrder })
+      .where(eq(routineMovements.id, routineMovementId));
+
+    await db.update(routineMovements)
+      .set({ order: currentOrder })
+      .where(eq(routineMovements.id, allMovements[newIndex].id));
+
+    return { success: true };
+  },
+
+  removeMovement: async ({ request, params }: RequestEvent) => {
+    const formData = await request.formData();
+    const routineMovementId = formData.get("routineMovementId") as string;
+
+    if (!routineMovementId) {
+      return fail(400, { error: "Missing routineMovementId" });
+    }
+
+    await db.delete(routineMovements).where(eq(routineMovements.id, routineMovementId));
+
+    return { success: true };
+  },
+
+  addMovement: async ({ request, params }: RequestEvent) => {
+    const formData = await request.formData();
+    const movementId = formData.get("movementId") as string;
+
+    if (!movementId) {
+      return fail(400, { error: "Missing movementId" });
+    }
+
+    const practice = await db.query.practiceLogs.findFirst({
+      where: eq(practiceLogs.id, params.id),
+    });
+
+    if (!practice) {
+      return fail(404, { error: "Practice not found" });
+    }
+
+    const movement = await db.query.movements.findFirst({
+      where: eq(movements.id, movementId),
+    });
+
+    if (!movement) {
+      return fail(404, { error: "Movement not found" });
+    }
+
+    const existingMovements = await db.query.routineMovements.findMany({
+      where: eq(routineMovements.routineId, practice.routineId),
+      orderBy: routineMovements.order,
+    });
+
+    const maxOrder = existingMovements.length > 0 
+      ? Math.max(...existingMovements.map(m => m.order)) 
+      : -1;
+
+    const targetTypeMap = {
+      timed: 'time' as const,
+      reps: 'reps' as const,
+      weighted: 'reps' as const,
+      resistance: 'reps' as const
+    };
+
+    const defaultTarget = movement.metadata?.defaultTarget;
+
+    await db.insert(routineMovements).values({
+      id: nanoid(),
+      routineId: practice.routineId,
+      movementId: movement.id,
+      order: maxOrder + 1,
+      target: {
+        type: targetTypeMap[movement.type as keyof typeof targetTypeMap],
+        value: defaultTarget?.value || 30,
+        unit: defaultTarget?.unit
+      },
+      sets: 1,
+      isBilateral: movement.isBilateral ?? false,
+      switchSidesDuration: movement.switchSidesDuration ?? 5,
+      weight: null,
+      weightUnit: movement.weightUnit || null,
+      notes: null
+    });
+
+    return { success: true };
   },
 };

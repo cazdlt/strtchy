@@ -45,9 +45,12 @@
 	let activeSetTimerDuration = $state(0);
 	let activeSetTimerInterval = $state<ReturnType<typeof setInterval> | null>(null);
 	let activeSetTimerPaused = $state(false);
+	let lastActiveSetTimerValue = $state(0);
 
 	// Practice data state
 	let completedSets = $state<Set<string>>(new Set());
+	let skippedSets = $state<Set<string>>(new Set());
+	let completedValues = $state<Record<string, number>>({});
 	let movementNotes = $state<Record<string, string>>({});
 	let isAutoCompletingSet = $state(false);
 	let currentActiveSetKey = $state<string | null>(null);
@@ -73,13 +76,24 @@
 	// Read-only check
 	let isReadOnly = $state(data.isReadOnly);
 
+	// Movement management state
+	let showAddMovementModal = $state(false);
+	let isReordering = $state<Record<string, boolean>>({});
+	let isRemoving = $state<Record<string, boolean>>({});
+	let isAddingMovement = $state(false);
+
 	onMount(() => {
-		// Initialize completed sets from practice data
+		// Initialize completed/skipped sets from practice data
 		for (const pd of data.practice.practiceData) {
 			const key = `${pd.routineMovementId}-${pd.setNumber}-${pd.side || 'none'}`;
-			completedSets.add(key);
+			if (pd.status === 'skipped') {
+				skippedSets.add(key);
+			} else {
+				completedSets.add(key);
+			}
 		}
 		completedSets = new Set(completedSets);
+		skippedSets = new Set(skippedSets);
 
 		// Start duration timer
 		durationInterval = setInterval(() => {
@@ -131,7 +145,7 @@
 		}, 0)
 	);
 
-	const completedSetsCount = $derived(completedSets.size);
+	const completedSetsCount = $derived(completedSets.size + skippedSets.size);
 
 	const allSetsComplete = $derived(completedSetsCount >= totalSets);
 
@@ -149,18 +163,21 @@
 			const rm = data.allRoutineMovements[i];
 			if (i !== activeMovementIndex) continue;
 
-			const sets = rm.isBilateral ? rm.sets * 2 : rm.sets;
+			const actualSets = setOverrides[rm.id] ?? rm.sets;
+			const sets = rm.isBilateral ? actualSets * 2 : actualSets;
 
 			for (let j = 1; j <= sets; j++) {
 				const side = rm.isBilateral ? (j % 2 === 1 ? 'left' : 'right') : null;
 				const actualSetNumber = rm.isBilateral ? Math.ceil(j / 2) : j;
 				const key = `${rm.id}-${actualSetNumber}-${side || 'none'}`;
 
-				if (!completedSets.has(key)) {
+				if (!completedSets.has(key) && !skippedSets.has(key)) {
 					// This is the active set
 					if (rm.target.type === 'time' && rm.target.value > 0) {
 						// Only start/restart timer if active set changed
 						if (currentActiveSetKey !== key) {
+							playSound('setStart');
+							playCountdown();
 							startActiveSetTimer(rm.target.value, async () => {
 								await handleSetComplete({
 									setNumber: actualSetNumber,
@@ -189,7 +206,9 @@
 		checkAndStartActiveSetTimer();
 	});
 
-	function playBeep() {
+	type SoundType = 'countdown' | 'setStart' | 'setComplete' | 'restStart' | 'restEnd' | 'switchSides' | 'practiceComplete';
+
+	function playSound(type: SoundType) {
 		if (!settings.audioEnabled) return;
 
 		if (!audioContext && 'AudioContext' in window) {
@@ -202,21 +221,65 @@
 			audioContext.resume();
 		}
 
-		const oscillator = audioContext.createOscillator();
-		const gainNode = audioContext.createGain();
-		oscillator.connect(gainNode);
-		gainNode.connect(audioContext.destination);
-		oscillator.frequency.value = 800;
-		oscillator.type = 'sine';
-		gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-		gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-		oscillator.start(audioContext.currentTime);
-		oscillator.stop(audioContext.currentTime + 0.1);
+		const playTone = (freq: number, duration: number, delay: number = 0) => {
+			const oscillator = audioContext!.createOscillator();
+			const gainNode = audioContext!.createGain();
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext!.destination);
+			oscillator.frequency.value = freq;
+			oscillator.type = 'sine';
+			const startTime = audioContext!.currentTime + delay;
+			gainNode.gain.setValueAtTime(0.15, startTime);
+			gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+			oscillator.start(startTime);
+			oscillator.stop(startTime + duration);
+		};
+
+		switch (type) {
+			case 'countdown':
+				playTone(880, 0.1, 0);
+				playTone(880, 0.1, 0.15);
+				playTone(880, 0.1, 0.3);
+				break;
+			case 'setStart':
+				playTone(660, 0.15);
+				break;
+			case 'setComplete':
+				playTone(523, 0.1);
+				playTone(659, 0.1, 0.1);
+				playTone(784, 0.15, 0.2);
+				break;
+			case 'restStart':
+				playTone(440, 0.2);
+				playTone(330, 0.2, 0.2);
+				break;
+			case 'restEnd':
+				playTone(523, 0.1);
+				playTone(659, 0.15, 0.1);
+				break;
+			case 'switchSides':
+				playTone(698, 0.12);
+				playTone(880, 0.12, 0.12);
+				playTone(1047, 0.2, 0.24);
+				break;
+			case 'practiceComplete':
+				playTone(523, 0.1);
+				playTone(659, 0.1, 0.1);
+				playTone(784, 0.1, 0.2);
+				playTone(1047, 0.3, 0.3);
+				break;
+		}
+	}
+
+	async function playCountdown() {
+		playSound('countdown');
+		await new Promise((r) => setTimeout(r, 450));
 	}
 
 	function startActiveSetTimer(duration: number, onComplete: () => void) {
 		activeSetTimerDuration = duration;
 		activeSetTimer = duration;
+		lastActiveSetTimerValue = duration;
 		activeSetTimerPaused = false;
 
 		if (activeSetTimerInterval) {
@@ -226,12 +289,13 @@
 		activeSetTimerInterval = setInterval(async () => {
 			if (!activeSetTimerPaused) {
 				activeSetTimer--;
+				lastActiveSetTimerValue = activeSetTimer;
 				if (activeSetTimer <= 0) {
 					if (activeSetTimerInterval) {
 						clearInterval(activeSetTimerInterval);
 						activeSetTimerInterval = null;
 					}
-					playBeep();
+					playSound('setComplete');
 					isAutoCompletingSet = true;
 					await onComplete();
 					isAutoCompletingSet = false;
@@ -255,7 +319,7 @@
 	}
 
 	async function handleSetComplete(setData: any) {
-		const { setNumber, side, movementIndex } = setData;
+		const { setNumber, side, movementIndex, skipped = false } = setData;
 
 		isCompletingSet = true;
 
@@ -271,6 +335,7 @@
 		formData.append('setNumber', setNumber.toString());
 		formData.append('value', setData.value.toString());
 		formData.append('measurementType', rm.target.type);
+		formData.append('status', skipped ? 'skipped' : 'completed');
 
 		if (side) {
 			formData.append('side', side);
@@ -293,16 +358,57 @@
 
 		if (response.ok) {
 			const key = `${rm.id}-${setNumber}-${side || 'none'}`;
-			completedSets.add(key);
-			completedSets = new Set(completedSets);
+			if (skipped) {
+				skippedSets.add(key);
+				skippedSets = new Set(skippedSets);
+			} else {
+				completedSets.add(key);
+				completedSets = new Set(completedSets);
+			}
+			completedValues[key] = setData.value;
 			currentActiveSetKey = null;
 
-			playBeep();
+			playSound('setComplete');
 
 			// Auto-play logic
 			if (settings.autoPlay) {
 				handleAutoPlay(rm, setNumber, side);
 			}
+		}
+
+		isCompletingSet = false;
+	}
+
+	async function handleUncompleteSet(setData: any) {
+		const { setNumber, side, routineMovementId } = setData;
+
+		isCompletingSet = true;
+
+		// Create form data
+		const formData = new FormData();
+		formData.append('routineMovementId', routineMovementId);
+		formData.append('setNumber', setNumber.toString());
+		if (side) {
+			formData.append('side', side);
+		}
+
+		// Delete from server
+		const response = await fetch('?/uncompleteSet', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (response.ok) {
+			const key = `${routineMovementId}-${setNumber}-${side || 'none'}`;
+			completedSets.delete(key);
+			skippedSets.delete(key);
+			delete completedValues[key];
+			completedSets = new Set(completedSets);
+			skippedSets = new Set(skippedSets);
+			currentActiveSetKey = null;
+
+			// After uncompleting, we might want to scroll back to it
+			scrollToNextIncompleteSet();
 		}
 
 		isCompletingSet = false;
@@ -315,7 +421,7 @@
 		// Check if this was a bilateral left side
 		if (rm.isBilateral && side === 'left') {
 			const nextSideKey = `${rm.id}-${setNumber}-right`;
-			if (!completedSets.has(nextSideKey)) {
+			if (!completedSets.has(nextSideKey) && !skippedSets.has(nextSideKey)) {
 				if (rm.switchSidesDuration > 0) {
 					startRestTimer(
 						rm.switchSidesDuration,
@@ -334,7 +440,8 @@
 		}
 
 		// Calculate total sets for this movement
-		const movementTotalSets = rm.isBilateral ? rm.sets * 2 : rm.sets;
+		const actualSets = setOverrides[rm.id] ?? rm.sets;
+		const movementTotalSets = rm.isBilateral ? actualSets * 2 : actualSets;
 		const movementCompletedSets = countCompletedMovementSets(rm.id, rm.isBilateral);
 
 		// Check if all sets for this movement are complete
@@ -376,6 +483,11 @@
 				count += 1;
 			}
 		}
+		for (const key of skippedSets) {
+			if (key.startsWith(`${routineMovementId}-`)) {
+				count += 1;
+			}
+		}
 		return count;
 	}
 
@@ -401,6 +513,12 @@
 		restType = type;
 		nextExerciseName = nextName;
 		showRestTimer = true;
+
+		if (type === 'switch-sides') {
+			playSound('switchSides');
+		} else {
+			playSound('restStart');
+		}
 		restingMovementIndex = movementIndex ?? -1;
 		activeRestSetNumber = setNumber ?? null;
 		activeRestSide = side ?? null;
@@ -422,7 +540,7 @@
 			clearInterval(restInterval);
 			restInterval = null;
 		}
-		playBeep();
+		playSound('restEnd');
 		showRestTimer = false;
 		restingMovementIndex = -1;
 		activeRestSetNumber = null;
@@ -449,16 +567,18 @@
 	function scrollToNextIncompleteSet() {
 		for (let i = 0; i < data.allRoutineMovements.length; i++) {
 			const rm = data.allRoutineMovements[i];
-			const sets = rm.isBilateral ? rm.sets * 2 : rm.sets;
+			const actualSets = setOverrides[rm.id] ?? rm.sets;
+			const sets = rm.isBilateral ? actualSets * 2 : actualSets;
 
 			for (let j = 1; j <= sets; j++) {
 				const side = rm.isBilateral ? (j % 2 === 1 ? 'left' : 'right') : null;
 				const actualSetNumber = rm.isBilateral ? Math.ceil(j / 2) : j;
 				const key = `${rm.id}-${actualSetNumber}-${side || 'none'}`;
 
-				if (!completedSets.has(key)) {
+				if (!completedSets.has(key) && !skippedSets.has(key)) {
 					activeMovementIndex = i;
 					scrollToSet(rm.id, actualSetNumber, side);
+					playSound('setStart');
 					return;
 				}
 			}
@@ -575,6 +695,66 @@
 		isAdjustingSets[routineMovementId] = false;
 	}
 
+	async function handleMoveMovement(routineMovementId: string, direction: 'up' | 'down') {
+		isReordering[routineMovementId] = true;
+		
+		const formData = new FormData();
+		formData.append('routineMovementId', routineMovementId);
+		formData.append('direction', direction);
+
+		const response = await fetch('?/reorderMovement', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (response.ok) {
+			window.location.reload();
+		} else {
+			alert('Failed to reorder movement');
+			isReordering[routineMovementId] = false;
+		}
+	}
+
+	async function handleRemoveMovement(routineMovementId: string) {
+		if (!confirm('Remove this movement from the routine?')) return;
+		
+		isRemoving[routineMovementId] = true;
+		
+		const formData = new FormData();
+		formData.append('routineMovementId', routineMovementId);
+
+		const response = await fetch('?/removeMovement', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (response.ok) {
+			window.location.reload();
+		} else {
+			alert('Failed to remove movement');
+			isRemoving[routineMovementId] = false;
+		}
+	}
+
+	async function handleAddMovement(movementId: string) {
+		isAddingMovement = true;
+		
+		const formData = new FormData();
+		formData.append('movementId', movementId);
+
+		const response = await fetch('?/addMovement', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (response.ok) {
+			window.location.reload();
+		} else {
+			alert('Failed to add movement');
+			isAddingMovement = false;
+		}
+	}
+
 	function handleExit() {
 		if (confirm('Exit practice? Your progress so far is saved.')) {
 			if (isReadOnly) {
@@ -589,6 +769,7 @@
 		if (!confirm('Complete workout?')) return;
 
 		isCompletingWorkout = true;
+		playSound('practiceComplete');
 
 		await fetch('?/completePractice', {
 			method: 'POST',
@@ -603,21 +784,23 @@
 
 		for (let i = 0; i < data.allRoutineMovements.length; i++) {
 			const rm = data.allRoutineMovements[i];
-			const sets = rm.isBilateral ? rm.sets * 2 : rm.sets;
+			const actualSets = setOverrides[rm.id] ?? rm.sets;
+			const sets = rm.isBilateral ? actualSets * 2 : actualSets;
 
 			for (let j = 1; j <= sets; j++) {
 				const side = rm.isBilateral ? (j % 2 === 1 ? 'left' : 'right') : null;
 				const actualSetNumber = rm.isBilateral ? Math.ceil(j / 2) : j;
 				const key = `${rm.id}-${actualSetNumber}-${side || 'none'}`;
 
-				if (!completedSets.has(key)) {
+				if (!completedSets.has(key) && !skippedSets.has(key)) {
 					const setData = {
 						setNumber: actualSetNumber,
 						side,
 						movementIndex: i,
-						value: rm.target.value,
+						value: 0,
 						weight: rm.weight,
-						rating: 0
+						rating: 0,
+						skipped: true
 					};
 
 					await handleSetComplete(setData);
@@ -630,6 +813,25 @@
 	function isMovementCompleted(routineMovementId: string, totalSets: number): boolean {
 		return countCompletedMovementSets(routineMovementId, false) >= totalSets;
 	}
+
+	// Group movements by type for the add modal
+	const groupedMovements = $derived.by(() => {
+		const groups: Record<string, any[]> = {
+			Timed: [],
+			Repetitions: [],
+			Weighted: [],
+			Resistance: []
+		};
+
+		for (const movement of data.allMovements) {
+			if (movement.type === 'timed') groups.Timed.push(movement);
+			else if (movement.type === 'reps') groups.Repetitions.push(movement);
+			else if (movement.type === 'weighted') groups.Weighted.push(movement);
+			else if (movement.type === 'resistance') groups.Resistance.push(movement);
+		}
+
+		return groups;
+	});
 </script>
 
 <svelte:head>
@@ -698,6 +900,8 @@
 				previousStats={movementPreviousStats}
 				isActive={isActive}
 				completedSets={completedSets}
+				{skippedSets}
+				{completedValues}
 				activeSetTimer={activeSetTimer}
 				activeSetTimerPaused={activeSetTimerPaused}
 				onToggleTimerPaused={toggleActiveSetTimerPaused}
@@ -707,6 +911,7 @@
 				onSetComplete={handleSetComplete}
 				onNotesChange={(notes: string) => handleNotesChange(rm.id, notes)}
 				onAdjustSets={(direction) => handleAdjustSets(rm.id, direction)}
+				onUncompleteSet={handleUncompleteSet}
 				isAdjustingSets={isAdjustingSets[rm.id]}
 				onSkipSet={settings.autoPlay ? handleSkipSet : undefined}
 				
@@ -716,11 +921,16 @@
 				restRemainingTime={restTimer}
 				restBetweenSetsDuration={data.practice.routine.restBetweenSets}
 				onSkipRest={skipRest}
+				onMoveUp={() => handleMoveMovement(rm.id, 'up')}
+				onMoveDown={() => handleMoveMovement(rm.id, 'down')}
+				onRemove={() => handleRemoveMovement(rm.id)}
+				isFirst={index === 0}
+				isLast={index === data.allRoutineMovements.length - 1}
 			/>
 
 			{#if index < data.allRoutineMovements.length - 1}
 				{@const isRestActive = showRestTimer && restType === 'between-movements' && restingMovementIndex === index}
-				{@const currentMovementSets = rm.isBilateral ? rm.sets * 2 : rm.sets}
+				{@const currentMovementSets = rm.isBilateral ? (setOverrides[rm.id] ?? rm.sets) * 2 : (setOverrides[rm.id] ?? rm.sets)}
 				{@const isCurrentMovementComplete = countCompletedMovementSets(rm.id, rm.isBilateral) >= currentMovementSets}
 				{@const nextMovement = data.allRoutineMovements[index + 1]}
 				{@const isNextMovementStarted = countCompletedMovementSets(nextMovement.id, nextMovement.isBilateral) > 0}
@@ -736,6 +946,18 @@
 				/>
 			{/if}
 		{/each}
+
+		{#if !isReadOnly}
+			<button
+				onclick={() => showAddMovementModal = true}
+				class="w-full p-4 bg-gray-800/30 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 hover:bg-gray-800/50 transition-all flex items-center justify-center gap-2"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+				</svg>
+				Add Movement
+			</button>
+		{/if}
 	</main>
 
 	{#if !isReadOnly}
@@ -756,6 +978,56 @@
 		isSaving={isSavingSettings}
 		error={settingsError}
 	/>
+
+	<!-- Add Movement Modal -->
+	{#if showAddMovementModal}
+		<div class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+			<div class="bg-gray-900 border border-gray-700 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+				<div class="p-4 border-b border-gray-800 flex items-center justify-between">
+					<h2 class="text-lg font-semibold text-white">Add Movement</h2>
+					<button
+						onclick={() => showAddMovementModal = false}
+						class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="p-4 overflow-y-auto flex-1">
+					{#if isAddingMovement}
+						<div class="flex items-center justify-center py-8">
+							<svg class="animate-spin h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							</svg>
+						</div>
+					{:else}
+						{#each Object.entries(groupedMovements) as [category, movementsList]}
+							{#if movementsList.length > 0}
+								<div class="mb-4">
+									<h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">{category}</h3>
+									<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+										{#each movementsList as movement}
+											<button
+												onclick={() => handleAddMovement(movement.id)}
+												class="text-left p-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-emerald-500 hover:bg-gray-800/80 transition-all"
+											>
+												<div class="font-medium text-sm text-white">{movement.name}</div>
+												{#if movement.description}
+													<div class="text-xs text-gray-400 mt-1 line-clamp-2">{movement.description}</div>
+												{/if}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+						{/each}
+					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>

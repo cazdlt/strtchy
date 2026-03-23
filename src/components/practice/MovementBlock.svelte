@@ -18,6 +18,8 @@
 		previousStats,
 		isActive,
 		completedSets,
+		skippedSets = new Set<string>(),
+		completedValues = {},
 		onSetComplete,
 		onNotesChange,
 		activeSetTimer = 0,
@@ -29,7 +31,14 @@
 		isPreview = false,
 		onAdjustSets,
 		onSkipSet,
+		onUncompleteSet,
 		isAdjustingSets = false,
+		// Reorder/Remove
+		onMoveUp,
+		onMoveDown,
+		onRemove,
+		isFirst = false,
+		isLast = false,
 		// Rest State
 		activeRestType = null,
 		activeRestSetNumber = null,
@@ -53,6 +62,8 @@
 		previousStats?: any;
 		isActive: boolean;
 		completedSets: Set<string>;
+		skippedSets?: Set<string>;
+		completedValues?: Record<string, number>;
 		onSetComplete: (setData: any) => void;
 		onNotesChange: (notes: string) => void;
 		activeSetTimer?: number;
@@ -64,7 +75,14 @@
 		isPreview?: boolean;
 		onAdjustSets?: (direction: 'up' | 'down') => void;
 		onSkipSet?: () => void;
+		onUncompleteSet?: (setData: any) => void;
 		isAdjustingSets?: boolean;
+		// Reorder/Remove
+		onMoveUp?: () => void;
+		onMoveDown?: () => void;
+		onRemove?: () => void;
+		isFirst?: boolean;
+		isLast?: boolean;
 		// Rest State
 		activeRestType?: 'between-sets' | 'switch-sides' | null;
 		activeRestSetNumber?: number | null;
@@ -76,6 +94,12 @@
 
 	let collapsed = $state(false);
 	let currentNotes = $state(notes || '');
+
+	$effect(() => {
+		if (isActive) {
+			collapsed = false;
+		}
+	});
 
 	$effect(() => {
 		currentNotes = notes || '';
@@ -143,6 +167,15 @@
 		});
 	}
 
+	function handleUncompleteSet(data: any, setNumber: number, side: 'left' | 'right' | null) {
+		onUncompleteSet?.({
+			...data,
+			setNumber,
+			side,
+			routineMovementId
+		});
+	}
+
 	function getSetKey(setNumber: number, side: 'left' | 'right' | null): string {
 		return `${routineMovementId}-${setNumber}-${side || 'none'}`;
 	}
@@ -151,13 +184,18 @@
 		return completedSets.has(getSetKey(setNumber, side));
 	}
 
+	function isSetSkipped(setNumber: number, side: 'left' | 'right' | null): boolean {
+		return skippedSets.has(getSetKey(setNumber, side));
+	}
+
 	function isSetActive(setNumber: number, side: 'left' | 'right' | null): boolean {
 		if (!isActive || activeRestType) return false;
 
 		const firstIncomplete = items.find(
 			(item) =>
 				item.type === 'set' &&
-				!completedSets.has(`${routineMovementId}-${item.setNumber}-${item.side || 'none'}`)
+				!completedSets.has(`${routineMovementId}-${item.setNumber}-${item.side || 'none'}`) &&
+				!skippedSets.has(`${routineMovementId}-${item.setNumber}-${item.side || 'none'}`)
 		);
 
 		return firstIncomplete?.setNumber === setNumber && firstIncomplete?.side === side;
@@ -200,16 +238,44 @@
 </script>
 
 <div class="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden mb-4">
-	<button
-		onclick={() => (collapsed = !collapsed)}
-		class="w-full p-4 flex items-start gap-3 text-left hover:bg-gray-700/50 transition-colors"
-	>
-		<div
-			class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-sm font-semibold text-white flex-shrink-0"
-		>
-			{movementIndex + 1}
+	<div class="w-full p-4 flex items-start gap-3">
+		<div class="flex flex-col items-center gap-1 flex-shrink-0">
+			<button
+				onclick={() => (collapsed = !collapsed)}
+				class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-sm font-semibold text-white hover:bg-gray-600 transition-colors"
+				aria-label={collapsed ? 'Expand' : 'Collapse'}
+			>
+				{movementIndex + 1}
+			</button>
+			{#if !isPreview}
+				<div class="flex flex-col gap-1">
+					<button
+						onclick={() => onMoveUp?.()}
+						disabled={isFirst}
+						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+						aria-label="Move up"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+						</svg>
+					</button>
+					<button
+						onclick={() => onMoveDown?.()}
+						disabled={isLast}
+						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+						aria-label="Move down"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+						</svg>
+					</button>
+				</div>
+			{/if}
 		</div>
-		<div class="flex-1 min-w-0">
+		<button
+			onclick={() => (collapsed = !collapsed)}
+			class="flex-1 min-w-0 text-left hover:bg-gray-700/50 transition-colors rounded-lg p-2 -m-2"
+		>
 			<div class="flex items-center gap-2 flex-wrap">
 				<h3 class="font-semibold text-white">{movementName}</h3>
 				<span
@@ -228,18 +294,37 @@
 			{#if description}
 				<p class="text-gray-400 text-sm mt-1 line-clamp-2">{description}</p>
 			{/if}
-		</div>
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke-width="1.5"
-			stroke="currentColor"
-			class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform {collapsed ? 'rotate-180' : ''}"
+		</button>
+		<div class="flex items-center gap-2 flex-shrink-0">
+			{#if !isPreview}
+				<button
+					onclick={() => onRemove?.()}
+					class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-red-400 hover:border-red-400/50 transition-all"
+					aria-label="Remove movement"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			{/if}
+		<button
+			onclick={() => (collapsed = !collapsed)}
+			class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+			aria-label={collapsed ? 'Expand' : 'Collapse'}
 		>
-			<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-		</svg>
-	</button>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+					class="w-5 h-5 transition-transform {collapsed ? 'rotate-180' : ''}"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+				</svg>
+			</button>
+		</div>
+	</div>
 
 	{#if !collapsed}
 		<div class="border-t border-gray-700 p-2 space-y-2">
@@ -316,8 +401,11 @@
 			{#each items as item (item.key)}
 				{#if item.type === 'set'}
 					{@const isCompleted = isSetCompleted(item.setNumber!, item.side!)}
+					{@const isSkipped = isSetSkipped(item.setNumber!, item.side!)}
 					{@const active = isSetActive(item.setNumber!, item.side!)}
 					{@const showTimer = active && movementType === 'timed' && activeSetTimer > 0}
+					{@const setKey = getSetKey(item.setNumber!, item.side!)}
+					{@const completedValue = completedValues?.[setKey]}
 					<SetRow
 						id={getSetElementId(item.setNumber!, item.side!)}
 						setNumber={item.setNumber!}
@@ -332,6 +420,8 @@
 							: previousStats}
 						isActive={active}
 						isCompleted={isCompleted}
+						isSkipped={isSkipped}
+						{completedValue}
 						{isPreview}
 						activeSetTimer={showTimer ? activeSetTimer : 0}
 						activeSetTimerPaused={activeSetTimerPaused}
@@ -339,6 +429,7 @@
 						onResetTimer={showTimer ? onResetTimer : undefined}
 						isCompleting={isCompletingSet}
 						onComplete={(data) => handleSetComplete(data, item.setNumber!, item.side!)}
+						onUncomplete={(data) => handleUncompleteSet(data, item.setNumber!, item.side!)}
 						onSkip={active ? onSkipSet : undefined}
 					/>
 				{:else}

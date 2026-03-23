@@ -139,6 +139,7 @@ export const practiceData = sqliteTable('practice_data', {
 	weightUnit: text('weight_unit', { enum: ['lbs', 'kg', 'bodyweight'] }),
 	customMeasurement: text('custom_measurement'), // e.g., band color
 	rating: integer('rating'), // 1-10 rating after completing movement
+	status: text('status', { enum: ['completed', 'skipped'] }).notNull().default('completed'),
 	completedAt: integer('completed_at', { mode: 'timestamp' }).notNull(),
 });
 

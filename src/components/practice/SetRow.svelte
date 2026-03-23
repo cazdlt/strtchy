@@ -12,8 +12,11 @@
 		previousStats = null,
 		isActive = false,
 		isCompleted = false,
+		isSkipped = false,
+		completedValue = null,
 		isPreview = false,
 		onComplete,
+		onUncomplete,
 		onSkip,
 		onValueChange,
 		activeSetTimer = 0,
@@ -33,8 +36,11 @@
 		previousStats?: any;
 		isActive?: boolean;
 		isCompleted?: boolean;
+		isSkipped?: boolean;
+		completedValue?: number | null;
 		isPreview?: boolean;
 		onComplete?: (data: any) => void;
+		onUncomplete?: (data: any) => void;
 		onSkip?: () => void;
 		onValueChange?: (value: number, weight?: number) => void;
 		activeSetTimer?: number;
@@ -49,18 +55,37 @@
 	let currentWeight = $state(weight || 0);
 	let effortRating = $state(0);
 
+	const displayValue = $derived((isCompleted || isSkipped) && completedValue !== null && completedValue !== undefined ? completedValue : currentValue);
+
 	$effect(() => {
 		currentValue = targetValue;
 		currentWeight = weight || 0;
 	});
 
 	function handleComplete() {
+		if (isCompleted || isSkipped) {
+			if (onUncomplete) {
+				onUncomplete({
+					value: currentValue,
+					weight: movementType === 'weighted' || movementType === 'resistance' ? currentWeight : null,
+					weightUnit,
+					rating: effortRating
+				});
+			}
+			return;
+		}
+
+		const value = (movementType === 'timed')
+			? (activeSetTimer > 0 ? activeSetTimer : targetValue)
+			: currentValue;
+
 		if (onComplete) {
 			onComplete({
-				value: currentValue,
+				value,
 				weight: movementType === 'weighted' || movementType === 'resistance' ? currentWeight : null,
 				weightUnit,
-				rating: effortRating
+				rating: effortRating,
+				skipped: false
 			});
 		}
 	}
@@ -155,7 +180,7 @@
 								-
 							</button>
 						{/if}
-						<span class="text-2xl font-bold text-white w-16 text-center">{formatTime(currentValue)}</span>
+						<span class="text-2xl font-bold text-white w-16 text-center">{formatTime(displayValue)}</span>
 						{#if !isPreview}
 							<button
 								onclick={() => handleValueChange(currentValue + 5)}
@@ -166,7 +191,7 @@
 						{/if}
 					</div>
 				{/if}
-			{:else if movementType === 'reps'}
+				{:else if movementType === 'reps'}
 				<div class="flex items-center gap-2">
 					{#if !isPreview}
 						<button
@@ -176,7 +201,7 @@
 							-
 						</button>
 					{/if}
-					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">{currentValue}</span>
+					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">{displayValue}</span>
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(currentValue + 1)}
@@ -215,7 +240,7 @@
 							-
 						</button>
 					{/if}
-					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">{currentValue}</span>
+					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">{displayValue}</span>
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(currentValue + 1)}
@@ -256,13 +281,15 @@
 			{/if}
 			<button
 				onclick={handleComplete}
-				disabled={isCompleting || isCompleted}
+				disabled={isCompleting}
 				class="px-4 h-11 rounded-lg flex items-center justify-center font-semibold transition-all shadow-sm {isCompleted
-					? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+					? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30'
+					: isSkipped
+					? 'bg-gray-600/30 text-gray-400 border border-gray-600/30'
 					: isActive
 					? 'bg-blue-600 hover:bg-blue-500 text-white'
 					: 'bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-400'} disabled:opacity-50 disabled:cursor-not-allowed"
-				aria-label="Complete set {setNumber}"
+				aria-label={isCompleted || isSkipped ? "Un-complete set {setNumber}" : isActive ? "Complete set {setNumber}" : "Start set {setNumber}"}
 			>
 				{#if isCompleting}
 					<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -274,11 +301,21 @@
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
 					</svg>
 					Done
-				{:else}
+				{:else if isSkipped}
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5 opacity-70">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+					</svg>
+					Skipped
+				{:else if isActive}
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
 					</svg>
 					Complete
+				{:else}
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5 opacity-70">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					Not started
 				{/if}
 			</button>
 		</div>
