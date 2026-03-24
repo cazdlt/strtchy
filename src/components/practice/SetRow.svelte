@@ -56,7 +56,7 @@
 		isPaused?: boolean;
 	}>();
 
-	let currentValue = $state(targetValue);
+	let currentValue = $state(0);
 	let currentWeight = $state(weight || 0);
 	let effortRating = $state(0);
 	let autoRepInterval: ReturnType<typeof setInterval> | null = $state(null);
@@ -68,7 +68,7 @@
 		if (active && !prevIsActive) {
 			untrack(() => {
 				if (!isCompleted && !isSkipped) {
-					currentValue = targetValue;
+					currentValue = 0;
 					currentWeight = weight || 0;
 				}
 				prevIsActive = true;
@@ -230,53 +230,70 @@
 								<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
 							</svg>
 						</button>
-						<span class="text-3xl font-bold {activeSetTimerPaused ? 'text-yellow-400' : 'text-white'} w-16 text-center">{formatTime(activeSetTimer)}</span>
+						<div class="font-bold w-24 text-center transition-all">
+							<span class="text-3xl {activeSetTimerPaused ? 'text-yellow-400' : 'text-white'}">{formatTime(activeSetTimer)}</span>
+							<span class="text-gray-500 text-lg mx-1">/</span>
+							<span class="text-gray-400 text-lg">{formatTime(targetValue)}</span>
+						</div>
 					</div>
 				{:else}
-					<div class="flex items-center gap-2">
-{#if !isPreview}
-						<button
-							onclick={() => handleValueChange(Math.max(0, currentValue - 5))}
-							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
-						>
-							-
-						</button>
-					{/if}
-					<span class="text-2xl font-bold text-white w-16 text-center">{formatTime(displayValue)}</span>
+			<div class="flex items-center gap-2">
 					{#if !isPreview}
-						<button
-							onclick={() => handleValueChange(currentValue + 5)}
-							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
-						>
-							+
-						</button>
-					{/if}
+					<button
+						onclick={() => handleValueChange(Math.max(0, currentValue - 5))}
+						disabled={isPaused}
+						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+					>
+						-
+					</button>
+				{/if}
+				<div class="font-bold w-24 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">
+					<span class="text-current">{formatTime(displayValue)}</span>
+					<span class="text-gray-500 text-lg mx-1">/</span>
+					<span class="text-gray-400 text-lg">{formatTime(targetValue)}</span>
+				</div>
+					{#if !isPreview}
+					<button
+						onclick={() => handleValueChange(currentValue + 5)}
+						disabled={isPaused}
+						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+					>
+						+
+					</button>
+				{/if}
 					</div>
 				{/if}
-				{:else if movementType === 'reps'}
-				<div class="flex items-center gap-2">
-					{#if !isPreview}
-						<button
-							onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
-							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
-						>
-							-
-						</button>
-					{/if}
-					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">{displayValue}</span>
-					{#if !isPreview}
-						<button
-							onclick={() => handleValueChange(currentValue + 1)}
-							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
-						>
-							+
-						</button>
-					{/if}
+			{:else if movementType === 'reps'}
+			<div class="flex items-center gap-2">
+				{#if !isPreview}
+					<button
+						onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
+						disabled={isPaused}
+						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+					>
+						-
+					</button>
+				{/if}
+				<div class="font-bold w-20 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">
+					<span class="text-current">{displayValue}</span>
+					<span class="text-gray-500 text-lg mx-1">/</span>
+					<span class="text-gray-400 text-lg">{targetValue}</span>
 				</div>
+				{#if !isPreview}
+					<button
+						onclick={() => handleValueChange(currentValue + 1)}
+						disabled={isPaused}
+						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+					>
+						+
+					</button>
+				{/if}
+				{#if isActive && timePerRep && timePerRep > 0}
+					<span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded ml-1">
+						{timePerRep}s/rep
+					</span>
+				{/if}
+			</div>
 			{:else if movementType === 'weighted' || movementType === 'resistance_band'}
 				<div class="flex items-center gap-2">
 					{#if !isPreview}
@@ -309,7 +326,11 @@
 							-
 						</button>
 					{/if}
-					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">{displayValue}</span>
+					<div class="font-bold w-20 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">
+						<span class="text-current">{displayValue}</span>
+						<span class="text-gray-500 text-lg mx-1">/</span>
+						<span class="text-gray-400 text-lg">{targetValue}</span>
+					</div>
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(currentValue + 1)}

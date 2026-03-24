@@ -284,8 +284,8 @@
 
 	function startActiveSetTimer(duration: number, onComplete: () => void) {
 		activeSetTimerDuration = duration;
-		activeSetTimer = duration;
-		lastActiveSetTimerValue = duration;
+		activeSetTimer = 0;
+		lastActiveSetTimerValue = 0;
 		activeSetTimerPaused = false;
 
 		if (activeSetTimerInterval) {
@@ -294,9 +294,9 @@
 
 		activeSetTimerInterval = setInterval(async () => {
 			if (!activeSetTimerPaused && !isPaused) {
-				activeSetTimer--;
+				activeSetTimer++;
 				lastActiveSetTimerValue = activeSetTimer;
-				if (activeSetTimer <= 0) {
+				if (activeSetTimer >= duration) {
 					if (activeSetTimerInterval) {
 						clearInterval(activeSetTimerInterval);
 						activeSetTimerInterval = null;
@@ -667,7 +667,7 @@
 
 	function resetActiveSetTimer() {
 		if (activeSetTimerInterval && activeSetTimerDuration > 0) {
-			activeSetTimer = activeSetTimerDuration;
+			activeSetTimer = 0;
 			activeSetTimerPaused = false;
 		}
 	}
