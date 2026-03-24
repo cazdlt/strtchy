@@ -8,7 +8,8 @@
 		nextExerciseName = '',
 		onSkip,
 		isActive = false,
-		isCompleted = false
+		isCompleted = false,
+		isPaused = false
 	} = $props<{
 		remainingTime: number;
 		totalDuration: number;
@@ -17,6 +18,7 @@
 		onSkip?: () => void;
 		isActive?: boolean;
 		isCompleted?: boolean;
+		isPaused?: boolean;
 	}>();
 
 	const label = $derived(type === 'between-sets' ? 'Rest between sets' : 'Rest before next exercise');
@@ -52,7 +54,8 @@
 		{#if isActive && onSkip}
 			<button
 				onclick={onSkip}
-				class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+				disabled={isPaused}
+				class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
 				aria-label="Skip rest"
 			>
 				Skip

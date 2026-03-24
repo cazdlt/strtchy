@@ -14,6 +14,7 @@
 		switchSidesDuration,
 		weight = null,
 		weightUnit = null,
+		timePerRep = null,
 		notes = null,
 		previousStats,
 		isActive,
@@ -45,12 +46,13 @@
 		activeRestSide = null,
 		restRemainingTime = 0,
 		restBetweenSetsDuration = 0,
-		onSkipRest
+		onSkipRest,
+		isPaused = false
 	} = $props<{
 		movementIndex: number;
 		routineMovementId: string;
 		movementName: string;
-		movementType: 'timed' | 'reps' | 'weighted' | 'resistance';
+		movementType: 'timed' | 'reps' | 'weighted' | 'resistance_band';
 		description?: string | null;
 		targetValue: number;
 		sets: number;
@@ -58,6 +60,7 @@
 		switchSidesDuration: number;
 		weight?: number | null;
 		weightUnit?: string | null;
+		timePerRep?: number | null;
 		notes?: string | null;
 		previousStats?: any;
 		isActive: boolean;
@@ -90,6 +93,7 @@
 		restRemainingTime?: number;
 		restBetweenSetsDuration?: number;
 		onSkipRest?: () => void;
+		isPaused?: boolean;
 	}>();
 
 	let collapsed = $state(false);
@@ -239,47 +243,49 @@
 
 <div class="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden mb-4">
 	<div class="w-full p-4 flex items-start gap-3">
-		<div class="flex flex-col items-center gap-1 flex-shrink-0">
+		<div class="flex flex-col items-center flex-shrink-0">
+			{#if !isPreview}
+				<button
+					onclick={() => onMoveUp?.()}
+					disabled={isFirst}
+					class="w-10 h-6 flex items-center justify-center rounded-t-lg bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+					aria-label="Move up"
+					title="Move up"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mt-0.5">
+						<path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 011.06 0l7.5 7.5a.75.75 0 11-1.06 1.06L12 4.06l-6.97 6.97a.75.75 0 01-1.06-1.06l7.5-7.5z" clip-rule="evenodd" />
+					</svg>
+				</button>
+			{/if}
 			<button
 				onclick={() => (collapsed = !collapsed)}
-				class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-sm font-semibold text-white hover:bg-gray-600 transition-colors"
+				class="w-10 h-10 bg-gray-700/80 flex items-center justify-center text-sm font-semibold text-white hover:bg-gray-600 transition-colors rounded-none"
 				aria-label={collapsed ? 'Expand' : 'Collapse'}
 			>
 				{movementIndex + 1}
 			</button>
 			{#if !isPreview}
-				<div class="flex flex-col gap-1">
-					<button
-						onclick={() => onMoveUp?.()}
-						disabled={isFirst}
-						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-						aria-label="Move up"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-						</svg>
-					</button>
-					<button
-						onclick={() => onMoveDown?.()}
-						disabled={isLast}
-						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-						aria-label="Move down"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-						</svg>
-					</button>
-				</div>
+				<button
+					onclick={() => onMoveDown?.()}
+					disabled={isLast}
+					class="w-10 h-6 flex items-center justify-center rounded-b-lg bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+					aria-label="Move down"
+					title="Move down"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+						<path fill-rule="evenodd" d="M12.53 16.28a.75.75 0 01-1.06 0l-7.5-7.5a.75.75 0 011.06-1.06L12 14.69l6.97-6.97a.75.75 0 011.06 1.06l-7.5 7.5z" clip-rule="evenodd" />
+					</svg>
+				</button>
 			{/if}
 		</div>
 		<button
 			onclick={() => (collapsed = !collapsed)}
-			class="flex-1 min-w-0 text-left hover:bg-gray-700/50 transition-colors rounded-lg p-2 -m-2"
+			class="flex-1 min-w-0 text-left hover:bg-gray-700/30 transition-colors rounded-lg p-2 -m-2"
 		>
 			<div class="flex items-center gap-2 flex-wrap">
 				<h3 class="font-semibold text-white">{movementName}</h3>
 				<span
-					class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-300"
+					class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700/80 text-gray-300"
 				>
 					{movementType}
 				</span>
@@ -295,32 +301,31 @@
 				<p class="text-gray-400 text-sm mt-1 line-clamp-2">{description}</p>
 			{/if}
 		</button>
-		<div class="flex items-center gap-2 flex-shrink-0">
+		<div class="flex items-center gap-1 flex-shrink-0">
 			{#if !isPreview}
 				<button
 					onclick={() => onRemove?.()}
-					class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-red-400 hover:border-red-400/50 transition-all"
+					class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-all"
 					aria-label="Remove movement"
+					title="Remove movement"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+						<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
 					</svg>
 				</button>
 			{/if}
 		<button
 			onclick={() => (collapsed = !collapsed)}
-			class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+			class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
 			aria-label={collapsed ? 'Expand' : 'Collapse'}
 		>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
 					viewBox="0 0 24 24"
-					stroke-width="1.5"
-					stroke="currentColor"
+					fill="currentColor"
 					class="w-5 h-5 transition-transform {collapsed ? 'rotate-180' : ''}"
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+					<path fill-rule="evenodd" d="M12.53 16.28a.75.75 0 01-1.06 0l-7.5-7.5a.75.75 0 011.06-1.06L12 14.69l6.97-6.97a.75.75 0 011.06 1.06l-7.5 7.5z" clip-rule="evenodd" />
 				</svg>
 			</button>
 		</div>
@@ -368,28 +373,28 @@
 				</div>
 			{/if}
 
-			<!-- Set Controller (Adjust Sets) -->
-			{#if !isPreview && isActive}
+		<!-- Set Controller (Adjust Sets) -->
+		{#if !isPreview}
 				<div class="px-2 pb-2 mb-2 flex items-center justify-between border-b border-gray-700/50">
 					<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Adjust Sets</span>
 					<div class="flex items-center gap-3">
-						<button
-							onclick={() => onAdjustSets?.('down')}
-							disabled={isAdjustingSets || sets <= 1}
-							class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
-							aria-label="Remove set"
-						>
+					<button
+						onclick={() => onAdjustSets?.('down')}
+						disabled={isAdjustingSets || sets <= 1}
+						class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
+						aria-label="Remove set"
+					>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
 							</svg>
 						</button>
 						<span class="text-sm font-bold text-blue-400 min-w-[3rem] text-center">{sets} Sets</span>
-						<button
-							onclick={() => onAdjustSets?.('up')}
-							disabled={isAdjustingSets}
-							class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
-							aria-label="Add set"
-						>
+					<button
+						onclick={() => onAdjustSets?.('up')}
+						disabled={isAdjustingSets}
+						class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
+						aria-label="Add set"
+					>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
 							</svg>
@@ -406,15 +411,16 @@
 					{@const showTimer = active && movementType === 'timed' && activeSetTimer > 0}
 					{@const setKey = getSetKey(item.setNumber!, item.side!)}
 					{@const completedValue = completedValues?.[setKey]}
-					<SetRow
-						id={getSetElementId(item.setNumber!, item.side!)}
-						setNumber={item.setNumber!}
-						{movementType}
-						targetValue={targetValue}
-						{weight}
-						{weightUnit}
-						{isBilateral}
-						side={item.side!}
+				<SetRow
+					id={getSetElementId(item.setNumber!, item.side!)}
+					setNumber={item.setNumber!}
+					{movementType}
+					targetValue={targetValue}
+					{weight}
+					{weightUnit}
+					{timePerRep}
+					{isBilateral}
+					side={item.side!}
 						previousStats={Array.isArray(previousStats) 
 							? previousStats.find(ps => ps.setNumber === item.setNumber && (ps.side || null) === (item.side || null)) 
 							: previousStats}
@@ -431,6 +437,7 @@
 						onComplete={(data) => handleSetComplete(data, item.setNumber!, item.side!)}
 						onUncomplete={(data) => handleUncompleteSet(data, item.setNumber!, item.side!)}
 						onSkip={active ? onSkipSet : undefined}
+						isPaused={isPaused}
 					/>
 				{:else}
 					{@const active = isRestActive(item)}
@@ -444,6 +451,7 @@
 						isCompleted={completed}
 						{isPreview}
 						onSkip={onSkipRest}
+						isPaused={isPaused}
 					/>
 				{/if}
 			{/each}

@@ -71,7 +71,7 @@
 			timed: 'time' as const,
 			reps: 'reps' as const,
 			weighted: 'reps' as const,
-			resistance: 'reps' as const
+			resistance_band: 'reps' as const
 		};
 
 		const defaultTarget = movement.metadata?.defaultTarget;
@@ -119,14 +119,14 @@
 			Timed: [],
 			Repetitions: [],
 			Weighted: [],
-			Resistance: []
+			'Resistance Band': []
 		};
 
 		for (const movement of data.movements) {
 			if (movement.type === 'timed') groups.Timed.push(movement);
 			else if (movement.type === 'reps') groups.Repetitions.push(movement);
 			else if (movement.type === 'weighted') groups.Weighted.push(movement);
-			else if (movement.type === 'resistance') groups.Resistance.push(movement);
+			else if (movement.type === 'resistance_band') groups['Resistance Band'].push(movement);
 		}
 
 		return groups;
@@ -367,7 +367,7 @@
 								</div>
 							</div>
 
-							{#if movement.type === 'weighted' || movement.type === 'resistance'}
+							{#if movement.type === 'weighted' || movement.type === 'resistance_band'}
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-11">
 									<div>
 										<label class="block text-xs text-gray-400 mb-1">Default Weight</label>

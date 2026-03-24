@@ -10,6 +10,7 @@
 	let type = $state(data.movement.type);
 	let defaultValue = $state(String(data.movement.metadata?.defaultTarget?.value || ''));
 	let defaultUnit = $state(data.movement.weightUnit || '');
+	let timePerRep = $state(data.movement.timePerRep ?? 3);
 	let isBilateral = $state(data.movement.isBilateral ?? false);
 	let switchSidesDuration = $state(data.movement.switchSidesDuration ?? 5);
 	let selectedFile = $state<File | null>(null);
@@ -22,7 +23,7 @@
 		{ value: 'timed', label: 'Timed', placeholder: '30', unit: 'seconds' },
 		{ value: 'reps', label: 'Repetitions', placeholder: '10', unit: null },
 		{ value: 'weighted', label: 'Weighted', placeholder: '10', unit: 'reps' },
-		{ value: 'resistance', label: 'Resistance', placeholder: '10', unit: 'reps' }
+		{ value: 'resistance_band', label: 'Resistance Band', placeholder: '10', unit: 'reps' }
 	];
 
 	const selectedType = $derived(movementTypes.find((t) => t.value === type));
@@ -228,12 +229,33 @@
 						bind:value={defaultValue}
 						min="1"
 						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-						placeholder={selectedType?.placeholder}
-						required
-					/>
-				</div>
+					placeholder={selectedType?.placeholder}
+					required
+				/>
+			</div>
 
-				{#if type === 'weighted' || type === 'resistance'}
+			{#if type !== 'timed'}
+				<div>
+					<label for="time_per_rep" class="block text-sm font-medium text-zinc-300 mb-2">
+						Seconds per Rep (Auto-advance)
+					</label>
+					<input
+						id="time_per_rep"
+						name="time_per_rep"
+						type="number"
+						bind:value={timePerRep}
+						min="1"
+						max="60"
+						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+						placeholder="3"
+					/>
+					<p class="text-xs text-zinc-500 mt-1">
+						Set to 0 to disable auto-advance
+					</p>
+				</div>
+			{/if}
+
+			{#if type === 'weighted' || type === 'resistance_band'}
 					<div>
 						<label for="weight_unit" class="block text-sm font-medium text-zinc-300 mb-2">
 							Default Weight Unit *

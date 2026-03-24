@@ -60,7 +60,9 @@ async function getPreviousStats(movementId: string, userId: string, currentPract
   return stats;
 }
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, depends }) => {
+  depends('app:practice');
+  
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, params.id),
     with: {
@@ -447,6 +449,12 @@ export const actions = {
       return fail(400, { error: "Missing routineMovementId" });
     }
 
+    // First delete any practice_data records referencing this routine_movement
+    await db.delete(practiceData).where(
+      eq(practiceData.routineMovementId, routineMovementId)
+    );
+
+    // Then delete the routine_movement
     await db.delete(routineMovements).where(eq(routineMovements.id, routineMovementId));
 
     return { success: true };
@@ -489,7 +497,7 @@ export const actions = {
       timed: 'time' as const,
       reps: 'reps' as const,
       weighted: 'reps' as const,
-      resistance: 'reps' as const
+      resistance_band: 'reps' as const
     };
 
     const defaultTarget = movement.metadata?.defaultTarget;

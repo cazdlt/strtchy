@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 	import PracticeHeader from '../../../components/practice/PracticeHeader.svelte';
@@ -9,6 +9,7 @@
 	import MovementBlock from '../../../components/practice/MovementBlock.svelte';
 	import PracticeFooter from '../../../components/practice/PracticeFooter.svelte';
 	import PracticeSettings from '../../../components/practice/PracticeSettings.svelte';
+	import PracticePauseBanner from '../../../components/practice/PracticePauseBanner.svelte';
 	import { formatTime } from '$lib/utils/formatting';
 	import { nanoid } from 'nanoid';
 
@@ -82,6 +83,9 @@
 	let isRemoving = $state<Record<string, boolean>>({});
 	let isAddingMovement = $state(false);
 
+	// Pause state
+	let isPaused = $state(false);
+
 	onMount(() => {
 		// Initialize completed/skipped sets from practice data
 		for (const pd of data.practice.practiceData) {
@@ -97,7 +101,9 @@
 
 		// Start duration timer
 		durationInterval = setInterval(() => {
-			duration++;
+			if (!isPaused) {
+				duration++;
+			}
 		}, 1000);
 
 		// Request wake lock
@@ -287,7 +293,7 @@
 		}
 
 		activeSetTimerInterval = setInterval(async () => {
-			if (!activeSetTimerPaused) {
+			if (!activeSetTimerPaused && !isPaused) {
 				activeSetTimer--;
 				lastActiveSetTimerValue = activeSetTimer;
 				if (activeSetTimer <= 0) {
@@ -528,9 +534,11 @@
 		scrollToRest();
 
 		restInterval = setInterval(() => {
-			restTimer--;
-			if (restTimer <= 0) {
-				finishRest();
+			if (!isPaused) {
+				restTimer--;
+				if (restTimer <= 0) {
+					finishRest();
+				}
 			}
 		}, 1000);
 	}
@@ -697,6 +705,7 @@
 
 	async function handleMoveMovement(routineMovementId: string, direction: 'up' | 'down') {
 		isReordering[routineMovementId] = true;
+		isPaused = true;
 		
 		const formData = new FormData();
 		formData.append('routineMovementId', routineMovementId);
@@ -708,8 +717,18 @@
 		});
 
 		if (response.ok) {
-			window.location.reload();
+			await invalidate('app:practice');
+			isReordering[routineMovementId] = false;
+			
+			// Wait for DOM update then scroll to the moved exercise
+			requestAnimationFrame(() => {
+				const element = document.getElementById(`movement-${routineMovementId}`);
+				if (element) {
+					element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+				}
+			});
 		} else {
+			isPaused = false;
 			alert('Failed to reorder movement');
 			isReordering[routineMovementId] = false;
 		}
@@ -719,6 +738,7 @@
 		if (!confirm('Remove this movement from the routine?')) return;
 		
 		isRemoving[routineMovementId] = true;
+		isPaused = true;
 		
 		const formData = new FormData();
 		formData.append('routineMovementId', routineMovementId);
@@ -729,8 +749,10 @@
 		});
 
 		if (response.ok) {
-			window.location.reload();
+			await invalidate('app:practice');
+			isRemoving[routineMovementId] = false;
 		} else {
+			isPaused = false;
 			alert('Failed to remove movement');
 			isRemoving[routineMovementId] = false;
 		}
@@ -738,6 +760,7 @@
 
 	async function handleAddMovement(movementId: string) {
 		isAddingMovement = true;
+		isPaused = true;
 		
 		const formData = new FormData();
 		formData.append('movementId', movementId);
@@ -748,8 +771,11 @@
 		});
 
 		if (response.ok) {
-			window.location.reload();
+			await invalidate('app:practice');
+			isAddingMovement = false;
+			showAddMovementModal = false;
 		} else {
+			isPaused = false;
 			alert('Failed to add movement');
 			isAddingMovement = false;
 		}
@@ -777,6 +803,10 @@
 		});
 
 		goto(`/practice/${practiceId}/summary`);
+	}
+
+	function togglePause() {
+		isPaused = !isPaused;
 	}
 
 	async function handleSkipSet() {
@@ -820,14 +850,14 @@
 			Timed: [],
 			Repetitions: [],
 			Weighted: [],
-			Resistance: []
+			'Resistance Band': []
 		};
 
 		for (const movement of data.allMovements) {
 			if (movement.type === 'timed') groups.Timed.push(movement);
 			else if (movement.type === 'reps') groups.Repetitions.push(movement);
 			else if (movement.type === 'weighted') groups.Weighted.push(movement);
-			else if (movement.type === 'resistance') groups.Resistance.push(movement);
+			else if (movement.type === 'resistance_band') groups['Resistance Band'].push(movement);
 		}
 
 		return groups;
@@ -864,6 +894,7 @@
 				onSkip={isActive ? skipRest : undefined}
 				isActive={isActive}
 				isCompleted={firstMovementCompleted}
+				isPaused={isPaused}
 			/>
 		{/if}
 
@@ -884,6 +915,7 @@
 			{@const movementPreviousStats = data.previousStatsMap[rm.id] || null}
 			{@const isSavingNotes = notesSavingStates[rm.id]}
 
+		<div id="movement-{rm.id}">
 			<MovementBlock
 				movementIndex={index}
 				routineMovementId={rm.id}
@@ -896,6 +928,7 @@
 				switchSidesDuration={rm.switchSidesDuration}
 				weight={rm.weight}
 				weightUnit={rm.weightUnit}
+				timePerRep={rm.movement.timePerRep}
 				notes={rm.notes || movementNotes[rm.id]}
 				previousStats={movementPreviousStats}
 				isActive={isActive}
@@ -926,7 +959,9 @@
 				onRemove={() => handleRemoveMovement(rm.id)}
 				isFirst={index === 0}
 				isLast={index === data.allRoutineMovements.length - 1}
+				isPaused={isPaused}
 			/>
+		</div>
 
 			{#if index < data.allRoutineMovements.length - 1}
 				{@const isRestActive = showRestTimer && restType === 'between-movements' && restingMovementIndex === index}
@@ -943,6 +978,7 @@
 					onSkip={isRestActive ? skipRest : undefined}
 					isActive={isRestActive}
 					isCompleted={isNextMovementStarted}
+					isPaused={isPaused}
 				/>
 			{/if}
 		{/each}
@@ -950,7 +986,8 @@
 		{#if !isReadOnly}
 			<button
 				onclick={() => showAddMovementModal = true}
-				class="w-full p-4 bg-gray-800/30 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 hover:bg-gray-800/50 transition-all flex items-center justify-center gap-2"
+				disabled={isPaused}
+				class="w-full p-4 bg-gray-800/30 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 hover:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-800/30 disabled:hover:text-gray-400 disabled:hover:border-gray-600 transition-all flex items-center justify-center gap-2"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -961,14 +998,20 @@
 	</main>
 
 	{#if !isReadOnly}
-		<PracticeFooter
-			completedSets={completedSetsCount}
-			{totalSets}
-			onSkipSet={settings.autoPlay ? handleSkipSet : undefined}
-			onCompleteWorkout={allSetsComplete ? handleCompleteWorkout : undefined}
-			isCompletingWorkout={isCompletingWorkout}
-		/>
+	<PracticeFooter
+		completedSets={completedSetsCount}
+		{totalSets}
+		onCompleteWorkout={allSetsComplete ? handleCompleteWorkout : undefined}
+		isCompletingWorkout={isCompletingWorkout}
+		onTogglePause={togglePause}
+		{isPaused}
+	/>
 	{/if}
+
+	<PracticePauseBanner
+		show={isPaused}
+		onResume={togglePause}
+	/>
 
 	<PracticeSettings
 		show={showSettings}
@@ -987,7 +1030,8 @@
 					<h2 class="text-lg font-semibold text-white">Add Movement</h2>
 					<button
 						onclick={() => showAddMovementModal = false}
-						class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+						disabled={isPaused}
+						class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-400 transition-all"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1011,7 +1055,8 @@
 										{#each movementsList as movement}
 											<button
 												onclick={() => handleAddMovement(movement.id)}
-												class="text-left p-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-emerald-500 hover:bg-gray-800/80 transition-all"
+												disabled={isPaused}
+												class="text-left p-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-emerald-500 hover:bg-gray-800/80 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-700 disabled:hover:bg-gray-800 transition-all"
 											>
 												<div class="font-medium text-sm text-white">{movement.name}</div>
 												{#if movement.description}

@@ -1,10 +1,11 @@
 <script lang="ts">
-	let { completedSets, totalSets, onSkipSet, onCompleteWorkout, isCompletingWorkout = false } = $props<{
+	let { completedSets, totalSets, onCompleteWorkout, isCompletingWorkout = false, onTogglePause = () => {}, isPaused = false } = $props<{
 		completedSets: number;
 		totalSets: number;
-		onSkipSet?: () => void;
 		onCompleteWorkout?: () => void;
 		isCompletingWorkout?: boolean;
+		onTogglePause?: () => void;
+		isPaused?: boolean;
 	}>();
 
 	const progress = $derived(totalSets > 0 ? (completedSets / totalSets) * 100 : 0);
@@ -27,13 +28,29 @@
 		</div>
 
 		<div class="flex gap-3">
+			<!-- Pause/Resume Button -->
+			<button
+				onclick={onTogglePause}
+				class="flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl {isPaused ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'} transition-all"
+				aria-label={isPaused ? 'Resume workout' : 'Pause workout'}
+			>
+				{#if isPaused}
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+						<path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" />
+					</svg>
+				{:else}
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+						<path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clip-rule="evenodd" />
+					</svg>
+				{/if}
+			</button>
 
 			<button
 				onclick={onCompleteWorkout}
-				disabled={!allComplete || isCompletingWorkout}
+				disabled={!allComplete || isCompletingWorkout || isPaused}
 				class="flex-1 bg-gradient-to-r {allComplete
 					? 'from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500'
-					: 'from-gray-700 to-gray-700 cursor-not-allowed'} text-white py-4 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+					: 'from-gray-700 to-gray-700 cursor-not-allowed'} text-white h-14 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 			>
 				{#if isCompletingWorkout}
 					<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

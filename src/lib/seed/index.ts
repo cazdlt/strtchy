@@ -49,6 +49,7 @@ interface SeedMovement {
   isBilateral?: boolean;
   switchSidesDuration?: number;
   weightUnit?: string;
+  timePerRep?: number;
 }
 
 interface SeedRoutine {
@@ -105,12 +106,13 @@ export async function seedDatabase() {
         id,
         name: m.name,
         description: m.description,
-        type: m.type as "timed" | "reps" | "weighted" | "resistance",
+        type: m.type as "timed" | "reps" | "weighted" | "resistance_band",
         illustrationPath: svgMap[m.illustrationKey as keyof typeof svgMap] || null,
         isCustom: false,
         weightUnit: m.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,
         isBilateral: m.isBilateral ?? false,
         switchSidesDuration: m.switchSidesDuration ?? 5,
+        timePerRep: m.timePerRep ?? (m.type !== 'timed' ? 3 : null),
         equipment: m.equipment ?? null,
         metadata: { defaultTarget: m.defaultTarget as { type: "time" | "reps"; value: number; unit?: string } },
         createdAt: new Date(),

@@ -31,14 +31,15 @@
       "switchSidesDuration": 5
     },
 
-    {
-      "name": "Elevación de Arco con Banda",
-      "description": "De pie, coloca una banda elástica cerrada alrededor de ambos tobillos. Separa los pies para tensar la banda. Lucha contra ella empujando los bordes externos de los pies contra el suelo y elevando el arco plantar. Mantén los dedos en el suelo.",
-      "type": "reps",
-      "illustrationKey": "generic",
-      "equipment": ["Banda elástica"],
-      "defaultTarget": { "type": "reps", "value": 10 }
-    },
+		{
+			"name": "Elevación de Arco con Banda",
+			"description": "De pie, coloca una banda elástica cerrada alrededor de ambos tobillos. Separa los pies para tensar la banda. Lucha contra ella empujando los bordes externos de los pies contra el suelo y elevando el arco plantar. Mantén los dedos en el suelo.",
+			"type": "reps",
+			"illustrationKey": "generic",
+			"equipment": ["Banda elástica"],
+			"defaultTarget": { "type": "reps", "value": 10 },
+			"timePerRep": 3
+		},
     {
       "name": "Puente de Glúteo a Una Pierna",
       "description": "Acostado boca arriba, una pierna flexionada apoyada en el suelo, la otra estirada al aire. Eleva la cadera empujando con el talón apoyada.",

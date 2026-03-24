@@ -21,6 +21,7 @@ import type { RequestEvent } from './$types';
 			const type = formData.get('type');
 			const defaultValue = formData.get('default_value');
 			const defaultUnit = formData.get('default_unit') || null;
+			const timePerRep = formData.get('time_per_rep');
 			const isBilateral = formData.get('is_bilateral') === 'on';
 			const switchSidesDuration = formData.get('switch_sides_duration');
 			const illustration = formData.get('illustration') as File | null;
@@ -47,10 +48,10 @@ import type { RequestEvent } from './$types';
 				return fail(409, { duplicate_name: true, existing_name: existingMovement.name });
 			}
 
-    			const validTypes = ['timed', 'reps', 'weighted', 'resistance'];
-    			if (!validTypes.includes(type)) {
-    				return fail(400, { invalid_type: true });
-    			}
+    		const validTypes = ['timed', 'reps', 'weighted', 'resistance_band'];
+    		if (!validTypes.includes(type)) {
+    			return fail(400, { invalid_type: true });
+    		}
 
 			const value = parseInt(defaultValue, 10);
 			if (isNaN(value) || value <= 0) {
@@ -81,24 +82,25 @@ import type { RequestEvent } from './$types';
     				illustrationPath = `/uploads/movements/${filename}`;
     			}
 
-    			const targetTypeMap = {
-    				timed: 'time' as const,
-    				reps: 'reps' as const,
-    				weighted: 'reps' as const,
-    				resistance: 'reps' as const
-    			};
+    		const targetTypeMap = {
+    			timed: 'time' as const,
+    			reps: 'reps' as const,
+    			weighted: 'reps' as const,
+    			resistance_band: 'reps' as const
+    		};
 
-     			await db.insert(movements).values({
-     				id: generateMovementId(String(name)),
-     				name: String(name),
+      			await db.insert(movements).values({
+      				id: generateMovementId(String(name)),
+      				name: String(name),
     				description: description ? String(description) : null,
-    				type: type as 'timed' | 'reps' | 'weighted' | 'resistance',
+    				type: type as 'timed' | 'reps' | 'weighted' | 'resistance_band',
     				illustrationPath,
     				isCustom: true,
     				userId: locals.user.id,
-    				weightUnit: (type === 'weighted' || type === 'resistance') && defaultUnit ? (defaultUnit as 'lbs' | 'kg' | 'bodyweight') : null,
+    				weightUnit: (type === 'weighted' || type === 'resistance_band') && defaultUnit ? (defaultUnit as 'lbs' | 'kg' | 'bodyweight') : null,
     				isBilateral,
     				switchSidesDuration: switchSidesDur,
+    				timePerRep: type !== 'timed' && timePerRep ? parseInt(String(timePerRep), 10) || 3 : null,
     				equipment,
     				metadata: {
     					defaultTarget: {

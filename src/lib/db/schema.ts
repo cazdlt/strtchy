@@ -64,13 +64,14 @@ export const movements = sqliteTable('movements', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
 	description: text('description'),
-	type: text('type', { enum: ['timed', 'reps', 'weighted', 'resistance'] }).notNull(),
+	type: text('type', { enum: ['timed', 'reps', 'weighted', 'resistance_band'] }).notNull(),
 	illustrationPath: text('illustration_path'),
 	isCustom: integer('is_custom', { mode: 'boolean' }).notNull().default(false),
 	userId: text('user_id').references(() => user.id),
 	weightUnit: text('weight_unit', { enum: ['lbs', 'kg', 'bodyweight'] }),
 	isBilateral: integer('is_bilateral', { mode: 'boolean' }).notNull().default(false),
 	switchSidesDuration: integer('switch_sides_duration').notNull().default(5),
+	timePerRep: integer('time_per_rep'), // seconds per rep for auto-advance (null for timed exercises)
 	equipment: text('equipment', { mode: 'json' }).$type<string[]>(),
 	metadata: text('metadata', { mode: 'json' }).$type<{
 		defaultTarget?: {

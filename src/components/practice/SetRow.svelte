@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { formatTime, getRelativeTime } from '$lib/utils/formatting';
 
 	let {
@@ -15,6 +16,7 @@
 		isSkipped = false,
 		completedValue = null,
 		isPreview = false,
+		timePerRep = null,
 		onComplete,
 		onUncomplete,
 		onSkip,
@@ -24,13 +26,15 @@
 		onToggleTimerPaused,
 		onResetTimer,
 		isCompleting = false,
-		id = ''
+		id = '',
+		isPaused = false
 	} = $props<{
 		setNumber: number;
-		movementType: 'timed' | 'reps' | 'weighted' | 'resistance';
+		movementType: 'timed' | 'reps' | 'weighted' | 'resistance_band';
 		targetValue: number;
 		weight?: number | null;
 		weightUnit?: string | null;
+		timePerRep?: number | null;
 		isBilateral?: boolean;
 		side?: 'left' | 'right' | null;
 		previousStats?: any;
@@ -49,25 +53,83 @@
 		onResetTimer?: () => void;
 		isCompleting?: boolean;
 		id?: string;
+		isPaused?: boolean;
 	}>();
 
 	let currentValue = $state(targetValue);
 	let currentWeight = $state(weight || 0);
 	let effortRating = $state(0);
+	let autoRepInterval: ReturnType<typeof setInterval> | null = $state(null);
+	let prevIsActive = $state(false);
+
+	// Initialize values only when transitioning from inactive to active (untrack to avoid circular deps)
+	$effect(() => {
+		const active = isActive; // read reactivity
+		if (active && !prevIsActive) {
+			untrack(() => {
+				if (!isCompleted && !isSkipped) {
+					currentValue = targetValue;
+					currentWeight = weight || 0;
+				}
+				prevIsActive = true;
+			});
+		} else if (!active) {
+			untrack(() => {
+				prevIsActive = false;
+			});
+		}
+	});
 
 	const displayValue = $derived((isCompleted || isSkipped) && completedValue !== null && completedValue !== undefined ? completedValue : currentValue);
 
+	// Auto-increment rep counter for rep-based exercises with timePerRep
 	$effect(() => {
-		currentValue = targetValue;
-		currentWeight = weight || 0;
+		if (isActive && !isCompleted && !isSkipped && !isPaused && timePerRep && timePerRep > 0 && movementType !== 'timed') {
+			// Start auto-increment timer (untrack interval check to avoid circular dep)
+			const hasInterval = untrack(() => autoRepInterval !== null);
+			if (!hasInterval) {
+				const interval = setInterval(() => {
+					untrack(() => {
+						if (currentValue < targetValue) {
+							handleValueChange(currentValue + 1);
+						} else {
+							// Reached target, auto-complete
+							if (autoRepInterval) {
+								clearInterval(autoRepInterval);
+								autoRepInterval = null;
+							}
+							handleComplete();
+						}
+					});
+				}, timePerRep * 1000);
+				autoRepInterval = interval;
+			}
+		} else {
+			// Clear interval when not active or completed
+			untrack(() => {
+				if (autoRepInterval) {
+					clearInterval(autoRepInterval);
+					autoRepInterval = null;
+				}
+			});
+		}
+
+		return () => {
+			if (autoRepInterval) {
+				clearInterval(autoRepInterval);
+				autoRepInterval = null;
+			}
+		};
 	});
 
 	function handleComplete() {
+		if (isPaused) return;
+
 		if (isCompleted || isSkipped) {
 			if (onUncomplete) {
 				onUncomplete({
 					value: currentValue,
-					weight: movementType === 'weighted' || movementType === 'resistance' ? currentWeight : null,
+					weight: movementType === 'weighted' || movementType === 'resistance_band' ? currentWeight : null,
 					weightUnit,
 					rating: effortRating
 				});
@@ -82,7 +144,7 @@
 		if (onComplete) {
 			onComplete({
 				value,
-				weight: movementType === 'weighted' || movementType === 'resistance' ? currentWeight : null,
+				weight: movementType === 'weighted' || movementType === 'resistance_band' ? currentWeight : null,
 				weightUnit,
 				rating: effortRating,
 				skipped: false
@@ -129,7 +191,7 @@
 					{formatTime(previousStats.value)} @ {previousStats.rating || '-'}
 				{:else if movementType === 'reps'}
 					{previousStats.value} reps @ {previousStats.rating || '-'}
-				{:else if movementType === 'weighted' || movementType === 'resistance'}
+				{:else if movementType === 'weighted' || movementType === 'resistance_band'}
 					{previousStats.weight}{previousStats.weightUnit} × {previousStats.value} @ {previousStats.rating || '-'}
 				{/if}
 				{#if previousStats.completedAt}
@@ -172,23 +234,25 @@
 					</div>
 				{:else}
 					<div class="flex items-center gap-2">
-						{#if !isPreview}
-							<button
-								onclick={() => handleValueChange(Math.max(0, currentValue - 5))}
-								class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
-							>
-								-
-							</button>
-						{/if}
-						<span class="text-2xl font-bold text-white w-16 text-center">{formatTime(displayValue)}</span>
-						{#if !isPreview}
-							<button
-								onclick={() => handleValueChange(currentValue + 5)}
-								class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
-							>
-								+
-							</button>
-						{/if}
+{#if !isPreview}
+						<button
+							onclick={() => handleValueChange(Math.max(0, currentValue - 5))}
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+						>
+							-
+						</button>
+					{/if}
+					<span class="text-2xl font-bold text-white w-16 text-center">{formatTime(displayValue)}</span>
+					{#if !isPreview}
+						<button
+							onclick={() => handleValueChange(currentValue + 5)}
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+						>
+							+
+						</button>
+					{/if}
 					</div>
 				{/if}
 				{:else if movementType === 'reps'}
@@ -196,7 +260,8 @@
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
 						>
 							-
 						</button>
@@ -205,18 +270,20 @@
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(currentValue + 1)}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
 						>
 							+
 						</button>
 					{/if}
 				</div>
-			{:else if movementType === 'weighted' || movementType === 'resistance'}
+			{:else if movementType === 'weighted' || movementType === 'resistance_band'}
 				<div class="flex items-center gap-2">
 					{#if !isPreview}
 						<button
 							onclick={() => handleWeightChange(Math.max(0, currentWeight - 5))}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
 						>
 							-
 						</button>
@@ -225,7 +292,8 @@
 					{#if !isPreview}
 						<button
 							onclick={() => handleWeightChange(currentWeight + 5)}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
 						>
 							+
 						</button>
@@ -235,7 +303,8 @@
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
 						>
 							-
 						</button>
@@ -244,7 +313,8 @@
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(currentValue + 1)}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded flex items-center justify-center text-white"
+							disabled={isPaused}
+							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
 						>
 							+
 						</button>
@@ -261,7 +331,8 @@
 						min="1"
 						max="10"
 						placeholder="-"
-						class="w-12 bg-gray-800 border border-gray-600 rounded text-center text-white text-sm py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						disabled={isPaused}
+						class="w-12 bg-gray-800 border border-gray-600 rounded text-center text-white text-sm py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 					/>
 				</div>
 			{/if}
@@ -273,15 +344,15 @@
 			{#if isActive && onSkip}
 				<button
 					onclick={onSkip}
-					disabled={isCompleting}
-					class="text-xs font-semibold py-1 px-3 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors text-gray-300 w-full text-center"
+					disabled={isCompleting || isPaused}
+					class="text-xs font-semibold py-1 px-3 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded-md transition-colors text-gray-300 w-full text-center"
 				>
 					Skip
 				</button>
 			{/if}
 			<button
 				onclick={handleComplete}
-				disabled={isCompleting}
+				disabled={isCompleting || isPaused}
 				class="px-4 h-11 rounded-lg flex items-center justify-center font-semibold transition-all shadow-sm {isCompleted
 					? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30'
 					: isSkipped

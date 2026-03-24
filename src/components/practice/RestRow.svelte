@@ -9,7 +9,8 @@
 		isCompleted = false,
 		isPreview = false,
 		onSkip,
-		id = ''
+		id = '',
+		isPaused = false
 	} = $props<{
 		label?: string;
 		duration: number;
@@ -19,6 +20,7 @@
 		isPreview?: boolean;
 		onSkip?: () => void;
 		id?: string;
+		isPaused?: boolean;
 	}>();
 
 	const progress = $derived(duration > 0 ? ((duration - (remainingTime || 0)) / duration) * 100 : 0);
@@ -66,7 +68,8 @@
 	{#if isActive}
 		<button
 			onclick={onSkip}
-			class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wide transition-colors relative z-10 shadow-sm"
+			disabled={isPaused}
+			class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 text-white px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wide transition-colors relative z-10 shadow-sm"
 		>
 			Skip
 		</button>
