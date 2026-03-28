@@ -51,8 +51,38 @@
 	);
 
 	$effect(() => {
-		if (form?.missingFields) {
-			console.log('Missing fields:', form.missingFields);
+		if (form?.submittedData) {
+			name = (form.submittedData.name as string) || data.routine.name;
+			description = (form.submittedData.description as string) || (data.routine.description || '');
+			restBetweenMovements = (form.submittedData.restBetweenMovements as string) || String(data.routine.restBetweenMovements || '30');
+			restBetweenSets = (form.submittedData.restBetweenSets as string) || String(data.routine.restBetweenSets || '15');
+			autoAdvance = form.submittedData.autoAdvance ?? (data.routine.autoAdvance ?? true);
+			audioEnabled = form.submittedData.audioEnabled ?? (data.routine.audioEnabled ?? true);
+			keepAwake = form.submittedData.keepAwake ?? (data.routine.keepAwake ?? true);
+			const movementsData = form.submittedData.movementsData as string;
+			if (movementsData && movementsData.trim() && movementsData !== '[]' && movementsData !== 'null') {
+				try {
+					const parsed = JSON.parse(movementsData);
+					if (Array.isArray(parsed) && parsed.length > 0) {
+						selectedMovements = parsed.map((m: any) => ({
+							movementId: m.movementId,
+							name: data.movements.find((mov: any) => mov.id === m.movementId)?.name || 'Unknown',
+							type: data.movements.find((mov: any) => mov.id === m.movementId)?.type || 'timed',
+							targetType: m.targetType,
+							targetValue: m.targetValue,
+							targetUnit: m.targetUnit,
+							weight: m.weight,
+							weightUnit: m.weightUnit,
+							sets: m.sets,
+							isBilateral: m.isBilateral ?? false,
+							switchSidesDuration: m.switchSidesDuration ?? 5,
+							notes: m.notes
+						}));
+					}
+				} catch (e) {
+					console.error('Failed to parse movements data:', e);
+				}
+			}
 		}
 	});
 
@@ -156,6 +186,12 @@
 	</header>
 
 	<div class="max-w-4xl mx-auto p-6 space-y-8 pb-32">
+		{#if form?.error}
+			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+				<strong>Error:</strong> {form.error}
+			</div>
+		{/if}
+
 		{#if form?.missing && form?.missingFields}
 			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
 				<strong>Missing required fields:</strong> {form.missingFields.join(', ')}
@@ -168,9 +204,9 @@
 			</div>
 		{/if}
 
-		{#if form?.no_movements}
+		{#if form?.duplicate_name}
 			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-				Please add at least one movement to your routine
+				A routine with the name "{form?.existing_name}" already exists
 			</div>
 		{/if}
 

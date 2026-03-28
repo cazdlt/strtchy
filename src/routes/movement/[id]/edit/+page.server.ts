@@ -1,10 +1,10 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { db } from '$lib/db';
 import { movements } from '$lib/db/schema';
-import { nanoid } from 'nanoid';
-import { writeFile, mkdir, unlink } from 'fs/promises';
-import { join } from 'path';
 import { eq } from 'drizzle-orm';
+import { updateMovement } from '$lib/db/helpers/movements';
+import { movementUpdateSchema } from '$lib/validation/schemas/movement';
+import { checkboxParser } from '$lib/validation/helpers/parsers';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -32,122 +32,89 @@ export const actions: Actions = {
 			return fail(404, { not_found: true });
 		}
 
+		const formData = await request.formData();
+
+		// Collect submitted data for error returns
+		const submittedData = {
+			name: formData.get('name'),
+			description: formData.get('description'),
+			type: formData.get('type'),
+			defaultValue: formData.get('default_value'),
+			defaultUnit: formData.get('default_unit'),
+			timePerRep: formData.get('time_per_rep'),
+			isBilateral: checkboxParser(formData.get('is_bilateral')),
+			switchSidesDuration: formData.get('switch_sides_duration'),
+			equipment: formData.get('equipment')
+		};
+
+		const parsed = movementUpdateSchema.safeParse({
+			...submittedData,
+			illustration: formData.get('illustration')
+		});
+
+		if (!parsed.success) {
+			// Map Zod errors to old error format for UI compatibility
+			const errorIssues = parsed.error.issues;
+
+			// Check for missing required fields
+			const missingFields = errorIssues.filter(issue =>
+				issue.message.includes('required') || issue.code === 'too_small'
+			);
+			if (missingFields.length > 0) {
+				return fail(400, { missing: true, submittedData });
+			}
+
+			// Check for invalid type
+			const typeError = errorIssues.find(issue => issue.path.includes('type'));
+			if (typeError) {
+				return fail(400, { invalid_type: true, submittedData });
+			}
+
+			// Check for invalid value
+			const valueError = errorIssues.find(issue => issue.path.includes('defaultValue'));
+			if (valueError) {
+				return fail(400, { invalid_value: true, submittedData });
+			}
+
+			// Check for invalid file
+			const fileError = errorIssues.find(issue => issue.path.includes('illustration'));
+			if (fileError) {
+				return fail(400, { invalid_file: true, submittedData });
+			}
+
+			return fail(400, { error: 'Validation failed', submittedData });
+		}
+
 		try {
-			const formData = await request.formData();
-
-			const name = formData.get('name');
-			const description = formData.get('description') || null;
-			const type = formData.get('type');
-			const defaultValue = formData.get('default_value');
-			const defaultUnit = formData.get('default_unit') || null;
-			const timePerRep = formData.get('time_per_rep');
-			const isBilateral = formData.get('is_bilateral') === 'on';
-			const switchSidesDuration = formData.get('switch_sides_duration');
-			const illustration = formData.get('illustration') as File | null;
 			const removeIllustration = formData.get('remove_illustration') === 'true';
-			const equipmentRaw = formData.get('equipment') || '';
+			const illustrationFile = parsed.data.illustration;
 
-			let equipment: string[] = [];
-			if (typeof equipmentRaw === 'string' && equipmentRaw.trim()) {
-				equipment = equipmentRaw.split(',').map(e => e.trim()).filter(Boolean);
-			}
-
-			if (!name || !type || !defaultValue) {
-				return fail(400, { missing: true });
-			}
-
-			if (typeof name !== 'string' || typeof type !== 'string' || typeof defaultValue !== 'string') {
-				return fail(400, { invalid: true });
-			}
-
-			const validTypes = ['timed', 'reps', 'weighted', 'resistance_band'];
-			if (!validTypes.includes(type)) {
-				return fail(400, { invalid_type: true });
-			}
-
-			const value = parseInt(defaultValue, 10);
-			if (isNaN(value) || value <= 0) {
-				return fail(400, { invalid_value: true });
-			}
-
-			const switchSidesDur = switchSidesDuration ? parseInt(String(switchSidesDuration), 10) : 5;
-			if (isNaN(switchSidesDur) || switchSidesDur < 0) {
-				return fail(400, { invalid_switch_sides_duration: true });
-			}
-
-			let illustrationPath = movement.illustrationPath;
-
-			if (removeIllustration && illustrationPath) {
-				const filepath = join(process.cwd(), 'static', illustrationPath);
-				try {
-					await unlink(filepath);
-				} catch (e) {
-					console.error('Failed to delete illustration:', e);
-				}
-				illustrationPath = null;
-			}
-
-			if (illustration && illustration.size > 0) {
-				const validTypesImg = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/webp'];
-				if (!validTypesImg.includes(illustration.type)) {
-					return fail(400, { invalid_file: true });
-				}
-
-				if (illustrationPath) {
-					const oldFilepath = join(process.cwd(), 'static', illustrationPath);
-					try {
-						await unlink(oldFilepath);
-					} catch (e) {
-						console.error('Failed to delete old illustration:', e);
-					}
-				}
-
-				const ext = illustration.name.split('.').pop()?.toLowerCase() || 'png';
-				const filename = `${nanoid()}.${ext}`;
-				const uploadDir = join(process.cwd(), 'static', 'uploads', 'movements');
-
-				await mkdir(uploadDir, { recursive: true });
-				const filepath = join(uploadDir, filename);
-				const bytes = await illustration.arrayBuffer();
-				await writeFile(filepath, Buffer.from(bytes));
-
-				illustrationPath = `/uploads/movements/${filename}`;
-			}
-
-			const targetTypeMap = {
-				timed: 'time' as const,
-				reps: 'reps' as const,
-				weighted: 'reps' as const,
-				resistance_band: 'reps' as const
-			};
-
-			await db
-				.update(movements)
-				.set({
-					name: String(name),
-					description: description ? String(description) : null,
-					type: type as 'timed' | 'reps' | 'weighted' | 'resistance_band',
-					illustrationPath,
-					weightUnit: (type === 'weighted' || type === 'resistance_band') && defaultUnit ? (defaultUnit as 'lbs' | 'kg' | 'bodyweight') : null,
-					isBilateral,
-					switchSidesDuration: switchSidesDur,
-					timePerRep: type !== 'timed' && timePerRep ? parseInt(String(timePerRep), 10) || 3 : null,
-					equipment,
-					metadata: {
-						defaultTarget: {
-							type: targetTypeMap[type as keyof typeof targetTypeMap],
-							value,
-							unit: undefined
-						}
-					}
-				})
-				.where(eq(movements.id, params.id));
+			await updateMovement(
+				params.id,
+				parsed.data,
+				locals.user.id,
+				illustrationFile || undefined,
+				removeIllustration
+			);
 
 			throw redirect(303, '/movements');
 		} catch (error) {
 			if (error && typeof error === 'object' && 'status' in error) {
 				throw error;
 			}
+
+			if (error instanceof Error) {
+				if (error.message.includes('already exists')) {
+					const match = error.message.match(/"([^"]+)"/);
+					const existingName = match ? match[1] : '';
+					return fail(409, { duplicate_name: true, existing_name: existingName, submittedData });
+				}
+				if (error.message.includes('not found')) {
+					return fail(404, { not_found: true, error: error.message });
+				}
+				return fail(400, { error: error.message, submittedData });
+			}
+
 			console.error('Error updating movement:', error);
 			return fail(500, { error: 'Failed to update movement' });
 		}

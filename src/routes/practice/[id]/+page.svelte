@@ -1012,7 +1012,7 @@
 
 	<!-- Wake Lock Warning -->
 	{#if wakeLockError && hasStarted}
-		<div class="fixed top-20 left-4 right-4 z-40" onclick={handleUserInteraction}>
+		<div class="fixed top-20 left-4 right-4 z-40" onclick={handleUserInteraction} onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && handleUserInteraction()} role="button" tabindex="0">
 			<div class="bg-yellow-900/80 border border-yellow-600 rounded-xl p-4 flex items-center justify-between cursor-pointer">
 				<div class="flex items-center gap-3">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-yellow-400">

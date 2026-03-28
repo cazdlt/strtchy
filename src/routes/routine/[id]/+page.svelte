@@ -71,6 +71,14 @@
 						<span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Sets</span>
 						<span class="text-lg font-bold font-mono text-blue-400">{totalSets}</span>
 					</div>
+					<div class="bg-gray-900/50 border border-white/5 rounded-xl p-3 flex flex-col items-center justify-center min-w-[100px]">
+						<span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Rest (sets)</span>
+						<span class="text-lg font-bold font-mono text-amber-400">{data.routine.restBetweenSets}s</span>
+					</div>
+					<div class="bg-gray-900/50 border border-white/5 rounded-xl p-3 flex flex-col items-center justify-center min-w-[100px]">
+						<span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Rest (mvmt)</span>
+						<span class="text-lg font-bold font-mono text-orange-400">{data.routine.restBetweenMovements}s</span>
+					</div>
 				</div>
 			</div>
 
@@ -89,6 +97,14 @@
 							<path d="M10 3.75a.75.75 0 00-1.264-.546L5.203 6.48H3.5a1.75 1.75 0 00-1.75 1.75v3.5c0 .966.784 1.75 1.75 1.75h1.703l3.533 3.276a.75.75 0 001.264-.546V3.75z" />
 						</svg>
 						Audio
+					</span>
+				{/if}
+				{#if data.routine.keepAwake}
+					<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-bold">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
+							<path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.403a.75.75 0 10-1.06 1.061l1.061 1.06a.75.75 0 101.061-1.06l-1.061-1.061zM6.464 14.596a.75.75 0 101.06-1.061l-1.06-1.061a.75.75 0 00-1.061 1.06l1.061 1.061zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.061l-1.061-1.06a.75.75 0 10-1.061 1.06l1.061 1.061zM5.403 6.464a.75.75 0 001.061 1.06l1.06-1.061a.75.75 0 00-1.06-1.061l-1.061 1.06z" />
+						</svg>
+						Keep Awake
 					</span>
 				{/if}
 				{#if data.equipment && data.equipment.length > 0}

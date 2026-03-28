@@ -163,6 +163,12 @@
 	</header>
 
 	<div class="max-w-4xl mx-auto p-6 space-y-8 pb-32">
+		{#if form?.error}
+			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+				<strong>Error:</strong> {form.error}
+			</div>
+		{/if}
+
 		{#if form?.missing && form?.missingFields}
 			<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
 				<strong>Missing required fields:</strong> {form.missingFields.join(', ')}
