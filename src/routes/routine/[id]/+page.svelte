@@ -5,9 +5,7 @@
 	import PracticeHeader from '../../../components/practice/PracticeHeader.svelte';
 	import MovementBlock from '../../../components/practice/MovementBlock.svelte';
 
-	let { data }: { data: PageData } = $props();
-
-	let showConfirm = $state(false);
+ let { data }: { data: PageData } = $props();
 
 	const totalSets = $derived(
 		data.routine.movements.reduce((sum: number, rm: any) => {
@@ -136,31 +134,12 @@
 	<div class="fixed bottom-0 left-0 right-0 p-6 bg-gray-950/80 border-t border-white/5 backdrop-blur-xl z-30">
 		<div class="max-w-4xl mx-auto">
 			<form method="POST" action="?/startPractice" use:enhance>
-				{#if showConfirm}
-					<div class="flex gap-4 animate-in slide-in-from-bottom-2 duration-300">
-						<button
-							type="button"
-							onclick={() => (showConfirm = false)}
-							class="flex-1 bg-gray-800 hover:bg-gray-700 text-white h-14 rounded-2xl font-bold transition-all active:scale-95"
-						>
-							Cancel
-						</button>
-						<button
-							type="submit"
-							class="flex-[2] bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white h-14 rounded-2xl font-bold shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
-						>
-							Yes, Let's Go!
-						</button>
-					</div>
-				{:else}
-					<button
-						type="button"
-						onclick={() => (showConfirm = true)}
-						class="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] hover:bg-right text-white h-16 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98]"
-					>
-						Start Practice
-					</button>
-				{/if}
+				<button
+					type="submit"
+					class="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] hover:bg-right text-white h-16 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98]"
+				>
+					Start Practice
+				</button>
 			</form>
 		</div>
 	</div>

@@ -50,6 +50,7 @@
 	let activeSetTimerInterval = $state<ReturnType<typeof setInterval> | null>(null);
 	let activeSetTimerPaused = $state(false);
 	let lastActiveSetTimerValue = $state(0);
+	let countdownPlayedForSet = $state<string | null>(null);
 
 	// Practice data state
 	let completedSets = $state<Set<string>>(new Set());
@@ -77,6 +78,10 @@
 
 	// Wake lock
 	let wakeLock = $state<WakeLockSentinel | null>(null);
+	let wakeLockError = $state<string | null>(null);
+
+	// Practice start state
+	let hasStarted = $state(false);
 
 	// Read-only check
 	// svelte-ignore state_referenced_locally
@@ -104,30 +109,10 @@
 		completedSets = new Set(completedSets);
 		skippedSets = new Set(skippedSets);
 
-		// Start duration timer
-		durationInterval = setInterval(() => {
-			if (!isPaused) {
-				duration++;
-			}
-		}, 1000);
-
-		// Request wake lock
-		if (settings.keepAwake && 'wakeLock' in navigator) {
-			navigator.wakeLock.request('screen').then((lock) => {
-				wakeLock = lock;
-			}).catch((err) => {
-				console.error('Wake lock error:', err);
-			});
-		}
-
-		// Start initial rest if auto-play is enabled
-		if (settings.autoPlay && data.practice.routine.restBetweenMovements > 0) {
-			const firstMovement = data.allRoutineMovements[0];
-			startRestTimer(
-				data.practice.routine.restBetweenMovements,
-				'between-movements',
-				firstMovement.movement.name
-			);
+		// Auto-start if practice has already started (existing practice with data)
+		if (data.practice.practiceData.length > 0) {
+			hasStarted = true;
+			startPractice(false);
 		}
 	});
 
@@ -148,6 +133,66 @@
 			wakeLock.release();
 		}
 	});
+
+	function startPractice(playStartSound = true) {
+		// Request wake lock (requires user gesture context)
+		if (settings.keepAwake && 'wakeLock' in navigator) {
+			navigator.wakeLock.request('screen').then((lock) => {
+				wakeLock = lock;
+				wakeLockError = null;
+				
+				// Listen for release (e.g., when tab loses focus)
+				lock.addEventListener('release', () => {
+					wakeLock = null;
+				});
+			}).catch((err) => {
+				console.error('Wake lock error:', err);
+				wakeLockError = 'Screen may turn off. Tap to re-enable.';
+			});
+		}
+
+		// Start duration timer
+		durationInterval = setInterval(() => {
+			if (!isPaused) {
+				duration++;
+			}
+		}, 1000);
+
+		// Start initial rest if auto-play is enabled
+		if (settings.autoPlay && data.practice.routine.restBetweenMovements > 0) {
+			const firstMovement = data.allRoutineMovements[0];
+			startRestTimer(
+				data.practice.routine.restBetweenMovements,
+				'between-movements',
+				firstMovement.movement.name
+			);
+		}
+
+		// Initialize audio context
+		if (settings.audioEnabled && !audioContext && 'AudioContext' in window) {
+			audioContext = new AudioContext();
+		}
+
+		// Play start sound if requested
+		if (playStartSound && settings.audioEnabled) {
+			playSound('setStart');
+		}
+	}
+
+	// Handle re-requesting wake lock when user interacts
+	function handleUserInteraction() {
+		if (settings.keepAwake && !wakeLock && 'wakeLock' in navigator) {
+			navigator.wakeLock.request('screen').then((lock) => {
+				wakeLock = lock;
+				wakeLockError = null;
+				lock.addEventListener('release', () => {
+					wakeLock = null;
+				});
+			}).catch((err) => {
+				console.error('Wake lock re-request error:', err);
+			});
+		}
+	}
 
 	const totalSets = $derived(
 		data.allRoutineMovements.reduce((sum: number, rm: any) => {
@@ -292,6 +337,7 @@
 		activeSetTimer = 0;
 		lastActiveSetTimerValue = 0;
 		activeSetTimerPaused = false;
+		countdownPlayedForSet = null;
 
 		if (activeSetTimerInterval) {
 			clearInterval(activeSetTimerInterval);
@@ -301,11 +347,21 @@
 			if (!activeSetTimerPaused && !isPaused) {
 				activeSetTimer++;
 				lastActiveSetTimerValue = activeSetTimer;
+
+				// Play countdown at 3-2-1 seconds remaining
+				const remaining = duration - activeSetTimer;
+				if (remaining <= 3 && remaining > 0 && countdownPlayedForSet !== currentActiveSetKey) {
+					playCountdown();
+					countdownPlayedForSet = currentActiveSetKey;
+				}
+
 				if (activeSetTimer >= duration) {
 					if (activeSetTimerInterval) {
 						clearInterval(activeSetTimerInterval);
 						activeSetTimerInterval = null;
 					}
+					// Small delay to let countdown sound finish
+					await new Promise(r => setTimeout(r, 500));
 					playSound('setComplete');
 					isAutoCompletingSet = true;
 					await onComplete();
@@ -541,6 +597,10 @@
 		restInterval = setInterval(() => {
 			if (!isPaused) {
 				restTimer--;
+				// Play countdown at 3-2-1 seconds remaining
+				if (restTimer === 3) {
+					playCountdown();
+				}
 				if (restTimer <= 0) {
 					finishRest();
 				}
@@ -874,6 +934,94 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
+	<!-- Start Practice Overlay -->
+	{#if !hasStarted && !isReadOnly}
+		<div class="fixed inset-0 bg-gray-950/95 z-50 flex flex-col items-center justify-center p-6">
+			<div class="text-center max-w-md">
+				<div class="mb-8">
+					<div class="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-blue-500/30">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-12 h-12 text-white">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+						</svg>
+					</div>
+					<h1 class="text-3xl font-bold text-white mb-2">{data.practice.routine.name}</h1>
+					<p class="text-gray-400">Ready to begin?</p>
+				</div>
+				
+				<div class="space-y-4 mb-8">
+					<div class="flex items-center justify-center gap-6 text-sm text-gray-400">
+						<div class="flex items-center gap-2">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75Z" />
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+							</svg>
+							<span>{totalSets} sets</span>
+						</div>
+						{#if settings.autoPlay}
+							<div class="flex items-center gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+								</svg>
+								<span>Auto-play on</span>
+							</div>
+						{/if}
+						{#if settings.keepAwake}
+							<div class="flex items-center gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+								</svg>
+								<span>Screen awake</span>
+							</div>
+						{/if}
+					</div>
+					
+					{#if data.equipment.length > 0}
+						<div class="mt-6 pt-6 border-t border-gray-800">
+							<div class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-3">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+								</svg>
+								<span>Equipment needed</span>
+							</div>
+							<div class="flex flex-wrap justify-center gap-2">
+								{#each data.equipment as item}
+									<span class="px-3 py-1.5 bg-gray-800/80 border border-gray-700 rounded-lg text-sm text-gray-300">
+										{item}
+									</span>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
+				
+				<button
+					onclick={() => {
+						hasStarted = true;
+						startPractice();
+					}}
+					class="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] hover:bg-right text-white h-16 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98]"
+				>
+					Start Practice
+				</button>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Wake Lock Warning -->
+	{#if wakeLockError && hasStarted}
+		<div class="fixed top-20 left-4 right-4 z-40" onclick={handleUserInteraction}>
+			<div class="bg-yellow-900/80 border border-yellow-600 rounded-xl p-4 flex items-center justify-between cursor-pointer">
+				<div class="flex items-center gap-3">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-yellow-400">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+					</svg>
+					<span class="text-yellow-200 text-sm">{wakeLockError}</span>
+				</div>
+				<button class="text-yellow-400 hover:text-yellow-200 text-sm font-medium">Tap to fix</button>
+			</div>
+		</div>
+	{/if}
+
 	<PracticeHeader
 		routineName={data.practice.routine.name}
 		{totalSets}

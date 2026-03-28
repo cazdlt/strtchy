@@ -1,13 +1,13 @@
 import { db } from '$lib/db';
 import { routines, routineMovements, practiceLogs, practiceData } from '$lib/db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, isNull } from 'drizzle-orm';
 import type { PageData, ActionsFailure, RequestEvent } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { nanoid } from 'nanoid';
 import { calculateRoutineDuration } from '$lib/utils/formatting';
 
 // Helper to get previous workout stats for a movement
-async function getPreviousStats(movementId: string, userId: string) {
+async function getPreviousStats(movementId: string, userId: string | null | undefined) {
 	// Find the most recent practice log that has data for this movement
 	const lastPracticeData = await db
 		.select({
@@ -18,7 +18,7 @@ async function getPreviousStats(movementId: string, userId: string) {
 		.innerJoin(routineMovements, eq(practiceData.routineMovementId, routineMovements.id))
 		.where(
 			and(
-				eq(practiceLogs.userId, userId),
+				userId ? eq(practiceLogs.userId, userId) : isNull(practiceLogs.userId),
 				eq(routineMovements.movementId, movementId)
 			)
 		)
@@ -87,12 +87,10 @@ export async function load({ params, locals }: { params: { id: string }; locals:
 
 	// Fetch previous workout stats for each movement
 	const previousStatsMap: Record<string, any> = {};
-	if (locals.user?.id) {
-		for (const rm of routine.movements) {
-			const prevStats = await getPreviousStats(rm.movementId, locals.user.id);
-			if (prevStats) {
-				previousStatsMap[rm.id] = prevStats;
-			}
+	for (const rm of routine.movements) {
+		const prevStats = await getPreviousStats(rm.movementId, locals.user?.id);
+		if (prevStats) {
+			previousStatsMap[rm.id] = prevStats;
 		}
 	}
 

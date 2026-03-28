@@ -7,13 +7,13 @@ import {
   movements,
   user,
 } from "$lib/db/schema";
-import { eq, desc, and, sql, isNotNull, ne } from "drizzle-orm";
+import { eq, desc, and, sql, isNotNull, ne, isNull } from "drizzle-orm";
 import { fail, redirect } from "@sveltejs/kit";
 import type { PageData, PageServerLoad, RequestEvent } from "./$types";
 import { nanoid } from "nanoid";
 
 // Helper to get previous workout stats for a movement
-async function getPreviousStats(movementId: string, userId: string, currentPracticeId: string) {
+async function getPreviousStats(movementId: string, userId: string | null | undefined, currentPracticeId: string) {
   // Find the most recent practice log that has data for this movement (excluding the current practice)
   const lastPracticeData = await db
     .select({
@@ -24,7 +24,7 @@ async function getPreviousStats(movementId: string, userId: string, currentPract
     .innerJoin(routineMovements, eq(practiceData.routineMovementId, routineMovements.id))
     .where(
       and(
-        eq(practiceLogs.userId, userId),
+        userId ? eq(practiceLogs.userId, userId) : isNull(practiceLogs.userId),
         eq(routineMovements.movementId, movementId),
         ne(practiceLogs.id, currentPracticeId)
       )
@@ -110,12 +110,10 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
 
   // Fetch previous workout stats for each movement
   const previousStatsMap: Record<string, any> = {};
-  if (locals.user?.id) {
-    for (const rm of allRoutineMovements) {
-      const prevStats = await getPreviousStats(rm.movementId, locals.user.id, params.id);
-      if (prevStats) {
-        previousStatsMap[rm.id] = prevStats;
-      }
+  for (const rm of allRoutineMovements) {
+    const prevStats = await getPreviousStats(rm.movementId, locals.user?.id, params.id);
+    if (prevStats) {
+      previousStatsMap[rm.id] = prevStats;
     }
   }
 
@@ -131,6 +129,16 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
   // Get all available movements for the add modal
   const allMovements = await db.select().from(movements).orderBy(movements.name);
 
+  // Collect all equipment from movements
+  const allEquipment = new Set<string>();
+  for (const rm of allRoutineMovements) {
+    if (rm.movement.equipment && Array.isArray(rm.movement.equipment)) {
+      for (const item of rm.movement.equipment) {
+        allEquipment.add(item);
+      }
+    }
+  }
+
   return {
     practice,
     allRoutineMovements,
@@ -142,6 +150,7 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     completedSets: completedSetsCount,
     setOverrides: overrides,
     allMovements,
+    equipment: Array.from(allEquipment).sort(),
   };
 };
 

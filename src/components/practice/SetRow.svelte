@@ -189,11 +189,11 @@
 		{#if previousStats}
 			<div class="text-sm text-gray-500 mb-1">
 				{#if movementType === 'timed'}
-					{formatTime(previousStats.value)} @ {previousStats.rating || '-'}
+					{formatTime(previousStats.value)}{#if previousStats.rating} @ {previousStats.rating}{/if}
 				{:else if movementType === 'reps'}
-					{previousStats.value} reps @ {previousStats.rating || '-'}
+					{previousStats.value} reps{#if previousStats.rating} @ {previousStats.rating}{/if}
 				{:else if movementType === 'weighted' || movementType === 'resistance_band'}
-					{previousStats.weight}{previousStats.weightUnit} × {previousStats.value} @ {previousStats.rating || '-'}
+					{previousStats.weight}{previousStats.weightUnit} × {previousStats.value}{#if previousStats.rating} @ {previousStats.rating}{/if}
 				{/if}
 				{#if previousStats.completedAt}
 					<span class="ml-2">({getRelativeTime(new Date(previousStats.completedAt))})</span>
