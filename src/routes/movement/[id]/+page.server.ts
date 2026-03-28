@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import type { PageData } from './$types';
 import { error } from '@sveltejs/kit';
 
-export async function load({ params }: { params: { id: string } }) {
+export async function load({ params, locals }: { params: { id: string }; locals: App.Locals }) {
 	const movement = await db.query.movements.findFirst({
 		where: eq(movements.id, params.id)
 	});
@@ -14,6 +14,7 @@ export async function load({ params }: { params: { id: string } }) {
 	}
 
 	return {
-		movement
+		movement,
+		user: locals.user
 	};
 }

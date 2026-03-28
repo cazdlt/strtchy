@@ -13,8 +13,6 @@ export const user = sqliteTable('user', {
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 	passwordHash: text('password_hash'),
 	preferences: text('preferences', { mode: 'json' }).$type<{
-		audioVolume?: number;
-		defaultRestTime?: number;
 		autoAdvance?: boolean;
 		audioEnabled?: boolean;
 		keepAwake?: boolean;

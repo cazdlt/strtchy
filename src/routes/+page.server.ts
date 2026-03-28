@@ -1,5 +1,5 @@
 import { db } from '$lib/db';
-import { routines, practiceLogs } from '$lib/db/schema';
+import { routines, practiceLogs, movements } from '$lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { formatDuration, getRelativeTime } from '$lib/utils/formatting';
 import { auth } from '$lib/auth';
@@ -8,6 +8,9 @@ import { redirect } from '@sveltejs/kit';
 export async function load({ locals }: { locals: App.Locals }) {
 	// Get all routines
 	const allRoutines = await db.select().from(routines).orderBy(desc(routines.createdAt));
+
+	// Get movements for home page preview
+	const allMovements = await db.select().from(movements).orderBy(desc(movements.createdAt));
 
 	// Get recent practices
 	const recentPractices = await db
@@ -26,6 +29,7 @@ export async function load({ locals }: { locals: App.Locals }) {
 	return {
 		user: locals.user,
 		routines: allRoutines,
+		movements: allMovements,
 		recentPractices: recentPractices.map((p) => ({
 			...p,
 			startedAt: getRelativeTime(p.startedAt),

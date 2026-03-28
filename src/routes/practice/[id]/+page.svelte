@@ -940,6 +940,16 @@
 	<!-- Start Practice Overlay -->
 	{#if !hasStarted && !isReadOnly}
 		<div class="fixed inset-0 bg-gray-950/95 z-50 flex flex-col items-center justify-center p-6">
+			<!-- Back button -->
+			<button
+				onclick={() => goto(`/routine/${routineId}`)}
+				class="absolute top-4 left-4 p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all active:scale-95 z-50"
+				aria-label="Back to routine"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+				</svg>
+			</button>
 			<div class="text-center max-w-md">
 				<div class="mb-8">
 					<div class="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-blue-500/30">

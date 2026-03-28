@@ -21,6 +21,13 @@ export const auth = betterAuth({
 				type: 'string',
 				required: false
 			}
+		},
+		deleteUser: {
+			enabled: true,
+			beforeDelete: async (userData) => {
+				// Custom cleanup before deletion if needed
+				console.log('Deleting user:', userData.id);
+			}
 		}
 	},
 	advanced: {

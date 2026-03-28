@@ -1,86 +1,38 @@
 <script lang="ts">
 	import { formatDuration } from '$lib/utils/formatting';
 	import type { PageData } from './$types';
-	import logo from '$lib/assets/logo.svg';
+	import PageHeader from '../components/ui/PageHeader.svelte';
 
 	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-	<title>Strtchy - Routines</title>
+	<title>Strtchy - Your Recovery Companion</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
-<header class="p-6 border-b border-gray-800">
-	<div class="max-w-4xl mx-auto flex items-center justify-between">
-		<div class="flex items-center gap-4">
-			<img src={logo} alt="Strtchy Logo" class="h-10" />
-			<div>
-				<p class="text-gray-400 text-sm">Your recovery companion</p>
-			</div>
-		</div>
-		<div class="flex items-center gap-3">
-			<a
-				href="/routines"
-				class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
-			>
-				Routines
-			</a>
-			{#if data.user}
-				<form method="POST" action="?/logout">
-					<button
-						type="submit"
-						class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
-					>
-						Log out
-					</button>
-				</form>
-			{:else}
-				<a
-					href="/login"
-					class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium"
-				>
-					Sign in
-				</a>
-			{/if}
-		</div>
-	</div>
-</header>
+	<PageHeader user={data.user} showNav={false} />
 
-  	<main class="max-w-4xl mx-auto p-6">
-		<div class="mb-8">
-			<h2 class="text-xl font-semibold mb-4">Browse</h2>
-			<a
-				href="/movements"
-				class="flex items-center gap-4 p-6 bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-700/50 rounded-xl hover:border-orange-600/50 hover:from-orange-600/30 hover:to-red-600/30 transition-all"
-			>
-				<div class="text-4xl">📚</div>
-				<div>
-					<h3 class="text-lg font-semibold mb-1">View All Movements</h3>
-					<p class="text-gray-400 text-sm">Browse your movement library</p>
-				</div>
-			</a>
-		</div>
-
+	<main class="max-w-4xl mx-auto p-6">
 		{#if data.user}
 			<div class="mb-8">
 				<h2 class="text-xl font-semibold mb-4">Create</h2>
-				<div class="grid gap-4 md:grid-cols-2">
-					<a
-						href="/movement/create"
-						class="flex items-center gap-4 p-6 bg-gradient-to-br from-emerald-600/20 to-emerald-800/20 border border-emerald-700/50 rounded-xl hover:border-emerald-600/50 hover:from-emerald-600/30 hover:to-emerald-800/30 transition-all"
-					>
-						<div class="text-4xl">🏃</div>
+				<div class="grid gap-4 md:grid-cols-2 min-w-0">
+				<a
+					href="/movement/create"
+					class="flex items-center gap-3 p-4 bg-gradient-to-br from-emerald-600/20 to-emerald-800/20 border border-emerald-700/50 rounded-xl hover:border-emerald-600/50 hover:from-emerald-600/30 hover:to-emerald-800/30 transition-all min-w-0"
+				>
+					<div class="text-2xl flex-shrink-0">🏃</div>
 						<div>
 							<h3 class="text-lg font-semibold mb-1">Create Movement</h3>
 							<p class="text-gray-400 text-sm">Add a custom movement to your library</p>
 						</div>
 					</a>
-					<a
-						href="/routine/create"
-						class="flex items-center gap-4 p-6 bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-700/50 rounded-xl hover:border-blue-600/50 hover:from-blue-600/30 hover:to-purple-600/30 transition-all"
-					>
-						<div class="text-4xl">📋</div>
+				<a
+					href="/routine/create"
+					class="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-700/50 rounded-xl hover:border-blue-600/50 hover:from-blue-600/30 hover:to-purple-600/30 transition-all min-w-0"
+				>
+					<div class="text-2xl flex-shrink-0">📋</div>
 						<div>
 							<h3 class="text-lg font-semibold mb-1">Create Routine</h3>
 							<p class="text-gray-400 text-sm">Build a custom routine from movements</p>
@@ -90,28 +42,89 @@
 			</div>
 		{/if}
 
-  		<div class="mb-8">
-  			<div class="flex items-center justify-between mb-4">
-  				<h2 class="text-xl font-semibold">Ready Routines</h2>
-  				<a href="/routines" class="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
-  					View All Routines →
-  				</a>
-  			</div>
-			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+		<div class="mb-8">
+			<div class="flex items-center justify-between mb-4">
+				<h2 class="text-xl font-semibold">Ready Routines</h2>
+				<a
+					href="/routines"
+					class="text-sm text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
+				>
+					Browse all
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="w-4 h-4"
+						width="16"
+						height="16"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+					</svg>
+				</a>
+			</div>
+			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 min-w-0">
 				{#each data.routines.slice(0, 6) as routine}
 					<a
 						href="/routine/{routine.id}"
-						class="block p-6 bg-gray-800/50 border border-gray-700 rounded-xl hover:border-gray-600 hover:bg-gray-800 transition-all"
+						class="block p-5 bg-gray-800/50 border border-gray-700 rounded-xl hover:border-gray-600 hover:bg-gray-800 transition-all"
 					>
-						<h3 class="text-lg font-semibold mb-2">{routine.name}</h3>
-						<p class="text-gray-400 text-sm mb-4">{routine.description}</p>
-						<div class="flex gap-4 text-xs text-gray-500">
-							{#if routine.restBetweenMovements}
-								<span>Rest: {routine.restBetweenMovements}s</span>
+						<div class="flex items-start justify-between mb-2">
+							<h3 class="font-semibold">{routine.name}</h3>
+							{#if routine.isCustom}
+								<span class="text-xs px-2 py-0.5 bg-purple-900/30 text-purple-400 rounded">Custom</span>
 							{/if}
-							{#if routine.autoAdvance}
-								<span>Auto-play</span>
-							{/if}
+						</div>
+						{#if routine.description}
+							<p class="text-gray-400 text-sm mb-3 line-clamp-2">{routine.description}</p>
+						{/if}
+					</a>
+				{/each}
+			</div>
+		</div>
+
+		<div class="mb-8">
+			<div class="flex items-center justify-between mb-4">
+				<h2 class="text-xl font-semibold">Movement Library</h2>
+				<a
+					href="/movements"
+					class="text-sm text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
+				>
+					Browse all
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="w-4 h-4"
+						width="16"
+						height="16"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+					</svg>
+				</a>
+			</div>
+			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 min-w-0">
+				{#each data.movements.slice(0, 6) as movement}
+					<a
+						href="/movement/{movement.id}"
+						class="flex items-center gap-3 p-4 bg-gray-800/50 border border-gray-700 rounded-xl hover:border-gray-600 hover:bg-gray-800 transition-all"
+					>
+						{#if movement.illustrationPath}
+							<img src={movement.illustrationPath} alt={movement.name} class="w-12 h-12 object-contain" />
+						{:else}
+							<div class="w-12 h-12 flex items-center justify-center bg-gray-700/30 rounded-lg text-gray-600 text-xl">🏃</div>
+						{/if}
+						<div class="flex-1 min-w-0">
+							<div class="flex items-center gap-2">
+								<span class="font-medium truncate">{movement.name}</span>
+								{#if movement.isBilateral}
+									<span class="text-xs px-1.5 py-0.5 bg-blue-900/30 text-blue-400 rounded">L/R</span>
+								{/if}
+							</div>
+							<span class="text-xs text-gray-500 capitalize">{movement.type}</span>
 						</div>
 					</a>
 				{/each}

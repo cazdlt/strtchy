@@ -2,10 +2,11 @@
 	import { formatDuration } from '$lib/utils/formatting';
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
-	import PracticeHeader from '../../../components/practice/PracticeHeader.svelte';
+	import PageHeader from '../../../components/ui/PageHeader.svelte';
 	import MovementBlock from '../../../components/practice/MovementBlock.svelte';
+	import { goto } from '$app/navigation';
 
- let { data }: { data: PageData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	const totalSets = $derived(
 		data.routine.movements.reduce((sum: number, rm: any) => {
@@ -14,7 +15,11 @@
 	);
 
 	function handleBack() {
-		window.location.href = '/routines';
+		if (window.history.length > 1) {
+			window.history.back();
+		} else {
+			goto('/routines');
+		}
 	}
 </script>
 
@@ -23,18 +28,37 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white pb-32">
-	<PracticeHeader
-		routineName={data.routine.name}
-		{totalSets}
-		completedSets={0}
-		currentMovementIndex={0}
-		totalMovements={data.routine.movements.length}
-		isPreview={true}
-		onExit={handleBack}
-		onSettings={() => {}}
-	/>
+<PageHeader
+	user={data.user}
+	title={data.routine.name}
+	subtitle="Routine Details"
+	showNav={false}
+>
+	<div class="flex items-center gap-3">
+		{#if data.user && data.user.id === data.routine.userId}
+			<a
+				href="/routine/{data.routine.id}/edit"
+				class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+				aria-label="Edit routine"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+					<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+				</svg>
+			</a>
+		{/if}
+		<button
+			onclick={handleBack}
+			class="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+			</svg>
+			Back
+		</button>
+	</div>
+</PageHeader>
 
-	<main class="max-w-4xl mx-auto p-4 space-y-6">
+	<main class="max-w-4xl mx-auto p-4 space-y-6 pt-6">
 		<!-- Routine Overview Card -->
 		<div class="bg-gray-800/40 border border-gray-700/50 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
 			<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -166,4 +190,3 @@
 		background: #0a0a0a;
 	}
 </style>
-
