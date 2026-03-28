@@ -1,6 +1,6 @@
 # Strtchy REST API
 
-A comprehensive REST API for managing movements and routines in the Strtchy stretching app.
+A comprehensive REST API for managing movements, routines, and practice sessions in the Strtchy stretching app.
 
 ## Base URL
 
@@ -11,28 +11,39 @@ https://your-domain.com  # Production
 
 ## Authentication
 
-All authenticated endpoints require a Bearer token in the `Authorization` header:
+All write operations (POST, PATCH, DELETE) require an API key in the `Authorization` header:
 
 ```http
-Authorization: Bearer <session_token>
+Authorization: Bearer <api_key>
 ```
 
-To get a session token, users must authenticate through the web interface. The session token is stored in the `session.token` field in the database.
+### Getting an API Key
 
-| Endpoint Type | Auth Required |
-|---------------|---------------|
-| `GET /api/movements` | No (public) |
-| `GET /api/movements/[id]` | No (public) |
-| `POST /api/movements` | Yes |
-| `PATCH /api/movements/[id]` | Yes |
-| `DELETE /api/movements/[id]` | Yes |
-| `GET /api/routines` | No (public) |
-| `GET /api/routines/[id]` | No (public) |
-| `POST /api/routines` | Yes |
-| `PATCH /api/routines/[id]` | Yes |
-| `DELETE /api/routines/[id]` | Yes |
-| `PATCH /api/routines/[id]/movements/[routineMovementId]` | Yes |
-| `DELETE /api/routines/[id]/movements/[routineMovementId]` | Yes |
+API keys are managed through the web interface at `/settings/api`. Each user can have one API key at a time.
+
+**Key Format:**
+- Prefix: `strtchy_`
+- Length: 32 characters after prefix
+- Example: `strtchy_a1b2c3d4e5f6...`
+
+**Important:** The API key is only shown once when generated. Store it securely.
+
+### Authentication Endpoints
+
+| Endpoint | Auth Required | Description |
+|----------|---------------|-------------|
+| `GET /api/movements` | No | List all movements (public) |
+| `GET /api/movements/[id]` | No | Get single movement (public) |
+| `POST /api/movements` | Yes | Create movement |
+| `PATCH /api/movements/[id]` | Yes | Update movement |
+| `DELETE /api/movements/[id]` | Yes | Delete movement |
+| `GET /api/routines` | No | List all routines (public) |
+| `GET /api/routines/[id]` | No | Get single routine (public) |
+| `POST /api/routines` | Yes | Create routine |
+| `PATCH /api/routines/[id]` | Yes | Update routine |
+| `DELETE /api/routines/[id]` | Yes | Delete routine |
+| `PATCH /api/routines/[id]/movements/[routineMovementId]` | Yes | Update routine movement config |
+| `DELETE /api/routines/[id]/movements/[routineMovementId]` | Yes | Remove movement from routine |
 
 ## Response Format
 
@@ -72,7 +83,7 @@ All responses follow a consistent structure:
 | 200 | Success |
 | 201 | Created |
 | 400 | Bad Request / Validation Error |
-| 401 | Unauthorized |
+| 401 | Unauthorized (invalid or missing API key) |
 | 404 | Not Found |
 | 409 | Conflict (duplicate name) |
 | 500 | Internal Server Error |
@@ -108,7 +119,8 @@ Returns all movements ordered by creation date (newest first).
       "timePerRep": null,
       "equipment": ["yoga mat"],
       "metadata": {
-        "defaultTarget": { "type": "time", "value": 30, "unit": null }
+        "defaultTarget": { "type": "time", "value": 30, "unit": null },
+        "suggestedTags": ["lower body", "flexibility"]
       },
       "createdAt": "2024-01-15T10:30:00.000Z"
     }
@@ -150,7 +162,7 @@ POST /api/movements
 **Headers:**
 ```http
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
 **Request Body:**
@@ -177,12 +189,18 @@ Authorization: Bearer <token>
 | `description` | string | No | Description (max 500 chars) |
 | `type` | enum | Yes | `timed`, `reps`, `weighted`, `resistance_band` |
 | `defaultValue` | number | Yes | Default target value (positive integer) |
-| `defaultUnit` | enum | No | `lbs`, `kg`, `bodyweight` (for weighted types) |
+| `defaultUnit` | enum | No | `lbs`, `kg`, `bodyweight` (for weighted/resistance types) |
 | `timePerRep` | number | No | Seconds per rep (for rep types, min 1) |
 | `isBilateral` | boolean | No | Whether exercise requires both sides (default: false) |
 | `switchSidesDuration` | number | No | Seconds to switch sides (min 0, default: 5) |
-| `equipment` | string[] | No | List of equipment names |
+| `equipment` | string[] | No | List of equipment names (comma-separated string or array) |
 | `illustration` | File | No | Image file (JPEG/PNG/WebP, max 5MB) |
+
+**Movement Types:**
+- `timed` - Time-based exercise (hold for X seconds)
+- `reps` - Repetition-based exercise (do X reps)
+- `weighted` - Weighted exercise with weight value
+- `resistance_band` - Resistance band exercise
 
 **Response (201):**
 ```json
@@ -220,7 +238,7 @@ PATCH /api/movements/{id}
 **Headers:**
 ```http
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
 **Request Body:** All fields are optional (partial update):
@@ -228,7 +246,8 @@ Authorization: Bearer <token>
 {
   "name": "New Name",
   "description": "New description",
-  "defaultValue": 60
+  "defaultValue": 60,
+  "isBilateral": false
 }
 ```
 
@@ -252,7 +271,7 @@ DELETE /api/movements/{id}
 
 **Headers:**
 ```http
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
 **Response (200):**
@@ -291,6 +310,7 @@ Returns all routines with movement counts, ordered by creation date (newest firs
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true,
+      "isCustom": true,
       "userId": "user_abc123",
       "createdAt": "2024-01-15T10:30:00.000Z",
       "movementsCount": 5
@@ -321,6 +341,7 @@ GET /api/routines/{id}
     "autoAdvance": true,
     "audioEnabled": true,
     "keepAwake": true,
+    "isCustom": true,
     "userId": "user_abc123",
     "createdAt": "2024-01-15T10:30:00.000Z",
     "movements": [
@@ -352,7 +373,7 @@ POST /api/routines
 **Headers:**
 ```http
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
 **Request Body:**
@@ -396,7 +417,7 @@ Authorization: Bearer <token>
 | `restBetweenSets` | number | Yes | Seconds between sets (min 0) |
 | `autoAdvance` | boolean | No | Auto-advance to next exercise (default: true) |
 | `audioEnabled` | boolean | No | Enable audio cues (default: true) |
-| `keepAwake` | boolean | No | Keep screen awake (default: true) |
+| `keepAwake` | boolean | No | Keep screen awake during practice (default: true) |
 | `movementsData` | array | Yes | Array of movement configurations |
 
 **movementsData Fields:**
@@ -408,11 +429,11 @@ Authorization: Bearer <token>
 | `target.type` | enum | Yes | `time` or `reps` |
 | `target.value` | number | Yes | Target value (positive) |
 | `target.unit` | string | No | Custom unit tag |
-| `target.customTag` | string | No | Custom tag |
+| `target.customTag` | string | No | Custom tag for the target |
 | `sets` | number | No | Number of sets (default: 1) |
 | `isBilateral` | boolean | No | Exercise is bilateral (default: false) |
 | `switchSidesDuration` | number | No | Seconds to switch sides (default: 5) |
-| `weight` | number | No | Weight value |
+| `weight` | number | No | Weight value for weighted exercises |
 | `weightUnit` | enum | No | `lbs`, `kg`, `bodyweight` |
 | `notes` | string | No | Notes for this movement (max 500) |
 
@@ -433,7 +454,7 @@ PATCH /api/routines/{id}
 **Headers:**
 ```http
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
 **Request Body:** All fields are optional:
@@ -441,26 +462,12 @@ Authorization: Bearer <token>
 ```json
 {
   "name": "New Routine Name",
-  "restBetweenMovements": 15
+  "restBetweenMovements": 15,
+  "autoAdvance": false
 }
 ```
 
-To update movements within a routine, include `movementsData`:
-
-```json
-{
-  "movementsData": [
-    {
-      "movementId": "mv_hamstring-stretch",
-      "order": 0,
-      "target": { "type": "time", "value": 60 },
-      "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5
-    }
-  ]
-}
-```
+Note: The `movementsData` field cannot be updated via this endpoint. Use the individual routine movement endpoints instead.
 
 **Response (200):**
 ```json
@@ -478,7 +485,7 @@ DELETE /api/routines/{id}
 
 **Headers:**
 ```http
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
 **Response (200):**
@@ -506,7 +513,7 @@ PATCH /api/routines/{routineId}/movements/{routineMovementId}
 **Headers:**
 ```http
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
 **Request Body:** All fields are optional (partial update):
@@ -514,7 +521,9 @@ Authorization: Bearer <token>
 {
   "target": { "value": 45 },
   "sets": 4,
-  "notes": "Hold deeper"
+  "notes": "Hold deeper",
+  "isBilateral": true,
+  "switchSidesDuration": 10
 }
 ```
 
@@ -604,7 +613,7 @@ curl -X GET http://localhost:5173/api/movements/mv_hamstring-stretch
 ```bash
 curl -X POST http://localhost:5173/api/movements \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
+  -H "Authorization: Bearer strtchy_YOUR_API_KEY" \
   -d '{
     "name": "Calf Stretch",
     "type": "timed",
@@ -617,21 +626,21 @@ curl -X POST http://localhost:5173/api/movements \
 ```bash
 curl -X PATCH http://localhost:5173/api/movements/mv_calf-stretch \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
+  -H "Authorization: Bearer strtchy_YOUR_API_KEY" \
   -d '{"defaultValue": 45}'
 ```
 
 ### Delete Movement (authenticated)
 ```bash
 curl -X DELETE http://localhost:5173/api/movements/mv_calf-stretch \
-  -H "Authorization: Bearer YOUR_SESSION_TOKEN"
+  -H "Authorization: Bearer strtchy_YOUR_API_KEY"
 ```
 
 ### Create Routine (authenticated)
 ```bash
 curl -X POST http://localhost:5173/api/routines \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
+  -H "Authorization: Bearer strtchy_YOUR_API_KEY" \
   -d '{
     "name": "Evening Stretch",
     "restBetweenMovements": 10,
@@ -640,7 +649,7 @@ curl -X POST http://localhost:5173/api/routines \
       {
         "movementId": "mv_hamstring-stretch",
         "order": 0,
-        "target": { "type": "time", "value": 30 },
+        "target": {"type": "time", "value": 30},
         "sets": 2,
         "isBilateral": true
       }
@@ -656,6 +665,7 @@ curl -X POST http://localhost:5173/api/routines \
 // Movement Types
 type MovementType = 'timed' | 'reps' | 'weighted' | 'resistance_band';
 type WeightUnit = 'lbs' | 'kg' | 'bodyweight';
+type TargetType = 'time' | 'reps';
 
 interface Movement {
   id: string;
@@ -664,19 +674,20 @@ interface Movement {
   type: MovementType;
   illustrationPath: string | null;
   isCustom: boolean;
-  userId: string;
+  userId: string | null;
   weightUnit: WeightUnit | null;
   isBilateral: boolean;
   switchSidesDuration: number;
   timePerRep: number | null;
-  equipment: string[];
+  equipment: string[] | null;
   metadata: {
-    defaultTarget: {
-      type: 'time' | 'reps';
+    defaultTarget?: {
+      type: TargetType;
       value: number;
-      unit: string | null;
+      unit?: string;
     };
-  };
+    suggestedTags?: string[];
+  } | null;
   createdAt: Date;
 }
 
@@ -690,9 +701,11 @@ interface Routine {
   autoAdvance: boolean;
   audioEnabled: boolean;
   keepAwake: boolean;
-  userId: string;
+  isCustom: boolean;
+  userId: string | null;
   createdAt: Date;
-  movements: RoutineMovement[];
+  movements?: RoutineMovement[];
+  movementsCount?: number;
 }
 
 interface RoutineMovement {
@@ -701,7 +714,7 @@ interface RoutineMovement {
   movementId: string;
   order: number;
   target: {
-    type: 'time' | 'reps';
+    type: TargetType;
     value: number;
     unit?: string;
     customTag?: string;
@@ -712,6 +725,72 @@ interface RoutineMovement {
   weight: number | null;
   weightUnit: WeightUnit | null;
   notes: string | null;
-  movement: Movement;
+  movement?: Movement;
 }
 ```
+
+---
+
+## File Structure
+
+```
+src/
+├── lib/
+│   ├── validation/
+│   │   ├── schemas/
+│   │   │   ├── movement.ts
+│   │   │   └── routine.ts
+│   │   └── helpers/
+│   │       ├── parsers.ts
+│   │       ├── duplicates.ts
+│   │       └── errors.ts
+│   ├── db/helpers/
+│   │   ├── movements.ts
+│   │   ├── routines.ts
+│   │   └── files.ts
+│   └── api/
+│       ├── auth.ts         # API key authentication
+│       ├── apiKey.ts       # API key generation/validation
+│       └── errors.ts       # Error formatting
+└── routes/api/
+    ├── movements/
+    │   ├── +server.ts
+    │   └── [id]/
+    │       └── +server.ts
+    └── routines/
+        ├── +server.ts
+        └── [id]/
+            ├── +server.ts
+            └── movements/[routineMovementId]/
+                └── +server.ts
+```
+
+---
+
+## API Key Management
+
+API keys are managed through the web interface at `/settings/api`.
+
+### Features:
+- **Generate**: Create a new API key (replaces any existing key)
+- **View Prefix**: See the first 16 characters of your key for identification
+- **Revoke**: Delete your API key to prevent further access
+
+### Security:
+- API keys are hashed using SHA-256 before storage
+- Only the prefix is stored in plain text for identification
+- Keys are only shown once upon generation
+- Last used timestamp is tracked for each key
+
+---
+
+## Shared Logic
+
+All API endpoints reuse the same validation and database logic as the web forms:
+
+- **Validation**: Zod schemas ensure data integrity
+- **Duplicate Checking**: Prevents duplicate names
+- **ID Generation**: Uses existing slug-based ID generation
+- **Database Operations**: Shared helpers for CRUD operations
+
+This ensures **100% consistency** between API and web interface.
