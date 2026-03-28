@@ -57,6 +57,7 @@
 	}>();
 
 	let currentValue = $state(0);
+	// svelte-ignore state_referenced_locally
 	let currentWeight = $state(weight || 0);
 	let effortRating = $state(0);
 	let autoRepInterval: ReturnType<typeof setInterval> | null = $state(null);

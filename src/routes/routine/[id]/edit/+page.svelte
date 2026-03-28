@@ -2,12 +2,19 @@
 	import type { PageData, ActionData } from './$types';
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
+	// svelte-ignore state_referenced_locally
 	let name = $state(data.routine.name);
+	// svelte-ignore state_referenced_locally
 	let description = $state(data.routine.description || '');
+	// svelte-ignore state_referenced_locally
 	let restBetweenMovements = $state(String(data.routine.restBetweenMovements || '30'));
+	// svelte-ignore state_referenced_locally
 	let restBetweenSets = $state(String(data.routine.restBetweenSets || '15'));
+	// svelte-ignore state_referenced_locally
 	let autoAdvance = $state(data.routine.autoAdvance ?? true);
+	// svelte-ignore state_referenced_locally
 	let audioEnabled = $state(data.routine.audioEnabled ?? true);
+	// svelte-ignore state_referenced_locally
 	let keepAwake = $state(data.routine.keepAwake ?? true);
 
 	interface SelectedMovement {
@@ -25,6 +32,7 @@
 		notes: string;
 	}
 
+	// svelte-ignore state_referenced_locally
 	let selectedMovements = $state<SelectedMovement[]>(
 		data.routine.movements.map((rm) => ({
 			movementId: rm.movementId,
@@ -331,21 +339,23 @@
 									</select>
 								</div>
 
-								<div>
-									<label class="block text-xs text-gray-400 mb-1">Target Value</label>
-									<input
-										type="number"
-										min="1"
-										bind:value={movement.targetValue}
+							<div>
+								<label for="target_value_{index}" class="block text-xs text-gray-400 mb-1">Target Value</label>
+								<input
+									type="number"
+									min="1"
+									id="target_value_{index}"
+									bind:value={movement.targetValue}
 										class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
 									/>
 								</div>
 
-								<div>
-									<label class="block text-xs text-gray-400 mb-1">Unit (optional)</label>
-									<input
-										type="text"
-										bind:value={movement.targetUnit}
+							<div>
+								<label for="target_unit_{index}" class="block text-xs text-gray-400 mb-1">Unit (optional)</label>
+								<input
+									type="text"
+									id="target_unit_{index}"
+									bind:value={movement.targetUnit}
 										class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
 										placeholder="seconds"
 									/>
@@ -354,21 +364,23 @@
 
 							{#if movement.type === 'weighted' || movement.type === 'resistance_band'}
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-11">
-									<div>
-										<label class="block text-xs text-gray-400 mb-1">Default Weight</label>
-										<input
-											type="number"
-											min="0"
-											bind:value={movement.weight}
+								<div>
+									<label for="weight_{index}" class="block text-xs text-gray-400 mb-1">Default Weight</label>
+									<input
+										type="number"
+										min="0"
+										id="weight_{index}"
+										bind:value={movement.weight}
 											class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
 											placeholder="0"
 										/>
 									</div>
 
-									<div>
-										<label class="block text-xs text-gray-400 mb-1">Weight Unit</label>
-										<select
-											bind:value={movement.weightUnit}
+								<div>
+									<label for="weight_unit_{index}" class="block text-xs text-gray-400 mb-1">Weight Unit</label>
+									<select
+										id="weight_unit_{index}"
+										bind:value={movement.weightUnit}
 											class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
 										>
 											<option value="">Select unit</option>
@@ -381,21 +393,23 @@
 							{/if}
 
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-11">
-								<div>
-									<label class="block text-xs text-gray-400 mb-1">Sets</label>
-									<input
-										type="number"
-										min="1"
-										bind:value={movement.sets}
+							<div>
+								<label for="sets_{index}" class="block text-xs text-gray-400 mb-1">Sets</label>
+								<input
+									type="number"
+									min="1"
+									id="sets_{index}"
+									bind:value={movement.sets}
 										class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
 									/>
 								</div>
 
-								<div>
-									<label class="block text-xs text-gray-400 mb-1">Notes (optional)</label>
-									<input
-										type="text"
-										bind:value={movement.notes}
+							<div>
+								<label for="notes_{index}" class="block text-xs text-gray-400 mb-1">Notes (optional)</label>
+								<input
+									type="text"
+									id="notes_{index}"
+									bind:value={movement.notes}
 										class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
 										placeholder="Focus on form..."
 									/>
@@ -413,12 +427,13 @@
 								</label>
 
 								{#if movement.isBilateral}
-									<div>
-										<label class="block text-xs text-gray-400 mb-1">Switch Sides Duration (seconds)</label>
-										<input
-											type="number"
-											min="0"
-											bind:value={movement.switchSidesDuration}
+								<div>
+									<label for="switch_duration_{index}" class="block text-xs text-gray-400 mb-1">Switch Sides Duration (seconds)</label>
+									<input
+										type="number"
+										min="0"
+										id="switch_duration_{index}"
+										bind:value={movement.switchSidesDuration}
 											class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
 										/>
 									</div>

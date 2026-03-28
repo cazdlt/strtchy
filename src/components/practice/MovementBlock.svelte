@@ -97,6 +97,7 @@
 	}>();
 
 	let collapsed = $state(false);
+	// svelte-ignore state_referenced_locally
 	let currentNotes = $state(notes || '');
 
 	$effect(() => {

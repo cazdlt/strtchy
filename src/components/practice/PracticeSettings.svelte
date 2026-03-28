@@ -19,6 +19,7 @@
 		error?: string | null;
 	}>();
 
+	// svelte-ignore state_referenced_locally
 	let localSettings = $state({
 		autoPlay: settings.autoPlay,
 		audioEnabled: settings.audioEnabled,
@@ -55,9 +56,10 @@
 							<p class="text-white font-medium">Auto-play</p>
 							<p class="text-gray-400 text-sm">Automatically advance to next set</p>
 						</div>
-						<button
-							onclick={() => (localSettings.autoPlay = !localSettings.autoPlay)}
-							class="w-12 h-7 rounded-full transition-colors {localSettings.autoPlay
+					<button
+						onclick={() => (localSettings.autoPlay = !localSettings.autoPlay)}
+						aria-label="Toggle auto-play"
+						class="w-12 h-7 rounded-full transition-colors {localSettings.autoPlay
 								? 'bg-blue-600'
 								: 'bg-gray-600'} relative"
 						>
@@ -74,9 +76,10 @@
 							<p class="text-white font-medium">Audio cues</p>
 							<p class="text-gray-400 text-sm">Play sounds for timer and completion</p>
 						</div>
-						<button
-							onclick={() => (localSettings.audioEnabled = !localSettings.audioEnabled)}
-							class="w-12 h-7 rounded-full transition-colors {localSettings.audioEnabled
+					<button
+						onclick={() => (localSettings.audioEnabled = !localSettings.audioEnabled)}
+						aria-label="Toggle audio cues"
+						class="w-12 h-7 rounded-full transition-colors {localSettings.audioEnabled
 								? 'bg-blue-600'
 								: 'bg-gray-600'} relative"
 						>
@@ -93,9 +96,10 @@
 							<p class="text-white font-medium">Keep screen awake</p>
 							<p class="text-gray-400 text-sm">Prevent screen from turning off</p>
 						</div>
-						<button
-							onclick={() => (localSettings.keepAwake = !localSettings.keepAwake)}
-							class="w-12 h-7 rounded-full transition-colors {localSettings.keepAwake
+					<button
+						onclick={() => (localSettings.keepAwake = !localSettings.keepAwake)}
+						aria-label="Toggle keep screen awake"
+						class="w-12 h-7 rounded-full transition-colors {localSettings.keepAwake
 								? 'bg-blue-600'
 								: 'bg-gray-600'} relative"
 						>

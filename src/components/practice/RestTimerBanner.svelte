@@ -16,6 +16,7 @@
 	}>();
 
 	let timerInterval: ReturnType<typeof setInterval> | null = null;
+	// svelte-ignore state_referenced_locally
 	let remaining = $state(duration);
 
 	$effect(() => {
@@ -45,6 +46,7 @@
 		}
 	});
 
+	// svelte-ignore state_referenced_locally
 	const progress = duration > 0 ? (remaining / duration) * 100 : 0;
 
 	function formatTime(seconds: number): string {

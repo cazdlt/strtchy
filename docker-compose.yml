@@ -1,0 +1,20 @@
+services:
+  strtchy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: strtchy
+    restart: unless-stopped
+    ports:
+      - "4173:4173"
+    volumes:
+      # Persist SQLite database
+      - ./data:/app/data
+      # Mount environment file
+      - ./.env.production:/app/.env.production:ro
+    environment:
+      # Ensure DATABASE_URL points to the persisted location
+      - DATABASE_URL=./data/prod/local.db
+    working_dir: /app
+    # Override the default CMD to ensure it uses the correct database path
+    command: sh -c "export DATABASE_URL=./data/prod/local.db && npx vite preview --host 0.0.0.0 --port 4173"

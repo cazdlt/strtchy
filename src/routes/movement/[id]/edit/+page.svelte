@@ -4,16 +4,26 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
+	// svelte-ignore state_referenced_locally
 	let name = $state(data.movement.name);
+	// svelte-ignore state_referenced_locally
 	let description = $state(data.movement.description || '');
+	// svelte-ignore state_referenced_locally
 	let equipment = $state(data.movement.equipment?.join(', ') || '');
+	// svelte-ignore state_referenced_locally
 	let type = $state(data.movement.type);
+	// svelte-ignore state_referenced_locally
 	let defaultValue = $state(String(data.movement.metadata?.defaultTarget?.value || ''));
+	// svelte-ignore state_referenced_locally
 	let defaultUnit = $state(data.movement.weightUnit || '');
+	// svelte-ignore state_referenced_locally
 	let timePerRep = $state(data.movement.timePerRep ?? 3);
+	// svelte-ignore state_referenced_locally
 	let isBilateral = $state(data.movement.isBilateral ?? false);
+	// svelte-ignore state_referenced_locally
 	let switchSidesDuration = $state(data.movement.switchSidesDuration ?? 5);
 	let selectedFile = $state<File | null>(null);
+	// svelte-ignore state_referenced_locally
 	let filePreview = $state<string | null>(data.movement.illustrationPath || null);
 	let removeIllustration = $state(false);
 

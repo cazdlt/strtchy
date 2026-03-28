@@ -16,10 +16,13 @@
 	let { data } = $props<{ data: PageData }>();
 
 	// Practice session state
+	// svelte-ignore state_referenced_locally
 	let practiceId = $state(data.practice.id);
+	// svelte-ignore state_referenced_locally
 	let routineId = $state(data.practice.routineId);
 
 	// Settings state
+	// svelte-ignore state_referenced_locally
 	let settings = $state({
 		autoPlay: data.practice.routine.autoAdvance ?? data.userPrefs?.autoAdvance ?? false,
 		audioEnabled: data.practice.routine.audioEnabled ?? data.userPrefs?.audioEnabled ?? true,
@@ -56,6 +59,7 @@
 	let isAutoCompletingSet = $state(false);
 	let currentActiveSetKey = $state<string | null>(null);
 	let isAutoAdvancing = $state(false);
+	// svelte-ignore state_referenced_locally
 	let setOverrides = $state<Record<string, number>>(data.setOverrides || {});
 
 	// UI state
@@ -75,6 +79,7 @@
 	let wakeLock = $state<WakeLockSentinel | null>(null);
 
 	// Read-only check
+	// svelte-ignore state_referenced_locally
 	let isReadOnly = $state(data.isReadOnly);
 
 	// Movement management state
@@ -1031,6 +1036,7 @@
 					<button
 						onclick={() => showAddMovementModal = false}
 						disabled={isPaused}
+						aria-label="Close"
 						class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-400 transition-all"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
