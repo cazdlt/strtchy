@@ -139,6 +139,21 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     }
   }
 
+  // Group movements by type for the add modal
+  const groupedMovements: Record<string, typeof allMovements> = {
+    Timed: [],
+    Repetitions: [],
+    Weighted: [],
+    'Resistance Band': []
+  };
+
+  for (const movement of allMovements) {
+    if (movement.type === 'timed') groupedMovements.Timed.push(movement);
+    else if (movement.type === 'reps') groupedMovements.Repetitions.push(movement);
+    else if (movement.type === 'weighted') groupedMovements.Weighted.push(movement);
+    else if (movement.type === 'resistance_band') groupedMovements['Resistance Band'].push(movement);
+  }
+
   return {
     practice,
     allRoutineMovements,
@@ -151,6 +166,7 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     setOverrides: overrides,
     allMovements,
     equipment: Array.from(allEquipment).sort(),
+    groupedMovements,
   };
 };
 
