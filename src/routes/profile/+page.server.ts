@@ -4,6 +4,7 @@ import { eq, count } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import type { RequestEvent } from './$types';
 import { auth } from '$lib/auth';
+import { generateApiKey } from '$lib/api/apiKey';
 
 export async function load({ locals }: { locals: App.Locals }) {
 	if (!locals.user) {
@@ -233,6 +234,40 @@ export const actions = {
 			console.error('Error deleting account:', error);
 			const message = error?.body?.message || error?.message || 'Failed to delete account. Please check your password.';
 			return fail(400, { error: message });
+		}
+	},
+	
+	// Rotate API key
+	rotateApiKey: async ({ locals }: RequestEvent) => {
+		if (!locals.user) {
+			return fail(401, { error: 'Not authenticated' });
+		}
+
+		try {
+			// Generate new API key
+			const { plaintext, hash, prefix } = generateApiKey();
+			
+			// Update user's API key
+			await db
+				.update(user)
+				.set({
+					apiKeyHash: hash,
+					apiKeyPrefix: prefix,
+					apiKeyCreatedAt: new Date(),
+					apiKeyLastUsedAt: null
+				})
+				.where(eq(user.id, locals.user.id));
+			
+			console.log('API key rotated for user:', locals.user.id);
+			
+			return { 
+				success: true, 
+				message: 'API key rotated successfully. Copy your new key now - it won\'t be shown again!',
+				apiKey: plaintext
+			};
+		} catch (error) {
+			console.error('Error rotating API key:', error);
+			return fail(500, { error: 'Failed to rotate API key' });
 		}
 	}
 };

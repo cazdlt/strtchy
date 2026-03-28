@@ -1,36 +1,31 @@
 import { db } from '$lib/db';
-import { session } from '$lib/db/schema';
-import { eq, gt, and } from 'drizzle-orm';
+import { user } from '$lib/db/schema';
+import { eq } from 'drizzle-orm';
 import type { RequestEvent } from '@sveltejs/kit';
+import { extractApiKeyFromHeader, validateApiKey } from './apiKey';
 
-export async function validateBearerToken(event: RequestEvent): Promise<{ user: any | null; session: any | null }> {
+/**
+ * Validate API key from Authorization header
+ * Replaces session token validation with API key validation
+ */
+export async function validateBearerToken(event: RequestEvent): Promise<{ user: any | null }> {
 	const authHeader = event.request.headers.get('Authorization');
-
-	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		return { user: null, session: null };
+	
+	// Try to extract API key from header
+	const apiKey = extractApiKeyFromHeader(authHeader);
+	
+	if (!apiKey) {
+		return { user: null };
 	}
-
-	const token = authHeader.substring(7);
-
-	const sessionResult = await db.query.session.findFirst({
-		where: and(eq(session.token, token), gt(session.expiresAt, new Date())),
-		with: {
-			user: true
-		}
-	});
-
-	if (!sessionResult) {
-		return { user: null, session: null };
+	
+	// Validate the API key
+	const userData = await validateApiKey(apiKey);
+	
+	if (!userData) {
+		return { user: null };
 	}
-
-	return {
-		user: sessionResult.user,
-		session: {
-			id: sessionResult.id,
-			token: sessionResult.token,
-			expiresAt: sessionResult.expiresAt
-		}
-	};
+	
+	return { user: userData };
 }
 
 export function requireAuth(user: any | null): void {

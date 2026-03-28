@@ -4,7 +4,8 @@ import type { RequestEvent } from './$types';
 
 export const load = async ({ url }: { url: URL }) => {
 	const registered = url.searchParams.get('registered');
-	return { registered };
+	const apiKey = url.searchParams.get('apiKey');
+	return { registered, apiKey };
 };
 
 export const actions = {

@@ -17,6 +17,11 @@ export const user = sqliteTable('user', {
 		audioEnabled?: boolean;
 		keepAwake?: boolean;
 	}>(),
+	// API Key fields
+	apiKeyHash: text('api_key_hash').unique(),
+	apiKeyPrefix: text('api_key_prefix'),
+	apiKeyCreatedAt: integer('api_key_created_at', { mode: 'timestamp' }),
+	apiKeyLastUsedAt: integer('api_key_last_used_at', { mode: 'timestamp' }),
 });
 
 export const session = sqliteTable('session', {
