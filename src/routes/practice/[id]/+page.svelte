@@ -265,7 +265,7 @@
 		checkAndStartActiveSetTimer();
 	});
 
-	type SoundType = 'countdown' | 'setStart' | 'setComplete' | 'restStart' | 'restEnd' | 'switchSides' | 'practiceComplete';
+	type SoundType = 'countdown' | 'setStart' | 'setComplete' | 'restStart' | 'restEnd' | 'switchSides' | 'practiceComplete' | 'rep';
 
 	function playSound(type: SoundType) {
 		if (!settings.audioEnabled) return;
@@ -326,6 +326,10 @@
 				playTone(659, 0.1, 0.1);
 				playTone(784, 0.1, 0.2);
 				playTone(1047, 0.3, 0.3);
+				break;
+			case 'rep':
+				// Very subtle click sound for each rep
+				playTone(1200, 0.03);
 				break;
 		}
 	}
@@ -1127,6 +1131,7 @@
 				isFirst={index === 0}
 				isLast={index === data.allRoutineMovements.length - 1}
 				isPaused={isPaused}
+				onRepIncrement={() => playSound('rep')}
 			/>
 		</div>
 

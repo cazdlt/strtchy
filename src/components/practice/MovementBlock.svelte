@@ -48,7 +48,8 @@
 		restRemainingTime = 0,
 		restBetweenSetsDuration = 0,
 		onSkipRest,
-		isPaused = false
+		isPaused = false,
+		onRepIncrement
 	} = $props<{
 		movementIndex: number;
 		routineMovementId: string;
@@ -96,6 +97,7 @@
 		restBetweenSetsDuration?: number;
 		onSkipRest?: () => void;
 		isPaused?: boolean;
+		onRepIncrement?: () => void;
 	}>();
 
 	let collapsed = $state(false);
@@ -442,6 +444,7 @@
 					onSkip={active ? onSkipSet : undefined}
 					isPaused={isPaused}
 					isInRestPeriod={isInRestPeriod}
+					onRepIncrement={active ? onRepIncrement : undefined}
 				/>
 				{:else}
 					{@const active = isRestActive(item)}

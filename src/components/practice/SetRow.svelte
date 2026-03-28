@@ -28,7 +28,8 @@
 		isCompleting = false,
 		id = '',
 		isPaused = false,
-		isInRestPeriod = false
+		isInRestPeriod = false,
+		onRepIncrement
 	} = $props<{
 		setNumber: number;
 		movementType: 'timed' | 'reps' | 'weighted' | 'resistance_band';
@@ -56,6 +57,7 @@
 		id?: string;
 		isPaused?: boolean;
 		isInRestPeriod?: boolean;
+		onRepIncrement?: () => void;
 	}>();
 
 	let currentValue = $state(0);
@@ -95,6 +97,8 @@
 					untrack(() => {
 						if (currentValue < targetValue) {
 							handleValueChange(currentValue + 1);
+							// Play subtle sound for each rep
+							onRepIncrement?.();
 						} else {
 							// Reached target, auto-complete
 							if (autoRepInterval) {
