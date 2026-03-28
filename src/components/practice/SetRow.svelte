@@ -27,7 +27,8 @@
 		onResetTimer,
 		isCompleting = false,
 		id = '',
-		isPaused = false
+		isPaused = false,
+		isInRestPeriod = false
 	} = $props<{
 		setNumber: number;
 		movementType: 'timed' | 'reps' | 'weighted' | 'resistance_band';
@@ -54,6 +55,7 @@
 		isCompleting?: boolean;
 		id?: string;
 		isPaused?: boolean;
+		isInRestPeriod?: boolean;
 	}>();
 
 	let currentValue = $state(0);
@@ -85,7 +87,7 @@
 
 	// Auto-increment rep counter for rep-based exercises with timePerRep
 	$effect(() => {
-		if (isActive && !isCompleted && !isSkipped && !isPaused && timePerRep && timePerRep > 0 && movementType !== 'timed') {
+		if (isActive && !isCompleted && !isSkipped && !isPaused && !isInRestPeriod && timePerRep && timePerRep > 0 && movementType !== 'timed') {
 			// Start auto-increment timer (untrack interval check to avoid circular dep)
 			const hasInterval = untrack(() => autoRepInterval !== null);
 			if (!hasInterval) {

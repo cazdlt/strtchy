@@ -41,6 +41,7 @@
 		isFirst = false,
 		isLast = false,
 		// Rest State
+		isInRestPeriod = false,
 		activeRestType = null,
 		activeRestSetNumber = null,
 		activeRestSide = null,
@@ -87,6 +88,7 @@
 		isFirst?: boolean;
 		isLast?: boolean;
 		// Rest State
+		isInRestPeriod?: boolean;
 		activeRestType?: 'between-sets' | 'switch-sides' | null;
 		activeRestSetNumber?: number | null;
 		activeRestSide?: 'left' | 'right' | null;
@@ -437,9 +439,10 @@
 						isCompleting={isCompletingSet}
 						onComplete={(data) => handleSetComplete(data, item.setNumber!, item.side!)}
 						onUncomplete={(data) => handleUncompleteSet(data, item.setNumber!, item.side!)}
-						onSkip={active ? onSkipSet : undefined}
-						isPaused={isPaused}
-					/>
+					onSkip={active ? onSkipSet : undefined}
+					isPaused={isPaused}
+					isInRestPeriod={isInRestPeriod}
+				/>
 				{:else}
 					{@const active = isRestActive(item)}
 					{@const completed = isRestCompleted(item)}

@@ -96,6 +96,9 @@
 	// Pause state
 	let isPaused = $state(false);
 
+	// Rest period state - true when any rest timer is active
+	let isInRestPeriod = $derived(showRestTimer);
+
 	onMount(() => {
 		// Initialize completed/skipped sets from practice data
 		for (const pd of data.practice.practiceData) {
@@ -209,7 +212,7 @@
 
 	// Start timer for timed exercises when they become active (auto-play mode)
 	function checkAndStartActiveSetTimer() {
-		if (!settings.autoPlay || isReadOnly || isAutoCompletingSet || isAutoAdvancing || restInterval !== null) {
+		if (!hasStarted || !settings.autoPlay || isReadOnly || isAutoCompletingSet || isAutoAdvancing || restInterval !== null) {
 			stopActiveSetTimer();
 			return;
 		}
@@ -1036,7 +1039,7 @@
 
 	<main class="pt-4 pb-32 px-4 max-w-4xl mx-auto">
 		<!-- Initial Rest indicator -->
-		{#if settings.autoPlay && data.practice.routine.restBetweenMovements > 0}
+		{#if hasStarted && settings.autoPlay && data.practice.routine.restBetweenMovements > 0}
 			{@const isActive = showRestTimer && restType === 'between-movements' && restingMovementIndex === -1}
 			{@const firstMovementCompleted = countCompletedMovementSets(data.allRoutineMovements[0].id, data.allRoutineMovements[0].isBilateral) > 0}
 			<InlineRestTimer
@@ -1063,8 +1066,8 @@
 			</div>
 		{/if}
 
-		{#each data.allRoutineMovements as rm, index (rm.id)}
-			{@const isActive = index === activeMovementIndex && !isReadOnly}
+	{#each data.allRoutineMovements as rm, index (rm.id)}
+		{@const isActive = index === activeMovementIndex && !isReadOnly && hasStarted}
 			{@const movementPreviousStats = data.previousStatsMap[rm.id] || null}
 			{@const isSavingNotes = notesSavingStates[rm.id]}
 
@@ -1101,6 +1104,7 @@
 				isAdjustingSets={isAdjustingSets[rm.id]}
 				onSkipSet={settings.autoPlay ? handleSkipSet : undefined}
 				
+				isInRestPeriod={isInRestPeriod}
 				activeRestType={restingMovementIndex === index && restType !== 'between-movements' ? restType : null}
 				activeRestSetNumber={restingMovementIndex === index ? activeRestSetNumber : null}
 				activeRestSide={restingMovementIndex === index ? activeRestSide : null}
