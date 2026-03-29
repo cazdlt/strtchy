@@ -3,8 +3,22 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import PageHeader from '../../../components/ui/PageHeader.svelte';
-	import PreviewMovementBlock from '../../../components/practice/PreviewMovementBlock.svelte';
 	import { goto } from '$app/navigation';
+	import { 
+		ArrowLeft, 
+		PencilSimple, 
+		Play, 
+		Clock, 
+		Stack, 
+		ArrowsLeftRight, 
+		Barbell, 
+		Timer,
+		PersonSimple,
+		SpeakerHigh,
+		Sun,
+		Lightning,
+		CaretRight
+	} from 'phosphor-svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -14,6 +28,8 @@
 		}, 0)
 	);
 
+	const totalMovements = $derived(data.routine.movements.length);
+
 	function handleBack() {
 		if (window.history.length > 1) {
 			window.history.back();
@@ -21,167 +37,318 @@
 			goto('/routines');
 		}
 	}
+
+	function getTypeIcon(type: string) {
+		switch (type) {
+			case 'timed': return Timer;
+			case 'reps': return Stack;
+			case 'weighted': return Barbell;
+			default: return PersonSimple;
+		}
+	}
+
+	function getTypeLabel(type: string) {
+		switch (type) {
+			case 'timed': return 'Timed';
+			case 'reps': return 'Reps';
+			case 'weighted': return 'Weighted';
+			case 'count': return 'Count';
+			case 'distance': return 'Distance';
+			default: return type;
+		}
+	}
+
+	function formatTarget(rm: any) {
+		if (!rm.target?.value) return null;
+		const unit = rm.target.unit || '';
+		return `${rm.target.value} ${unit}`;
+	}
+
+	function formatWeight(rm: any) {
+		if (!rm.weight) return null;
+		return `${rm.weight} ${rm.weightUnit || 'kg'}`;
+	}
 </script>
 
 <svelte:head>
 	<title>{data.routine.name} - Strtchy</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white pb-32">
-<PageHeader
-	user={data.user}
-	title={data.routine.name}
-	subtitle="Routine Details"
-	showNav={false}
->
-	<div class="flex items-center gap-3">
-		{#if data.user && data.user.id === data.routine.userId}
-			<a
-				href="/routine/{data.routine.id}/edit"
-				class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-				aria-label="Edit routine"
+<div class="min-h-screen bg-base text-text-primary pb-32">
+	<PageHeader user={data.user} showNav={false}>
+		<div class="flex items-center gap-3">
+			{#if data.user && data.user.id === data.routine.userId}
+				<a
+					href="/routine/{data.routine.id}/edit"
+					class="inline-flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-elevated text-text-primary transition-colors border border-accent-track hover:border-accent-primary"
+				>
+					<PencilSimple weight="bold" size={16} class="text-accent-primary" />
+					<span class="font-body text-sm uppercase tracking-wider hidden sm:inline">Edit</span>
+				</a>
+			{/if}
+			<button
+				onclick={handleBack}
+				class="inline-flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-elevated text-text-secondary hover:text-text-primary transition-colors border border-accent-track"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-				</svg>
-			</a>
-		{/if}
-		<button
-			onclick={handleBack}
-			class="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-			</svg>
-			Back
-		</button>
-	</div>
-</PageHeader>
+				<ArrowLeft weight="bold" size={16} />
+				<span class="font-body text-sm hidden sm:inline">Back</span>
+			</button>
+		</div>
+	</PageHeader>
 
-	<main class="max-w-4xl mx-auto p-4 space-y-6 pt-6">
-		<!-- Routine Overview Card -->
-		<div class="bg-gray-800/40 border border-gray-700/50 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-			<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-				<div class="flex-1">
-					<div class="flex items-center gap-3 mb-2">
-						<h1 class="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-							{data.routine.name}
-						</h1>
-						{#if data.user && data.user.id === data.routine.userId}
-							<a
-								href="/routine/{data.routine.id}/edit"
-								class="p-2 text-gray-500 hover:text-white transition-colors"
-								aria-label="Edit routine"
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-									<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-								</svg>
-							</a>
+	<main class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+		<!-- Hero Section -->
+		<section class="mb-8 pb-6 border-b-2 border-accent-track">
+			<div class="flex items-baseline gap-4 mb-3">
+				<span class="text-text-muted text-sm uppercase tracking-widest font-body">Routine</span>
+				<div class="flex-1 h-px bg-accent-track"></div>
+				{#if data.routine.isCustom}
+					<span class="shrink-0 px-2 py-0.5 bg-accent-primary/10 border border-accent-primary/30 text-accent-primary font-mono text-xs">CUSTOM</span>
+				{/if}
+			</div>
+			<h1 class="font-display text-5xl sm:text-6xl text-text-primary tracking-wide leading-none mb-4">
+				{data.routine.name.toUpperCase()}
+			</h1>
+			{#if data.routine.description}
+				<p class="font-body text-text-secondary text-lg leading-relaxed max-w-2xl">
+					{data.routine.description}
+				</p>
+			{/if}
+		</section>
+
+		<!-- Stats Grid -->
+		<section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+			<div class="bg-surface p-4 border-t-4 border-t-accent-primary" style="box-shadow: var(--shadow-elevated);">
+				<div class="flex items-center gap-2 mb-2">
+					<Clock weight="duotone" size={18} class="text-accent-primary" />
+					<span class="font-body text-text-muted text-xs uppercase tracking-wider">Duration</span>
+				</div>
+				<div class="flex items-baseline gap-1">
+					<span class="font-display text-3xl text-accent-primary">
+						{#if data.estimatedDuration}
+							{data.estimatedDuration >= 60 ? Math.round(data.estimatedDuration / 60) : data.estimatedDuration}
+						{:else}
+							--
 						{/if}
-					</div>
-					<p class="text-gray-400 leading-relaxed">{data.routine.description || 'No description provided.'}</p>
+					</span>
+					<span class="font-mono text-sm text-text-muted">{data.estimatedDuration && data.estimatedDuration >= 60 ? 'min' : 's'}</span>
 				</div>
-				
-				<div class="grid grid-cols-2 gap-3 flex-shrink-0">
-					{#if data.estimatedDuration}
-						<div class="bg-gray-900/50 border border-white/5 rounded-xl p-3 flex flex-col items-center justify-center min-w-[100px]">
-							<span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Time</span>
-							<span class="text-lg font-bold font-mono text-emerald-400">
-								~{data.estimatedDuration >= 60 ? Math.round(data.estimatedDuration / 60) + 'm' : data.estimatedDuration + 's'}
-							</span>
+			</div>
+
+			<div class="bg-surface p-4 border-t-4 border-t-accent-secondary" style="box-shadow: var(--shadow-elevated);">
+				<div class="flex items-center gap-2 mb-2">
+					<Stack weight="duotone" size={18} class="text-accent-secondary" />
+					<span class="font-body text-text-muted text-xs uppercase tracking-wider">Total Sets</span>
+				</div>
+				<div class="flex items-baseline gap-1">
+					<span class="font-display text-3xl text-accent-secondary">{totalSets}</span>
+					<span class="font-mono text-sm text-text-muted">sets</span>
+				</div>
+			</div>
+
+			<div class="bg-surface p-4 border-t-4 border-t-accent-warm" style="box-shadow: var(--shadow-elevated);">
+				<div class="flex items-center gap-2 mb-2">
+					<Timer weight="duotone" size={18} class="text-accent-warm" />
+					<span class="font-body text-text-muted text-xs uppercase tracking-wider">Rest (Sets)</span>
+				</div>
+				<div class="flex items-baseline gap-1">
+					<span class="font-display text-3xl text-accent-warm">{data.routine.restBetweenSets}</span>
+					<span class="font-mono text-sm text-text-muted">s</span>
+				</div>
+			</div>
+
+			<div class="bg-surface p-4 border-t-4 border-t-accent-cream" style="box-shadow: var(--shadow-elevated);">
+				<div class="flex items-center gap-2 mb-2">
+					<ArrowsLeftRight weight="duotone" size={18} class="text-accent-cream" />
+					<span class="font-body text-text-muted text-xs uppercase tracking-wider">Rest (Mvmt)</span>
+				</div>
+				<div class="flex items-baseline gap-1">
+					<span class="font-display text-3xl text-accent-cream">{data.routine.restBetweenMovements}</span>
+					<span class="font-mono text-sm text-text-muted">s</span>
+				</div>
+			</div>
+		</section>
+
+		<!-- Settings Tags -->
+		<section class="flex flex-wrap gap-2 mb-8">
+			{#if data.routine.autoAdvance}
+				<span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-primary/10 border border-accent-primary/30 text-accent-primary text-sm">
+					<Lightning weight="duotone" size={14} />
+					<span class="font-mono text-xs uppercase tracking-wider">Auto-Play</span>
+				</span>
+			{/if}
+			{#if data.routine.audioEnabled}
+				<span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-elevated border border-accent-track text-text-secondary text-sm">
+					<SpeakerHigh weight="duotone" size={14} class="text-accent-secondary" />
+					<span class="font-mono text-xs uppercase tracking-wider">Audio</span>
+				</span>
+			{/if}
+			{#if data.routine.keepAwake}
+				<span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-warm/10 border border-accent-warm/30 text-accent-warm text-sm">
+					<Sun weight="duotone" size={14} />
+					<span class="font-mono text-xs uppercase tracking-wider">Keep Awake</span>
+				</span>
+			{/if}
+			{#if data.equipment && data.equipment.length > 0}
+				{#each data.equipment as item}
+					<span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-accent-track text-text-secondary text-sm">
+						<Barbell weight="duotone" size={14} class="text-text-muted" />
+						<span class="font-body text-sm">{item}</span>
+					</span>
+				{/each}
+			{/if}
+		</section>
+
+		<!-- Timeline Section -->
+		<section class="mb-8">
+			<div class="flex items-baseline gap-4 mb-6">
+				<h2 class="font-display text-3xl text-text-primary tracking-wider">TIMELINE</h2>
+				<div class="flex-1 h-px bg-accent-track"></div>
+				<span class="font-mono text-sm text-text-muted">{totalMovements} movements</span>
+			</div>
+
+			<div class="space-y-4">
+				{#each data.routine.movements as rm, index (rm.id)}
+					<div class="group relative bg-surface border-t-4 border-t-accent-primary hover:-translate-y-0.5 transition-all duration-200" style="box-shadow: var(--shadow-elevated);">
+						<!-- Blue glow on hover -->
+						<div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style="box-shadow: inset 0 0 30px rgba(91, 141, 184, 0.1);"></div>
+						
+						<div class="p-5">
+							<div class="flex items-start gap-4">
+								<!-- Index Badge -->
+								<div class="w-12 h-12 bg-surface-elevated flex items-center justify-center shrink-0">
+									<span class="font-mono text-lg text-accent-primary">{String(index + 1).padStart(2, '0')}</span>
+								</div>
+
+								<!-- Content -->
+								<div class="flex-1 min-w-0">
+									<div class="flex items-start justify-between gap-3 mb-3">
+										<div>
+											<h3 class="font-title text-xl text-text-primary group-hover:text-accent-primary transition-colors leading-tight mb-1">
+												{rm.movement.name}
+											</h3>
+									<div class="flex items-center gap-2 text-text-muted text-sm">
+										{#if rm.movement.type === 'timed'}
+											<Timer weight="duotone" size={14} class="text-accent-primary" />
+										{:else if rm.movement.type === 'reps'}
+											<Stack weight="duotone" size={14} class="text-accent-primary" />
+										{:else if rm.movement.type === 'weighted'}
+											<Barbell weight="duotone" size={14} class="text-accent-primary" />
+										{:else}
+											<PersonSimple weight="duotone" size={14} class="text-accent-primary" />
+										{/if}
+										<span class="font-body capitalize">{getTypeLabel(rm.movement.type)}</span>
+									</div>
+										</div>
+
+										<!-- Tags -->
+										<div class="flex items-center gap-1.5 shrink-0">
+											{#if rm.isBilateral}
+												<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-secondary/10 text-accent-secondary text-xs font-mono">
+													<ArrowsLeftRight weight="bold" size={10} />
+													L/R
+												</span>
+											{/if}
+											<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-elevated text-text-muted text-xs font-mono">
+												<Stack weight="bold" size={10} />
+												{rm.sets} sets
+											</span>
+										</div>
+									</div>
+
+									<!-- Target Info -->
+									{#if formatTarget(rm)}
+										<div class="flex items-center gap-4 mb-3">
+											<div class="flex items-baseline gap-1">
+												<span class="font-display text-2xl text-accent-primary">{rm.target.value}</span>
+												<span class="font-mono text-xs text-text-muted">{rm.target.unit || ''}</span>
+												<span class="font-body text-xs text-text-muted uppercase tracking-wider ml-1">target</span>
+											</div>
+											{#if formatWeight(rm)}
+												<div class="w-px h-6 bg-accent-track"></div>
+												<div class="flex items-baseline gap-1">
+													<span class="font-display text-lg text-accent-warm">{rm.weight}</span>
+													<span class="font-mono text-xs text-text-muted">{rm.weightUnit || 'kg'}</span>
+												</div>
+											{/if}
+										</div>
+									{/if}
+
+									<!-- Notes -->
+									{#if rm.notes}
+										<p class="font-body text-text-secondary text-sm leading-relaxed bg-surface-elevated p-3 border-l-2 border-accent-track">
+											{rm.notes}
+										</p>
+									{/if}
+
+									<!-- Bilateral Info -->
+									{#if rm.isBilateral && rm.switchSidesDuration}
+										<div class="flex items-center gap-2 mt-3 text-text-muted text-sm">
+											<ArrowsLeftRight weight="duotone" size={14} class="text-accent-warm" />
+											<span class="font-body">Switch sides: <span class="font-mono text-accent-warm">{rm.switchSidesDuration}s</span></span>
+										</div>
+									{/if}
+								</div>
+							</div>
 						</div>
-					{/if}
-					<div class="bg-gray-900/50 border border-white/5 rounded-xl p-3 flex flex-col items-center justify-center min-w-[100px]">
-						<span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Sets</span>
-						<span class="text-lg font-bold font-mono text-blue-400">{totalSets}</span>
 					</div>
-					<div class="bg-gray-900/50 border border-white/5 rounded-xl p-3 flex flex-col items-center justify-center min-w-[100px]">
-						<span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Rest (sets)</span>
-						<span class="text-lg font-bold font-mono text-amber-400">{data.routine.restBetweenSets}s</span>
-					</div>
-					<div class="bg-gray-900/50 border border-white/5 rounded-xl p-3 flex flex-col items-center justify-center min-w-[100px]">
-						<span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Rest (mvmt)</span>
-						<span class="text-lg font-bold font-mono text-orange-400">{data.routine.restBetweenMovements}s</span>
-					</div>
-				</div>
+				{/each}
 			</div>
+		</section>
 
-			<div class="mt-6 flex flex-wrap gap-2">
-				{#if data.routine.autoAdvance}
-					<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-bold">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
-							<path fill-rule="evenodd" d="M15.312 11.424a1 1 0 010 1.152l-5.996 5.718a1 1 0 01-1.634-.768v-11.45a1 1 0 011.634-.768l5.996 5.718z" clip-rule="evenodd" />
-						</svg>
-						Auto-play
-					</span>
-				{/if}
-				{#if data.routine.audioEnabled}
-					<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full text-xs font-bold">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
-							<path d="M10 3.75a.75.75 0 00-1.264-.546L5.203 6.48H3.5a1.75 1.75 0 00-1.75 1.75v3.5c0 .966.784 1.75 1.75 1.75h1.703l3.533 3.276a.75.75 0 001.264-.546V3.75z" />
-						</svg>
-						Audio
-					</span>
-				{/if}
-				{#if data.routine.keepAwake}
-					<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-bold">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
-							<path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.403a.75.75 0 10-1.06 1.061l1.061 1.06a.75.75 0 101.061-1.06l-1.061-1.061zM6.464 14.596a.75.75 0 101.06-1.061l-1.06-1.061a.75.75 0 00-1.061 1.06l1.061 1.061zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.061l-1.061-1.06a.75.75 0 10-1.061 1.06l1.061 1.061zM5.403 6.464a.75.75 0 001.061 1.06l1.06-1.061a.75.75 0 00-1.06-1.061l-1.061 1.06z" />
-						</svg>
-						Keep Awake
-					</span>
-				{/if}
-				{#if data.equipment && data.equipment.length > 0}
-					{#each data.equipment as item}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-700/50 text-gray-300 border border-white/5 rounded-full text-xs font-bold">
-							📦 {item}
-						</span>
-					{/each}
+		<!-- Bottom Actions -->
+		<section class="pt-6 border-t-2 border-accent-track">
+			<div class="flex items-center justify-between">
+				<button
+					onclick={handleBack}
+					class="inline-flex items-center gap-2 text-text-muted hover:text-accent-primary transition-colors font-body uppercase tracking-wider text-sm"
+				>
+					<ArrowLeft weight="bold" size={16} />
+					Back to Routines
+				</button>
+
+				{#if data.user && data.user.id === data.routine.userId}
+					<a
+						href="/routine/{data.routine.id}/edit"
+						class="inline-flex items-center gap-2 px-6 py-3 bg-accent-primary text-white hover:bg-accent-primary-light transition-colors font-display text-lg tracking-widest"
+					>
+						<PencilSimple weight="bold" size={18} />
+						EDIT ROUTINE
+					</a>
 				{/if}
 			</div>
-		</div>
-
-		<div class="space-y-4">
-			<h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest px-1">Timeline</h2>
-			
-			{#each data.routine.movements as rm, index (rm.id)}
-				<PreviewMovementBlock
-					movementIndex={index}
-					routineMovementId={rm.id}
-					movementName={rm.movement.name}
-					movementType={rm.movement.type}
-					description={rm.movement.description}
-					targetValue={rm.target.value}
-					sets={rm.sets}
-					isBilateral={rm.isBilateral}
-					switchSidesDuration={rm.switchSidesDuration}
-					weight={rm.weight}
-					weightUnit={rm.weightUnit}
-					notes={rm.notes}
-					restBetweenSetsDuration={data.routine.restBetweenSets}
-					previousStats={data.previousStatsMap?.[rm.id]}
-				/>
-			{/each}
-		</div>
+		</section>
 	</main>
 
-	<!-- Fixed bottom button -->
-	<div class="fixed bottom-0 left-0 right-0 p-6 bg-gray-950/80 border-t border-white/5 backdrop-blur-xl z-30">
-		<div class="max-w-4xl mx-auto">
+	<!-- Fixed bottom Start Practice button -->
+	<div class="fixed bottom-0 left-0 right-0 p-6 bg-base/95 border-t-2 border-accent-track backdrop-blur-sm z-30">
+		<div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
 			<form method="POST" action="?/startPractice" use:enhance>
 				<button
 					type="submit"
-					class="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] hover:bg-right text-white h-16 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98]"
+					class="group w-full bg-accent-primary text-white hover:bg-accent-primary-light transition-all duration-150 h-16 font-display text-xl tracking-widest flex items-center justify-center gap-3"
+					style="box-shadow: var(--shadow-floating);"
 				>
-					Start Practice
+					<Play weight="fill" size={24} class="group-hover:scale-110 transition-transform" />
+					START PRACTICE
+					<CaretRight weight="bold" size={20} />
 				</button>
 			</form>
 		</div>
 	</div>
+
+	<!-- Footer (add padding to clear fixed button) -->
+	<footer class="border-t-2 border-accent-track mt-8 mb-24">
+		<div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+			<p class="text-text-muted text-sm text-center font-body">
+				STRTCHY — MOVE BETTER
+			</p>
+		</div>
+	</footer>
 </div>
 
 <style>
 	:global(body) {
-		background: #0a0a0a;
+		background: var(--color-base);
 	}
 </style>

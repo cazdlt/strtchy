@@ -1,4 +1,7 @@
 <script lang="ts">
+	import PageHeader from '../../components/ui/PageHeader.svelte';
+	import { Key, Copy, Check, ArrowRight, UserCircle } from 'phosphor-svelte';
+	
 	let { data, form } = $props();
 	let email = $state('');
 	let password = $state('');
@@ -13,119 +16,143 @@
 	}
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-900 to-black p-4">
-	<div class="w-full max-w-md">
-		<div class="bg-zinc-800/50 backdrop-blur-sm rounded-2xl p-8 border border-zinc-700">
-			<div class="text-center mb-8">
-				<div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-600/20 rounded-full mb-4">
-					<svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-					</svg>
-				</div>
-				<h1 class="text-3xl font-bold text-white mb-2">Welcome back</h1>
-				<p class="text-zinc-400">Sign in to continue your recovery journey</p>
-			</div>
+<svelte:head>
+	<title>Sign In — Strtchy</title>
+</svelte:head>
 
-			{#if data.registered}
-				<div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg text-sm mb-4">
-					Account created successfully! Please sign in.
+<div class="min-h-screen bg-base">
+	<PageHeader user={null} showNav={false} />
+
+	<main class="flex-1 flex items-center justify-center px-6 py-12">
+		<div class="w-full max-w-md">
+			<!-- Card -->
+			<div 
+				class="bg-surface p-8 sm:p-10 border-t-4 border-t-accent-primary"
+				style="box-shadow: var(--shadow-elevated);"
+			>
+				<!-- Header -->
+				<div class="mb-8">
+					<div class="flex items-baseline gap-3 mb-2">
+						<span class="text-text-muted text-sm uppercase tracking-widest font-body">Welcome back</span>
+						<div class="flex-1 h-px bg-accent-track"></div>
+					</div>
+					<h1 class="font-display text-4xl text-text-primary tracking-wide">
+						SIGN IN
+					</h1>
 				</div>
-			{/if}
-			
-			{#if data.apiKey}
-				<div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
-					<div class="flex items-start gap-3">
-						<svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-						</svg>
-						<div class="flex-1 min-w-0">
-							<p class="text-blue-400 font-semibold text-sm mb-2">
-								Your API Key
-							</p>
-							<p class="text-blue-300 text-xs mb-3">
-								This is your API key for programmatic access. Copy it now - it won't be shown again!
-							</p>
-							<div class="bg-zinc-900/80 rounded-lg p-3 font-mono text-sm text-blue-300 break-all mb-2">
-								{data.apiKey}
+
+				<!-- Success Message -->
+				{#if data.registered}
+					<div class="mb-6 bg-success/10 border border-success/20 px-4 py-3">
+						<p class="text-success text-sm font-body">Account created successfully! Please sign in.</p>
+					</div>
+				{/if}
+				
+				<!-- API Key Notice -->
+				{#if data.apiKey}
+					<div class="mb-6 bg-accent-primary/10 border-2 border-accent-primary/30 p-4">
+						<div class="flex items-start gap-3">
+							<Key weight="duotone" size={20} class="text-accent-primary mt-0.5 shrink-0" />
+							<div class="flex-1 min-w-0">
+								<p class="text-accent-primary font-title text-sm mb-1">
+									Your API Key
+								</p>
+								<p class="text-text-muted text-xs mb-3 font-body">
+									Copy it now — it won't be shown again!
+								</p>
+								<div class="bg-inset p-3 font-mono text-sm text-accent-primary-light break-all mb-2">
+									{data.apiKey}
+								</div>
+								<button
+									onclick={copyApiKey}
+									class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary border-2 border-accent-primary/50 transition-all duration-150 font-body text-sm"
+								>
+									{#if copied}
+										<Check weight="bold" size={16} />
+										Copied!
+									{:else}
+										<Copy weight="duotone" size={16} />
+										Copy to clipboard
+									{/if}
+								</button>
 							</div>
-							<button
-								onclick={copyApiKey}
-								class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-600/50 rounded-lg py-2 px-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
-							>
-								{#if copied}
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-									</svg>
-									Copied!
-								{:else}
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-									</svg>
-									Copy to clipboard
-								{/if}
-							</button>
 						</div>
 					</div>
-				</div>
-			{/if}
-
-			<form method="POST" class="space-y-4">
-				{#if form?.missing}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-						Please fill in all fields
-					</div>
 				{/if}
 
-				{#if form?.credentials}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-						Invalid email or password
+				<form method="POST" class="space-y-5">
+					<!-- Error Messages -->
+					{#if form?.missing}
+						<div class="bg-error/10 border border-error/20 px-4 py-3">
+							<p class="text-error text-sm font-body">Please fill in all fields</p>
+						</div>
+					{/if}
+
+					{#if form?.credentials}
+						<div class="bg-error/10 border border-error/20 px-4 py-3">
+							<p class="text-error text-sm font-body">Invalid email or password</p>
+						</div>
+					{/if}
+
+					{#if form?.invalid}
+						<div class="bg-error/10 border border-error/20 px-4 py-3">
+							<p class="text-error text-sm font-body">Invalid input provided</p>
+						</div>
+					{/if}
+
+					<!-- Email -->
+					<div>
+						<label for="email" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+							Email
+						</label>
+						<input
+							id="email"
+							name="email"
+							type="email"
+							bind:value={email}
+							class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							placeholder="you@example.com"
+							required
+						/>
 					</div>
-				{/if}
 
-				{#if form?.invalid}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-						Invalid input provided
+					<!-- Password -->
+					<div>
+						<label for="password" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+							Password
+						</label>
+						<input
+							id="password"
+							name="password"
+							type="password"
+							bind:value={password}
+							class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							placeholder="••••••••"
+							required
+						/>
 					</div>
-				{/if}
 
-				<div>
-					<label for="email" class="block text-sm font-medium text-zinc-300 mb-2">Email</label>
-					<input
-						id="email"
-						name="email"
-						type="email"
-						bind:value={email}
-						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-						placeholder="john@example.com"
-						required
-					/>
+					<!-- Submit -->
+					<button
+						type="submit"
+						class="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent-primary text-white hover:bg-accent-primary-light transition-all duration-150 font-display text-lg tracking-widest uppercase"
+					>
+						<UserCircle weight="duotone" size={20} />
+						Sign In
+						<ArrowRight weight="bold" size={20} />
+					</button>
+				</form>
+
+				<!-- Footer -->
+				<div class="mt-8 pt-6 border-t border-accent-track">
+					<p class="text-center text-text-muted text-sm font-body">
+						Don't have an account?
+						<a href="/register" class="text-accent-primary hover:text-accent-primary-light transition-colors font-semibold">
+							Create one
+						</a>
+					</p>
 				</div>
-
-				<div>
-					<label for="password" class="block text-sm font-medium text-zinc-300 mb-2">Password</label>
-					<input
-						id="password"
-						name="password"
-						type="password"
-						bind:value={password}
-						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-						placeholder="••••••••"
-						required
-					/>
-				</div>
-
-				<button
-					type="submit"
-					class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-zinc-800"
-				>
-					Sign In
-				</button>
-			</form>
-
-			<p class="mt-6 text-center text-zinc-400 text-sm">
-				Don't have an account?
-				<a href="/register" class="text-emerald-400 hover:text-emerald-300 font-medium">Create one</a>
-			</p>
+			</div>
 		</div>
-	</div>
+	</main>
 </div>

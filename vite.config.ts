@@ -47,4 +47,7 @@ export default defineConfig({
   ssr: {
     noExternal: ["phosphor-svelte"],
   },
+  preview: {
+    allowedHosts: ["localhost", "floresta.local", "floresta"],
+  },
 });

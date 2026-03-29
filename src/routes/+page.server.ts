@@ -1,15 +1,30 @@
 import { db } from "$lib/db";
-import { routines, practiceLogs, movements } from "$lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { routines, practiceLogs, movements, routineMovements } from "$lib/db/schema";
+import { desc, eq, count, sql } from "drizzle-orm";
 import { formatDuration, getRelativeTime } from "$lib/utils/formatting";
 import { auth } from "$lib/auth";
 import { redirect } from "@sveltejs/kit";
 
 export async function load({ locals }: { locals: App.Locals }) {
-  // Get all routines
+  // Get all routines with movement counts
   const allRoutines = await db
-    .select()
+    .select({
+      id: routines.id,
+      name: routines.name,
+      description: routines.description,
+      userId: routines.userId,
+      restBetweenMovements: routines.restBetweenMovements,
+      restBetweenSets: routines.restBetweenSets,
+      autoAdvance: routines.autoAdvance,
+      audioEnabled: routines.audioEnabled,
+      keepAwake: routines.keepAwake,
+      isCustom: routines.isCustom,
+      createdAt: routines.createdAt,
+      movementCount: sql<number>`count(${routineMovements.id})`.as("movement_count"),
+    })
     .from(routines)
+    .leftJoin(routineMovements, eq(routines.id, routineMovements.routineId))
+    .groupBy(routines.id)
     .orderBy(desc(routines.createdAt));
 
   // Get movements for home page preview

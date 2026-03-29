@@ -1,5 +1,22 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
+	import PageHeader from '../../components/ui/PageHeader.svelte';
+	import { 
+		User, 
+		Gear, 
+		Key, 
+		Lock, 
+		Trash, 
+		SignOut,
+		Copy,
+		Check,
+		ArrowClockwise,
+		Plus,
+		Barbell,
+		ListChecks,
+		PersonSimple,
+		Clock
+	} from 'phosphor-svelte';
 	
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	
@@ -26,8 +43,6 @@
 	let deleteConfirmText = $state('');
 	
 	// API key state
-	let showNewApiKey = $state(false);
-	let newApiKey = $state('');
 	let copiedApiKey = $state(false);
 	let showRotateConfirm = $state(false);
 	
@@ -59,486 +74,577 @@
 	
 	// Copy API key to clipboard
 	function copyApiKey() {
-		navigator.clipboard.writeText(newApiKey);
-		copiedApiKey = true;
-		setTimeout(() => copiedApiKey = false, 2000);
+		if (form?.apiKey) {
+			navigator.clipboard.writeText(form.apiKey);
+			copiedApiKey = true;
+			setTimeout(() => copiedApiKey = false, 2000);
+		}
 	}
 </script>
 
 <svelte:head>
-	<title>Profile - Strtchy</title>
+	<title>Profile — Strtchy</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
-	<header class="p-6 border-b border-gray-800">
-		<div class="max-w-4xl mx-auto flex items-center justify-between">
-			<div class="flex items-center gap-4">
-			<a href="/" class="text-emerald-500 hover:text-emerald-400 transition-colors" aria-label="Go back">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="m12 19-7-7 7-7"/>
-					<path d="M19 12H5"/>
-				</svg>
-			</a>
-				<h1 class="text-xl font-semibold">Your Profile</h1>
-			</div>
-		</div>
-	</header>
+<div class="min-h-screen bg-base">
+	<PageHeader user={data.user} showNav={true} />
 
-	<main class="max-w-4xl mx-auto p-6 space-y-8">
-		<!-- Profile Header with Avatar -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+	<main class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+		<!-- Hero Section -->
+		<section class="mb-10 pb-6 border-b-2 border-accent-track">
 			<div class="flex items-start gap-6">
-				<div class="text-6xl bg-gray-900/50 rounded-2xl p-4 border border-gray-700">
+				<!-- Avatar -->
+				<div 
+					class="w-24 h-24 sm:w-28 sm:h-28 bg-surface flex items-center justify-center text-5xl border-t-4 border-t-accent-primary shrink-0"
+					style="box-shadow: var(--shadow-elevated);"
+				>
 					{avatar}
 				</div>
-				<div class="flex-1">
-					<h2 class="text-2xl font-bold mb-1">{data.user.name || 'Anonymous'}</h2>
-					<p class="text-gray-400 mb-2">@{data.user.username || data.user.email.split('@')[0]}</p>
-					<p class="text-gray-500 text-sm">Member since {formatDate(data.user.createdAt)}</p>
+				
+				<div class="flex-1 min-w-0 pt-1">
+					<div class="flex items-baseline gap-3 mb-1">
+						<span class="text-text-muted text-sm uppercase tracking-widest font-body">Member since {formatDate(data.user.createdAt)}</span>
+						<div class="flex-1 h-px bg-accent-track hidden sm:block"></div>
+					</div>
+					<h1 class="font-display text-4xl sm:text-5xl text-text-primary tracking-wide mb-2">
+						{data.user.name || 'Your Profile'}
+					</h1>
+					<p class="text-text-secondary font-body">@{data.user.username || data.user.email.split('@')[0]}</p>
 				</div>
 			</div>
-		</div>
 
-		<!-- Statistics -->
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-			<div class="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 text-center">
-				<p class="text-3xl font-bold text-emerald-500">{data.stats.practicesCompleted}</p>
-				<p class="text-gray-400 text-sm">Practices</p>
+			<!-- Stats Bar -->
+			<div class="flex flex-wrap items-center gap-6 sm:gap-8 mt-8 pt-6 border-t border-accent-track">
+				<div class="flex items-baseline gap-2">
+					<Barbell weight="duotone" size={18} class="text-accent-primary" />
+					<span class="font-display text-3xl text-accent-primary">{data.stats.routinesCreated}</span>
+					<span class="text-text-muted text-sm uppercase tracking-wider font-body">routines</span>
+				</div>
+				<div class="w-px h-8 bg-accent-track hidden sm:block"></div>
+				<div class="flex items-baseline gap-2">
+					<ListChecks weight="duotone" size={18} class="text-accent-secondary" />
+					<span class="font-display text-3xl text-accent-secondary">{data.stats.practicesCompleted}</span>
+					<span class="text-text-muted text-sm uppercase tracking-wider font-body">sessions</span>
+				</div>
+				<div class="w-px h-8 bg-accent-track hidden sm:block"></div>
+				<div class="flex items-baseline gap-2">
+					<PersonSimple weight="duotone" size={18} class="text-accent-warm" />
+					<span class="font-display text-3xl text-accent-warm">{data.stats.movementsCreated}</span>
+					<span class="text-text-muted text-sm uppercase tracking-wider font-body">movements</span>
+				</div>
+				<div class="w-px h-8 bg-accent-track hidden sm:block"></div>
+				<div class="flex items-baseline gap-2">
+					<Clock weight="duotone" size={18} class="text-text-muted" />
+					<span class="font-display text-3xl text-text-primary">{formatDuration(data.stats.totalPracticeTime)}</span>
+					<span class="text-text-muted text-sm uppercase tracking-wider font-body">total time</span>
+				</div>
 			</div>
-			<div class="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 text-center">
-				<p class="text-3xl font-bold text-blue-500">{data.stats.routinesCreated}</p>
-				<p class="text-gray-400 text-sm">Routines</p>
-			</div>
-			<div class="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 text-center">
-				<p class="text-3xl font-bold text-purple-500">{data.stats.movementsCreated}</p>
-				<p class="text-gray-400 text-sm">Movements</p>
-			</div>
-			<div class="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 text-center">
-				<p class="text-3xl font-bold text-orange-500">{formatDuration(data.stats.totalPracticeTime)}</p>
-				<p class="text-gray-400 text-sm">Total Time</p>
-			</div>
-		</div>
+		</section>
 
-		<!-- Profile Information Form -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-			<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500">
-					<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-					<circle cx="12" cy="7" r="4"/>
-				</svg>
-				Profile Information
-			</h3>
+		<!-- Profile Information -->
+		<section class="mb-10">
+			<div class="flex items-center justify-between mb-6 pb-4 border-b border-accent-track">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 bg-accent-primary/10 flex items-center justify-center">
+						<User weight="duotone" size={20} class="text-accent-primary" />
+					</div>
+					<h2 class="font-display text-2xl text-text-primary tracking-wider">
+						PROFILE INFORMATION
+					</h2>
+				</div>
+			</div>
 			
-			<form method="POST" action="?/updateProfile" class="space-y-4">
-				{#if form?.message && form?.success}
-					<div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg">
-						{form.message}
+			<div 
+				class="bg-surface p-6 sm:p-8 border-t-4 border-t-accent-primary"
+				style="box-shadow: var(--shadow-elevated);"
+			>
+				<form method="POST" action="?/updateProfile" class="space-y-6">
+					{#if form?.message && form?.success}
+						<div class="bg-success/10 border border-success/20 px-4 py-3">
+							<p class="text-success text-sm font-body">{form.message}</p>
+						</div>
+					{/if}
+					
+					{#if form?.error && !isPasswordError(form?.error)}
+						<div class="bg-error/10 border border-error/20 px-4 py-3">
+							<p class="text-error text-sm font-body">{form.error}</p>
+						</div>
+					{/if}
+					
+					<div class="grid sm:grid-cols-2 gap-5">
+						<div>
+							<label for="name" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+								Display Name
+							</label>
+							<input
+								type="text"
+								id="name"
+								name="name"
+								bind:value={name}
+								class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+								placeholder="Your name"
+							/>
+						</div>
+						
+						<div>
+							<label for="username" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+								Username
+							</label>
+							<input
+								type="text"
+								id="username"
+								name="username"
+								bind:value={username}
+								class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+								placeholder="username"
+							/>
+						</div>
 					</div>
-				{/if}
-				
-				{#if form?.error && form?.error !== 'All password fields are required' && form?.error !== 'Invalid password data' && form?.error !== 'New passwords do not match' && form?.error !== 'Password must be at least 6 characters' && form?.error !== 'Current password is incorrect' && form?.error !== 'Cannot change password for this account' && form?.error !== 'Failed to change password' && form?.error !== 'Please type DELETE to confirm account deletion'}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg">
-						{form.error}
+					
+					<div>
+						<span class="block text-sm font-body text-text-secondary mb-3 uppercase tracking-wider">
+							Avatar
+						</span>
+						<div class="flex gap-2 flex-wrap">
+							{#each avatarOptions as emoji}
+								<button
+									type="button"
+									onclick={() => avatar = emoji}
+									aria-label="Select {emoji} as avatar"
+									aria-pressed={avatar === emoji}
+									class="text-2xl p-3 border-2 transition-all {avatar === emoji ? 'border-accent-primary bg-accent-primary/20' : 'border-accent-track hover:border-accent-primary hover:bg-surface-elevated'}"
+								>
+									{emoji}
+								</button>
+							{/each}
+						</div>
+						<input type="hidden" name="avatar" bind:value={avatar} />
 					</div>
-				{/if}
-				
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-300 mb-1">Display Name</label>
-					<input
-						type="text"
-						id="name"
-						name="name"
-						bind:value={name}
-						class="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-						placeholder="Your name"
-					/>
-				</div>
-				
-				<div>
-					<label for="username" class="block text-sm font-medium text-gray-300 mb-1">Username</label>
-					<input
-						type="text"
-						id="username"
-						name="username"
-						bind:value={username}
-						class="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-						placeholder="username"
-					/>
-				</div>
-				
-				<div>
-					<span class="block text-sm font-medium text-gray-300 mb-2">Avatar</span>
-					<div class="flex gap-2 flex-wrap">
-						{#each avatarOptions as emoji}
-							<button
-								type="button"
-								onclick={() => avatar = emoji}
-								aria-label="Select {emoji} as avatar"
-								aria-pressed={avatar === emoji}
-								class="text-2xl p-2 rounded-lg border transition-all {avatar === emoji ? 'border-emerald-500 bg-emerald-500/20' : 'border-gray-700 hover:border-gray-600 hover:bg-gray-800'}"
-							>
-								{emoji}
-							</button>
-						{/each}
-					</div>
-					<input type="hidden" name="avatar" bind:value={avatar} />
-				</div>
-				
-				<button
-					type="submit"
-					class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium"
-				>
-					Save Profile
-				</button>
-			</form>
-		</div>
+					
+					<button
+						type="submit"
+						class="inline-flex items-center gap-2 px-6 py-3 bg-accent-primary text-white hover:bg-accent-primary-light transition-all duration-150 font-display text-base tracking-widest uppercase"
+					>
+						Save Profile
+					</button>
+				</form>
+			</div>
+		</section>
 
-		<!-- Preferences Form -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-			<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
-					<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-					<circle cx="12" cy="12" r="3"/>
-				</svg>
-				Preferences
-			</h3>
-			
-			<form method="POST" action="?/updatePreferences" class="space-y-4">
-				<div class="space-y-3">
-					<label class="flex items-center gap-3 cursor-pointer">
-						<input
-							type="checkbox"
-							name="autoAdvance"
-							bind:checked={preferences.autoAdvance}
-							class="w-5 h-5 rounded border-gray-600 text-emerald-600 focus:ring-emerald-500"
-						/>
-						<span class="text-gray-300">Auto-advance to next exercise</span>
-					</label>
-					
-					<label class="flex items-center gap-3 cursor-pointer">
-						<input
-							type="checkbox"
-							name="audioEnabled"
-							bind:checked={preferences.audioEnabled}
-							class="w-5 h-5 rounded border-gray-600 text-emerald-600 focus:ring-emerald-500"
-						/>
-						<span class="text-gray-300">Enable audio cues</span>
-					</label>
-					
-					<label class="flex items-center gap-3 cursor-pointer">
-						<input
-							type="checkbox"
-							name="keepAwake"
-							bind:checked={preferences.keepAwake}
-							class="w-5 h-5 rounded border-gray-600 text-emerald-600 focus:ring-emerald-500"
-						/>
-						<span class="text-gray-300">Keep screen awake during practice</span>
-					</label>
+		<!-- Preferences -->
+		<section class="mb-10">
+			<div class="flex items-center justify-between mb-6 pb-4 border-b border-accent-track">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 bg-accent-secondary/10 flex items-center justify-center">
+						<Gear weight="duotone" size={20} class="text-accent-secondary" />
+					</div>
+					<h2 class="font-display text-2xl text-text-primary tracking-wider">
+						PREFERENCES
+					</h2>
 				</div>
-				
-				<button
-					type="submit"
-					class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
-				>
-					Save Preferences
-				</button>
-			</form>
-		</div>
+			</div>
+			
+			<div 
+				class="bg-surface p-6 sm:p-8 border-t-4 border-t-accent-secondary"
+				style="box-shadow: var(--shadow-elevated);"
+			>
+				<form method="POST" action="?/updatePreferences" class="space-y-5">
+					<div class="space-y-4">
+						<label class="flex items-center gap-4 cursor-pointer group">
+							<input
+								type="checkbox"
+								name="autoAdvance"
+								bind:checked={preferences.autoAdvance}
+								class="w-5 h-5 border-2 border-accent-track bg-inset text-accent-primary focus:border-accent-primary focus:outline-none"
+							/>
+							<span class="text-text-secondary group-hover:text-text-primary transition-colors font-body">Auto-advance to next exercise</span>
+						</label>
+						
+						<label class="flex items-center gap-4 cursor-pointer group">
+							<input
+								type="checkbox"
+								name="audioEnabled"
+								bind:checked={preferences.audioEnabled}
+								class="w-5 h-5 border-2 border-accent-track bg-inset text-accent-primary focus:border-accent-primary focus:outline-none"
+							/>
+							<span class="text-text-secondary group-hover:text-text-primary transition-colors font-body">Enable audio cues</span>
+						</label>
+						
+						<label class="flex items-center gap-4 cursor-pointer group">
+							<input
+								type="checkbox"
+								name="keepAwake"
+								bind:checked={preferences.keepAwake}
+								class="w-5 h-5 border-2 border-accent-track bg-inset text-accent-primary focus:border-accent-primary focus:outline-none"
+							/>
+							<span class="text-text-secondary group-hover:text-text-primary transition-colors font-body">Keep screen awake during practice</span>
+						</label>
+					</div>
+					
+					<button
+						type="submit"
+						class="inline-flex items-center gap-2 px-6 py-3 bg-accent-secondary text-white hover:bg-accent-primary-light transition-all duration-150 font-display text-base tracking-widest uppercase"
+					>
+						Save Preferences
+					</button>
+				</form>
+			</div>
+		</section>
 
 		<!-- API Key Management -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-			<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500">
-					<path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-				</svg>
-				API Key
-			</h3>
-			
-			{#if form?.message && form?.apiKey}
-				<div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg mb-4">
-					<p class="font-medium mb-2">{form.message}</p>
-					<div class="bg-gray-900/80 rounded-lg p-3 font-mono text-sm text-emerald-300 break-all mb-2">
-						{form.apiKey}
+		<section class="mb-10">
+			<div class="flex items-center justify-between mb-6 pb-4 border-b border-accent-track">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 bg-accent-warm/10 flex items-center justify-center">
+						<Key weight="duotone" size={20} class="text-accent-warm" />
 					</div>
-					<button
-						onclick={copyApiKey}
-						class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-600/50 rounded-lg py-2 px-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
-					>
-						{#if copiedApiKey}
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M20 6 9 17l-5-5"/>
-							</svg>
-							Copied!
-						{:else}
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-								<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-							</svg>
-							Copy to clipboard
-						{/if}
-					</button>
+					<h2 class="font-display text-2xl text-text-primary tracking-wider">
+						API KEY
+					</h2>
 				</div>
-			{/if}
+			</div>
 			
-			{#if data.user.apiKeyHash}
-				<div class="space-y-3">
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-gray-400">Current Key</span>
-						<span class="text-sm font-mono bg-gray-900/50 px-3 py-1 rounded text-gray-300">
-							{data.user.apiKeyPrefix || 'strtchy_****...****'}
-						</span>
-					</div>
-					
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-gray-400">Created</span>
-						<span class="text-sm text-gray-300">{formatDate(data.user.apiKeyCreatedAt)}</span>
-					</div>
-					
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-gray-400">Last Used</span>
-						<span class="text-sm text-gray-300">{data.user.apiKeyLastUsedAt ? formatDate(data.user.apiKeyLastUsedAt) : 'Never'}</span>
-					</div>
-					
-					{#if !showRotateConfirm}
-						<button
-							onclick={() => showRotateConfirm = true}
-							class="w-full mt-3 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-600/50 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-								<path d="M3 3v5h5"/>
-								<path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-								<path d="M16 21h5v-5"/>
-							</svg>
-							Rotate API Key
-						</button>
-					{:else}
-						<div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mt-3">
-							<p class="text-red-400 text-sm mb-3">
-								Are you sure? This will invalidate your current API key immediately. Any applications using it will stop working.
-							</p>
-							<div class="flex gap-3">
-								<form method="POST" action="?/rotateApiKey" class="flex-1">
-									<button
-										type="submit"
-										class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
-									>
-										Yes, Rotate Key
-									</button>
-								</form>
-								<button
-									onclick={() => showRotateConfirm = false}
-									class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors text-sm"
-								>
-									Cancel
-								</button>
-							</div>
+			<div 
+				class="bg-surface p-6 sm:p-8 border-t-4 border-t-accent-warm"
+				style="box-shadow: var(--shadow-elevated);"
+			>
+				{#if form?.message && form?.apiKey}
+					<div class="bg-success/10 border border-success/20 p-4 mb-6">
+						<p class="text-success font-title text-sm mb-3">{form.message}</p>
+						<div class="bg-inset p-3 font-mono text-sm text-accent-primary-light break-all mb-3">
+							{form.apiKey}
 						</div>
-					{/if}
-				</div>
-			{:else}
-				<div class="text-center py-4">
-					<p class="text-gray-400 text-sm mb-3">
-						You don't have an API key yet. Generate one to access the API programmatically.
-					</p>
-					<form method="POST" action="?/rotateApiKey">
 						<button
-							type="submit"
-							class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+							onclick={copyApiKey}
+							class="inline-flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary border-2 border-accent-primary/50 transition-all duration-150 font-body text-sm"
 						>
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M12 4v16"/>
-								<path d="M4 12h16"/>
-							</svg>
-							Generate API Key
+							{#if copiedApiKey}
+								<Check weight="bold" size={16} />
+								Copied!
+							{:else}
+								<Copy weight="duotone" size={16} />
+								Copy to clipboard
+							{/if}
 						</button>
-					</form>
-				</div>
-			{/if}
-		</div>
+					</div>
+				{/if}
+				
+				{#if data.user.apiKeyHash}
+					<div class="space-y-4">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-accent-track">
+							<span class="text-text-secondary text-sm font-body uppercase tracking-wider">Current Key</span>
+							<span class="font-mono text-sm text-text-primary bg-inset px-3 py-1">
+								{data.user.apiKeyPrefix || 'strtchy_****...****'}
+							</span>
+						</div>
+						
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-accent-track">
+							<span class="text-text-secondary text-sm font-body uppercase tracking-wider">Created</span>
+							<span class="text-text-primary text-sm font-body">{formatDate(data.user.apiKeyCreatedAt)}</span>
+						</div>
+						
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-accent-track">
+							<span class="text-text-secondary text-sm font-body uppercase tracking-wider">Last Used</span>
+							<span class="text-text-primary text-sm font-body">{data.user.apiKeyLastUsedAt ? formatDate(data.user.apiKeyLastUsedAt) : 'Never'}</span>
+						</div>
+						
+						{#if !showRotateConfirm}
+							<button
+								onclick={() => showRotateConfirm = true}
+								class="inline-flex items-center gap-2 px-4 py-2 bg-accent-warm/20 hover:bg-accent-warm/30 text-accent-warm border-2 border-accent-warm/50 transition-all duration-150 font-body text-sm"
+							>
+								<ArrowClockwise weight="duotone" size={16} />
+								Rotate API Key
+							</button>
+						{:else}
+							<div class="bg-error/10 border border-error/20 p-4">
+								<p class="text-error text-sm font-body mb-4">
+									Are you sure? This will invalidate your current API key immediately. Any applications using it will stop working.
+								</p>
+								<div class="flex flex-wrap gap-3">
+									<form method="POST" action="?/rotateApiKey" class="flex-1 min-w-[140px]">
+										<button
+											type="submit"
+											class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-error text-white hover:bg-error/80 transition-all duration-150 font-display text-sm tracking-wider uppercase"
+										>
+											Yes, Rotate Key
+										</button>
+									</form>
+									<button
+										onclick={() => showRotateConfirm = false}
+										class="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface-elevated hover:bg-accent-track text-text-secondary transition-all duration-150 font-body text-sm"
+									>
+										Cancel
+									</button>
+								</div>
+							</div>
+						{/if}
+					</div>
+				{:else}
+					<div class="text-center py-6">
+						<p class="text-text-secondary text-sm font-body mb-4">
+							You don't have an API key yet. Generate one to access the API programmatically.
+						</p>
+						<form method="POST" action="?/rotateApiKey">
+							<button
+								type="submit"
+								class="inline-flex items-center gap-2 px-6 py-3 bg-accent-warm text-white hover:bg-accent-orange transition-all duration-150 font-display text-base tracking-widest uppercase"
+							>
+								<Plus weight="bold" size={18} />
+								Generate API Key
+							</button>
+						</form>
+					</div>
+				{/if}
+			</div>
+		</section>
 
 		<!-- Password Change -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-			<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500">
-					<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-					<path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-				</svg>
-				Change Password
-			</h3>
+		<section class="mb-10">
+			<div class="flex items-center justify-between mb-6 pb-4 border-b border-accent-track">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 bg-accent-track flex items-center justify-center">
+						<Lock weight="duotone" size={20} class="text-text-muted" />
+					</div>
+					<h2 class="font-display text-2xl text-text-primary tracking-wider">
+						CHANGE PASSWORD
+					</h2>
+				</div>
+			</div>
 			
-			{#if !showPasswordForm}
-				<button
-					onclick={() => showPasswordForm = true}
-					class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors text-sm"
-				>
-					Change Password
-				</button>
-			{:else}
-				<form method="POST" action="?/changePassword" class="space-y-4">
-					{#if form?.error && (form?.error === 'All password fields are required' || form?.error === 'Invalid password data' || form?.error === 'New passwords do not match' || form?.error === 'Password must be at least 6 characters' || form?.error === 'Current password is incorrect' || form?.error === 'Cannot change password for this account' || form?.error === 'Failed to change password')}
-						<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg">
-							{form.error}
+			<div 
+				class="bg-surface p-6 sm:p-8 border-t-4 border-t-accent-track"
+				style="box-shadow: var(--shadow-elevated);"
+			>
+				{#if !showPasswordForm}
+					<button
+						onclick={() => showPasswordForm = true}
+						class="inline-flex items-center gap-2 px-6 py-3 bg-surface-elevated hover:bg-accent-track text-text-secondary hover:text-text-primary transition-all duration-150 font-body text-sm"
+					>
+						<Lock weight="duotone" size={18} />
+						Change Password
+					</button>
+				{:else}
+					<form method="POST" action="?/changePassword" class="space-y-5">
+						{#if form && isPasswordError(form.error)}
+							<div class="bg-error/10 border border-error/20 px-4 py-3">
+								<p class="text-error text-sm font-body">{form.error}</p>
+							</div>
+						{/if}
+						
+						{#if form?.message && form?.success}
+							<div class="bg-success/10 border border-success/20 px-4 py-3">
+								<p class="text-success text-sm font-body">{form.message}</p>
+							</div>
+						{/if}
+						
+						<div>
+							<label for="currentPassword" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+								Current Password
+							</label>
+							<input
+								type="password"
+								id="currentPassword"
+								name="currentPassword"
+								bind:value={currentPassword}
+								class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							/>
 						</div>
-					{/if}
-					
-					{#if form?.message && form?.success}
-						<div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg">
-							{form.message}
+						
+						<div>
+							<label for="newPassword" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+								New Password
+							</label>
+							<input
+								type="password"
+								id="newPassword"
+								name="newPassword"
+								bind:value={newPassword}
+								class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							/>
 						</div>
-					{/if}
-					
-					<div>
-						<label for="currentPassword" class="block text-sm font-medium text-gray-300 mb-1">Current Password</label>
-						<input
-							type="password"
-							id="currentPassword"
-							name="currentPassword"
-							bind:value={currentPassword}
-							class="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-						/>
-					</div>
-					
-					<div>
-						<label for="newPassword" class="block text-sm font-medium text-gray-300 mb-1">New Password</label>
-						<input
-							type="password"
-							id="newPassword"
-							name="newPassword"
-							bind:value={newPassword}
-							class="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-						/>
-					</div>
-					
-					<div>
-						<label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-1">Confirm New Password</label>
-						<input
-							type="password"
-							id="confirmPassword"
-							name="confirmPassword"
-							bind:value={confirmPassword}
-							class="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-						/>
-					</div>
-					
-					<div class="flex gap-3">
-						<button
-							type="submit"
-							class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors font-medium"
-						>
-							Update Password
-						</button>
-						<button
-							type="button"
-							onclick={() => showPasswordForm = false}
-							class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
-						>
-							Cancel
-						</button>
-					</div>
-				</form>
-			{/if}
-		</div>
+						
+						<div>
+							<label for="confirmPassword" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+								Confirm New Password
+							</label>
+							<input
+								type="password"
+								id="confirmPassword"
+								name="confirmPassword"
+								bind:value={confirmPassword}
+								class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							/>
+						</div>
+						
+						<div class="flex flex-wrap gap-3 pt-2">
+							<button
+								type="submit"
+								class="inline-flex items-center gap-2 px-6 py-3 bg-accent-primary text-white hover:bg-accent-primary-light transition-all duration-150 font-display text-base tracking-widest uppercase"
+							>
+								Update Password
+							</button>
+							<button
+								type="button"
+								onclick={() => showPasswordForm = false}
+								class="inline-flex items-center gap-2 px-6 py-3 bg-surface-elevated hover:bg-accent-track text-text-secondary hover:text-text-primary transition-all duration-150 font-body text-sm"
+							>
+								Cancel
+							</button>
+						</div>
+					</form>
+				{/if}
+			</div>
+		</section>
 
-		<!-- Delete Account -->
-		<div class="bg-gray-800/50 border border-red-900/50 rounded-xl p-6">
-			<h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-red-400">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M3 6h18"/>
-					<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-					<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-				</svg>
-				Delete Account
-			</h3>
+		<!-- Danger Zone -->
+		<section class="mb-10">
+			<div class="flex items-center justify-between mb-6 pb-4 border-b border-error/50">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 bg-error/10 flex items-center justify-center">
+						<Trash weight="duotone" size={20} class="text-error" />
+					</div>
+					<h2 class="font-display text-2xl text-error tracking-wider">
+						DANGER ZONE
+					</h2>
+				</div>
+			</div>
 			
-			<p class="text-gray-400 text-sm mb-4">
-				This will permanently delete your account and all associated data including your custom movements, routines, and practice history. This action cannot be undone.
-			</p>
-			
-			{#if !showDeleteConfirm}
-				<button
-					onclick={() => showDeleteConfirm = true}
-					class="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-600/50 rounded-lg transition-colors text-sm"
+			<div class="space-y-6">
+				<!-- Sign Out -->
+				<div 
+					class="bg-surface p-6 sm:p-8 border-t-4 border-t-accent-track"
+					style="box-shadow: var(--shadow-elevated);"
 				>
-					Delete Account
-				</button>
-			{:else}
-				<form method="POST" action="?/deleteAccount" class="space-y-4">
-					{#if form?.error === 'Please type DELETE to confirm account deletion' || form?.error === 'Password is required to delete account' || form?.error === 'Failed to delete account. Please check your password.'}
-						<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg">
-							{form.error}
+					<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+						<div class="flex items-center gap-3">
+							<SignOut weight="duotone" size={20} class="text-text-muted" />
+							<div>
+								<h3 class="font-title text-text-primary mb-1">Sign Out</h3>
+								<p class="text-text-secondary text-sm font-body">End your current session</p>
+							</div>
+						</div>
+						<form method="POST" action="/?/logout">
+							<button
+								type="submit"
+								class="inline-flex items-center gap-2 px-6 py-3 bg-surface-elevated hover:bg-accent-track text-text-secondary hover:text-text-primary transition-all duration-150 font-body text-sm"
+							>
+								<SignOut weight="duotone" size={16} />
+								Sign Out
+							</button>
+						</form>
+					</div>
+				</div>
+
+				<!-- Delete Account -->
+				<div 
+					class="bg-surface p-6 sm:p-8 border-t-4 border-t-error"
+					style="box-shadow: var(--shadow-elevated);"
+				>
+					{#if !showDeleteConfirm}
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+							<div class="flex items-center gap-3">
+								<Trash weight="duotone" size={20} class="text-error" />
+								<div>
+									<h3 class="font-title text-error mb-1">Delete Account</h3>
+									<p class="text-text-secondary text-sm font-body">Permanently remove all your data</p>
+								</div>
+							</div>
+							<button
+								onclick={() => showDeleteConfirm = true}
+								class="inline-flex items-center gap-2 px-6 py-3 bg-error/20 hover:bg-error/30 text-error border-2 border-error/50 transition-all duration-150 font-body text-sm"
+							>
+								<Trash weight="duotone" size={16} />
+								Delete Account
+							</button>
+						</div>
+					{:else}
+						<div class="space-y-5">
+							{#if form && isDeleteError(form.error)}
+								<div class="bg-error/10 border border-error/20 px-4 py-3">
+									<p class="text-error text-sm font-body">{form.error}</p>
+								</div>
+							{/if}
+							
+							<p class="text-error text-sm font-body">
+								This will permanently delete your account and all associated data including your custom movements, routines, and practice history. This action cannot be undone.
+							</p>
+							
+							<form method="POST" action="?/deleteAccount" class="space-y-4">
+								<div>
+									<label for="confirmDelete" class="block text-sm font-body text-error mb-2 uppercase tracking-wider">
+										Type "DELETE" to confirm
+									</label>
+									<input
+										type="text"
+										id="confirmDelete"
+										name="confirmDelete"
+										bind:value={deleteConfirmText}
+										class="w-full bg-inset text-text-primary border-2 border-error/50 px-4 py-3 focus:border-error focus:outline-none transition-colors font-body"
+										placeholder="DELETE"
+									/>
+								</div>
+								
+								<div>
+									<label for="password" class="block text-sm font-body text-error mb-2 uppercase tracking-wider">
+										Enter your password to confirm
+									</label>
+									<input
+										type="password"
+										id="password"
+										name="password"
+										class="w-full bg-inset text-text-primary border-2 border-error/50 px-4 py-3 focus:border-error focus:outline-none transition-colors font-body"
+										placeholder="Your password"
+									/>
+								</div>
+								
+								<div class="flex flex-wrap gap-3 pt-2">
+									<button
+										type="submit"
+										class="inline-flex items-center gap-2 px-6 py-3 bg-error text-white hover:bg-error/80 transition-all duration-150 font-display text-base tracking-widest uppercase"
+									>
+										<Trash weight="duotone" size={16} />
+										Permanently Delete
+									</button>
+									<button
+										type="button"
+										onclick={() => { showDeleteConfirm = false; deleteConfirmText = ''; }}
+										class="inline-flex items-center gap-2 px-6 py-3 bg-surface-elevated hover:bg-accent-track text-text-secondary hover:text-text-primary transition-all duration-150 font-body text-sm"
+									>
+										Cancel
+									</button>
+								</div>
+							</form>
 						</div>
 					{/if}
-					
-					<div>
-						<label for="confirmDelete" class="block text-sm font-medium text-red-400 mb-1">
-							Type "DELETE" to confirm
-						</label>
-						<input
-							type="text"
-							id="confirmDelete"
-							name="confirmDelete"
-							bind:value={deleteConfirmText}
-							class="w-full bg-gray-900/50 border border-red-600/50 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
-							placeholder="DELETE"
-						/>
-					</div>
-					
-					<div>
-						<label for="password" class="block text-sm font-medium text-red-400 mb-1">
-							Enter your password to confirm
-						</label>
-						<input
-							type="password"
-							id="password"
-							name="password"
-							class="w-full bg-gray-900/50 border border-red-600/50 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
-							placeholder="Your password"
-						/>
-					</div>
-					
-					<div class="flex gap-3">
-						<button
-							type="submit"
-							class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
-						>
-							Permanently Delete Account
-						</button>
-						<button
-							type="button"
-							onclick={() => { showDeleteConfirm = false; deleteConfirmText = ''; }}
-							class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
-						>
-							Cancel
-						</button>
-					</div>
-				</form>
-			{/if}
-		</div>
-		<!-- Sign Out -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-			<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-					<polyline points="16 17 21 12 16 7"/>
-					<line x1="21" x2="9" y1="12" y2="12"/>
-				</svg>
-				Sign Out
-			</h3>
-			
-			<form method="POST" action="/?/logout">
-				<button
-					type="submit"
-					class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-						<polyline points="16 17 21 12 16 7"/>
-						<line x1="21" x2="9" y1="12" y2="12"/>
-					</svg>
-					Sign Out
-				</button>
-			</form>
-		</div>
+				</div>
+			</div>
+		</section>
 	</main>
 </div>
+
+<script lang="ts" module>
+	function isPasswordError(error: string | undefined): boolean {
+		if (!error) return false;
+		const passwordErrors = [
+			'All password fields are required',
+			'Invalid password data',
+			'New passwords do not match',
+			'Password must be at least 6 characters',
+			'Current password is incorrect',
+			'Cannot change password for this account',
+			'Failed to change password'
+		];
+		return passwordErrors.includes(error);
+	}
+	
+	function isDeleteError(error: string | undefined): boolean {
+		if (!error) return false;
+		const deleteErrors = [
+			'Please type DELETE to confirm account deletion',
+			'Password is required to delete account',
+			'Failed to delete account. Please check your password.'
+		];
+		return deleteErrors.includes(error);
+	}
+</script>

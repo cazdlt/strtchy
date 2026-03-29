@@ -26,14 +26,15 @@
 </script>
 
 <div
-	class="group bg-surface border-t border-accent-track hover:border-t-accent-blue hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+	class="group bg-surface border-t-4 border-t-accent-primary hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+	style="box-shadow: var(--shadow-elevated);"
 >
 	<div class="p-5">
 		<div class="flex items-start justify-between gap-3 mb-3">
 			<h3 class="font-display font-bold text-lg flex-1 min-w-0">
 				<a
 					href="/routine/{routine.id}"
-					class="text-text-primary hover:text-accent-blue transition-colors block"
+					class="text-text-primary hover:text-accent-primary transition-colors block"
 				>
 					{routine.name}
 				</a>
@@ -50,7 +51,7 @@
 					<div class="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
 						<a
 							href="/routine/{routine.id}/edit"
-							class="p-1.5 bg-surface hover:bg-accent-blue text-text-muted hover:text-white transition-colors"
+							class="p-1.5 bg-surface hover:bg-accent-primary text-text-muted hover:text-white transition-colors"
 							title="Edit"
 							onclick={(e) => e.stopPropagation()}
 						>
@@ -80,10 +81,10 @@
 
 		<a
 			href="/routine/{routine.id}"
-			class="inline-flex items-center gap-2 text-sm text-accent-blue hover:text-accent-blue-light transition-colors mb-4"
+			class="inline-flex items-center gap-2 text-sm text-accent-primary hover:text-accent-primary-light transition-colors mb-4"
 		>
 			<span class="font-bold uppercase tracking-wider">View Routine</span>
-			<ArrowRight weight="duotone" size={16} />
+			<ArrowRight weight="duotone" size={14} />
 		</a>
 
 		<div class="flex flex-wrap gap-2 text-xs font-mono pt-3 border-t border-accent-track">
@@ -103,7 +104,7 @@
 				<span class="px-2 py-1 bg-inset text-text-muted">Rest: {routine.restBetweenMovements}s</span>
 			{/if}
 			{#if routine.autoAdvance}
-				<span class="px-2 py-1 bg-accent-blue/10 text-accent-blue border border-accent-blue/30">Auto-play</span>
+				<span class="px-2 py-1 bg-accent-primary/10 text-accent-primary border border-accent-primary/30">Auto-play</span>
 			{/if}
 		</div>
 	</div>

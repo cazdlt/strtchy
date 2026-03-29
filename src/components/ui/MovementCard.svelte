@@ -31,81 +31,79 @@
 </script>
 
 <div
-	class="group bg-surface border-t border-accent-track hover:border-t-accent-blue hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+	class="group bg-surface border-t-4 border-t-accent-primary hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+	style="box-shadow: var(--shadow-elevated);"
 >
 	<div class="p-5">
-		<div class="flex items-start justify-between gap-3 mb-4">
+		<!-- Name row - full width -->
+		<div class="flex items-start gap-2 mb-2">
+			<h3 class="font-display font-bold text-lg leading-tight">
+				<a
+					href="/movement/{movement.id}"
+					class="text-text-primary hover:text-accent-primary transition-colors"
+				>
+					{movement.name}
+				</a>
+			</h3>
+			{#if movement.isBilateral}
+				<span class="inline-flex items-center px-2 py-0.5 text-xs font-mono bg-accent-primary/10 text-accent-primary border border-accent-primary/30 whitespace-nowrap shrink-0 mt-1">
+					L/R
+				</span>
+			{/if}
+		</div>
+
+		<!-- Metadata row -->
+		<div class="flex items-center gap-3 mb-3">
+			<!-- Small icon -->
 			{#if movement.illustrationPath}
-				<div class="flex-shrink-0">
+				<div class="w-8 h-8 flex items-center justify-center bg-inet shrink-0">
 					<img
 						src={movement.illustrationPath}
-						alt={movement.name}
-						class="w-16 h-16 object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+						alt=""
+						class="w-6 h-6 object-contain opacity-80"
 					/>
 				</div>
 			{:else}
-				<div
-					class="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-inset text-text-muted"
-				>
-					<PersonSimple weight="duotone" size={32} />
+				<div class="w-8 h-8 flex items-center justify-center bg-inset text-text-muted shrink-0">
+					<PersonSimple weight="duotone" size={20} />
 				</div>
 			{/if}
 
-			<div class="flex-1 min-w-0">
-				<div class="flex items-center gap-2 mb-1">
-					<h3 class="font-display font-bold">
-						<a
-							href="/movement/{movement.id}"
-							class="text-text-primary hover:text-accent-blue transition-colors"
+			<span class="px-2 py-0.5 bg-inset text-xs text-text-muted font-mono uppercase tracking-wider">
+				{movement.type}
+			</span>
+
+			{#if movement.isCustom}
+				<span class="inline-flex items-center px-2 py-0.5 text-xs font-mono uppercase tracking-wider bg-accent-cream/10 text-text-muted border border-accent-track">
+					Custom
+				</span>
+			{/if}
+
+			{#if showActions}
+				<div class="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+					<a
+						href="/movement/{movement.id}/edit"
+						class="p-1.5 bg-surface hover:bg-accent-primary text-text-muted hover:text-white transition-colors"
+						title="Edit"
+						onclick={(e) => e.stopPropagation()}
+					>
+						<PencilSimple weight="duotone" size={16} />
+					</a>
+					{#if onDelete}
+						<button
+							type="button"
+							class="p-1.5 bg-surface hover:bg-error text-text-muted hover:text-white transition-colors"
+							title="Delete"
+							onclick={(e) => {
+								e.stopPropagation();
+								onDelete(movement.id);
+							}}
 						>
-							{movement.name}
-						</a>
-					</h3>
-					{#if movement.isBilateral}
-						<span class="inline-flex items-center px-2 py-0.5 text-xs font-mono bg-accent-blue/10 text-accent-blue border border-accent-blue/30">
-							L/R
-						</span>
+							<Trash weight="duotone" size={16} />
+						</button>
 					{/if}
 				</div>
-				<span class="px-2 py-0.5 bg-inset text-xs text-text-muted font-mono uppercase tracking-wider">
-					{movement.type}
-				</span>
-			</div>
-
-			<div class="flex items-center gap-1 flex-shrink-0">
-				{#if movement.isCustom}
-					<span
-						class="inline-flex items-center px-2 py-1 text-xs font-mono uppercase tracking-wider bg-accent-cream/10 text-text-muted border border-accent-track"
-					>
-						Custom
-					</span>
-				{/if}
-				{#if showActions}
-					<div class="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-						<a
-							href="/movement/{movement.id}/edit"
-							class="p-1.5 bg-surface hover:bg-accent-blue text-text-muted hover:text-white transition-colors"
-							title="Edit"
-							onclick={(e) => e.stopPropagation()}
-						>
-							<PencilSimple weight="duotone" size={16} />
-						</a>
-						{#if onDelete}
-							<button
-								type="button"
-								class="p-1.5 bg-surface hover:bg-error text-text-muted hover:text-white transition-colors"
-								title="Delete"
-								onclick={(e) => {
-									e.stopPropagation();
-									onDelete(movement.id);
-								}}
-							>
-								<Trash weight="duotone" size={16} />
-							</button>
-						{/if}
-					</div>
-				{/if}
-			</div>
+			{/if}
 		</div>
 
 		{#if movement.description}
@@ -122,16 +120,16 @@
 				{/if}
 				{#if movement.equipment && movement.equipment.length > 0}
 					{#each movement.equipment as item}
-						<span class="px-2 py-1 bg-accent-blue/10 text-accent-blue border border-accent-blue/30">{item}</span>
+						<span class="px-2 py-1 bg-accent-primary/10 text-accent-primary border border-accent-primary/30">{item}</span>
 					{/each}
 				{/if}
 			</div>
 			
-			<a
-				href="/movement/{movement.id}"
-				class="text-text-muted hover:text-accent-blue transition-colors"
-			>
-				<ArrowRight weight="duotone" size={20} />
+		<a
+			href="/movement/{movement.id}"
+			class="text-text-muted hover:text-accent-primary transition-colors shrink-0 ml-2"
+		>
+				<ArrowRight weight="duotone" size={14} />
 			</a>
 		</div>
 	</div>

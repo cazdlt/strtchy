@@ -12,7 +12,7 @@
 		subtitle = null,
 		children = undefined
 	}: {
-		user?: { id: string; name?: string; image?: string } | null;
+		user?: { id: string; name?: string | null; image?: string | null } | null;
 		showNav?: boolean;
 		backUrl?: string | null;
 		backText?: string;

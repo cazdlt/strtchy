@@ -1,94 +1,135 @@
 <script lang="ts">
+	import PageHeader from '../../components/ui/PageHeader.svelte';
+	import { ArrowRight, UserCirclePlus } from 'phosphor-svelte';
+	
 	let { data, form } = $props();
 	let username = $state('');
 	let email = $state('');
 	let password = $state('');
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-900 to-black p-4">
-	<div class="w-full max-w-md">
-		<div class="bg-zinc-800/50 backdrop-blur-sm rounded-2xl p-8 border border-zinc-700">
-			<h1 class="text-3xl font-bold text-white mb-2 text-center">Create Account</h1>
-			<p class="text-zinc-400 mb-8 text-center">Join Strtchy to track your recovery journey</p>
+<svelte:head>
+	<title>Create Account — Strtchy</title>
+</svelte:head>
 
-			<form method="POST" class="space-y-4">
-				{#if form?.missing}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-						Please fill in all fields
+<div class="min-h-screen bg-base">
+	<PageHeader user={null} showNav={false} />
+
+	<main class="flex-1 flex items-center justify-center px-6 py-12">
+		<div class="w-full max-w-md">
+			<!-- Card -->
+			<div 
+				class="bg-surface p-8 sm:p-10 border-t-4 border-t-accent-primary"
+				style="box-shadow: var(--shadow-elevated);"
+			>
+				<!-- Header -->
+				<div class="mb-8">
+					<div class="flex items-baseline gap-3 mb-2">
+						<span class="text-text-muted text-sm uppercase tracking-widest font-body">Get started</span>
+						<div class="flex-1 h-px bg-accent-track"></div>
 					</div>
-				{/if}
+					<h1 class="font-display text-4xl text-text-primary tracking-wide">
+						CREATE ACCOUNT
+					</h1>
+				</div>
+
+				<form method="POST" class="space-y-5">
+					<!-- Error Messages -->
+					{#if form?.missing}
+						<div class="bg-error/10 border border-error/20 px-4 py-3">
+							<p class="text-error text-sm font-body">Please fill in all fields</p>
+						</div>
+					{/if}
 
 				{#if form && 'email' in form && form.email === 'already_exists'}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-						An account with this email already exists
+					<div class="bg-error/10 border border-error/20 px-4 py-3">
+						<p class="text-error text-sm font-body">An account with this email already exists</p>
 					</div>
 				{/if}
 
-				{#if form?.error}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-						{form.error}
+					{#if form?.error}
+						<div class="bg-error/10 border border-error/20 px-4 py-3">
+							<p class="text-error text-sm font-body">{form.error}</p>
+						</div>
+					{/if}
+
+					{#if form?.invalid}
+						<div class="bg-error/10 border border-error/20 px-4 py-3">
+							<p class="text-error text-sm font-body">Invalid input provided</p>
+						</div>
+					{/if}
+
+					<!-- Username -->
+					<div>
+						<label for="username" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+							Username
+						</label>
+						<input
+							id="username"
+							name="username"
+							type="text"
+							bind:value={username}
+							class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							placeholder="johndoe"
+							required
+						/>
 					</div>
-				{/if}
 
-				{#if form?.invalid}
-					<div class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-						Invalid input provided
+					<!-- Email -->
+					<div>
+						<label for="email" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+							Email
+						</label>
+						<input
+							id="email"
+							name="email"
+							type="email"
+							bind:value={email}
+							class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							placeholder="you@example.com"
+							required
+						/>
 					</div>
-				{/if}
 
-				<div>
-					<label for="username" class="block text-sm font-medium text-zinc-300 mb-2">Username</label>
-					<input
-						id="username"
-						name="username"
-						type="text"
-						bind:value={username}
-						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-						placeholder="johndoe"
-						required
-					/>
+					<!-- Password -->
+					<div>
+						<label for="password" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
+							Password
+						</label>
+						<input
+							id="password"
+							name="password"
+							type="password"
+							bind:value={password}
+							class="w-full bg-inset text-text-primary border-2 border-accent-track px-4 py-3 focus:border-accent-primary focus:outline-none transition-colors font-body"
+							placeholder="••••••••"
+							required
+							minlength="8"
+						/>
+						<p class="mt-2 text-xs text-text-muted font-body">Must be at least 8 characters</p>
+					</div>
+
+					<!-- Submit -->
+					<button
+						type="submit"
+						class="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent-primary text-white hover:bg-accent-primary-light transition-all duration-150 font-display text-lg tracking-widest uppercase"
+					>
+						<UserCirclePlus weight="duotone" size={20} />
+						Create Account
+						<ArrowRight weight="bold" size={20} />
+					</button>
+				</form>
+
+				<!-- Footer -->
+				<div class="mt-8 pt-6 border-t border-accent-track">
+					<p class="text-center text-text-muted text-sm font-body">
+						Already have an account?
+						<a href="/login" class="text-accent-primary hover:text-accent-primary-light transition-colors font-semibold">
+							Sign in
+						</a>
+					</p>
 				</div>
-
-				<div>
-					<label for="email" class="block text-sm font-medium text-zinc-300 mb-2">Email</label>
-					<input
-						id="email"
-						name="email"
-						type="email"
-						bind:value={email}
-						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-						placeholder="john@example.com"
-						required
-					/>
-				</div>
-
-				<div>
-					<label for="password" class="block text-sm font-medium text-zinc-300 mb-2">Password</label>
-					<input
-						id="password"
-						name="password"
-						type="password"
-						bind:value={password}
-						class="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-						placeholder="••••••••"
-						required
-						minlength="8"
-					/>
-					<p class="mt-1 text-xs text-zinc-500">Must be at least 8 characters</p>
-				</div>
-
-				<button
-					type="submit"
-					class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-zinc-800"
-				>
-					Create Account
-				</button>
-			</form>
-
-			<p class="mt-6 text-center text-zinc-400 text-sm">
-				Already have an account?
-				<a href="/login" class="text-emerald-400 hover:text-emerald-300 font-medium">Sign in</a>
-			</p>
+			</div>
 		</div>
-	</div>
+	</main>
 </div>
