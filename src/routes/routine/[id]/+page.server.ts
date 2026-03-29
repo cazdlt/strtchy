@@ -91,7 +91,13 @@ export async function load({
   }
 
   const estimatedDuration = calculateRoutineDuration(
-    routine.movements,
+    routine.movements.map((rm) => ({
+      target: rm.target,
+      sets: rm.sets,
+      isBilateral: rm.isBilateral,
+      switchSidesDuration: rm.switchSidesDuration,
+      timePerRep: rm.movement.timePerRep,
+    })),
     routine.restBetweenMovements,
     routine.restBetweenSets,
   );

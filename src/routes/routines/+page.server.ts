@@ -1,5 +1,5 @@
 import { db } from "$lib/db";
-import { routines, routineMovements } from "$lib/db/schema";
+import { routines, routineMovements, movements } from "$lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { calculateRoutineDuration } from "$lib/utils/formatting";
 import { redirect } from "@sveltejs/kit";
@@ -15,15 +15,24 @@ export const load: PageServerLoad = async ({ locals }) => {
   const routinesWithCounts = await Promise.all(
     allRoutines.map(async (routine) => {
       const movementsData = await db
-        .select()
+        .select({
+          routineMovement: routineMovements,
+          movement: movements,
+        })
         .from(routineMovements)
-        .where(eq(routineMovements.routineId, routine.id))
-        .then((rows) => rows);
+        .innerJoin(movements, eq(routineMovements.movementId, movements.id))
+        .where(eq(routineMovements.routineId, routine.id));
 
       const movementsCount = movementsData.length;
 
       const estimatedDuration = calculateRoutineDuration(
-        movementsData,
+        movementsData.map((item) => ({
+          target: item.routineMovement.target,
+          sets: item.routineMovement.sets,
+          isBilateral: item.routineMovement.isBilateral,
+          switchSidesDuration: item.routineMovement.switchSidesDuration,
+          timePerRep: item.movement.timePerRep,
+        })),
         routine.restBetweenMovements,
         routine.restBetweenSets,
       );

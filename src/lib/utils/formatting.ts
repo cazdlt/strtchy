@@ -22,6 +22,7 @@ export function calculateRoutineDuration(
     sets: number;
     isBilateral: boolean;
     switchSidesDuration: number;
+    timePerRep?: number | null;
   }>,
   restBetweenMovements: number,
   restBetweenSets: number,
@@ -36,8 +37,10 @@ export function calculateRoutineDuration(
   for (let i = 0; i < movements.length; i++) {
     const rm = movements[i];
     const sideMultiplier = rm.isBilateral ? 2 : 1;
+    // Use timePerRep if available (for rep-based exercises), otherwise default to 3 seconds per rep
+    const secondsPerRep = rm.timePerRep ?? 3;
     const executionTime =
-      rm.target.type === "time" ? rm.target.value : rm.target.value * 4;
+      rm.target.type === "time" ? rm.target.value : rm.target.value * secondsPerRep;
 
     // Time spent exercising (both sides if bilateral)
     totalSeconds += executionTime * sideMultiplier * rm.sets;
