@@ -17,7 +17,8 @@
 		SpeakerHigh,
 		Sun,
 		Lightning,
-		CaretRight
+		CaretRight,
+		Trash
 	} from 'phosphor-svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -82,9 +83,28 @@
 					href="/routine/{data.routine.id}/edit"
 					class="inline-flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-elevated text-text-primary transition-colors border border-accent-track hover:border-accent-primary"
 				>
-					<PencilSimple weight="bold" size={16} class="text-accent-primary" />
+					<PencilSimple weight="bold" size={14} class="text-accent-primary" />
 					<span class="font-body text-sm uppercase tracking-wider hidden sm:inline">Edit</span>
 				</a>
+				<form 
+					method="POST" 
+					action="?/deleteRoutine" 
+					use:enhance
+					class="inline-flex"
+					onsubmit={(e) => {
+						if (!confirm('Are you sure you want to delete this routine? This action cannot be undone.')) {
+							e.preventDefault();
+						}
+					}}
+				>
+					<button
+						type="submit"
+						class="inline-flex items-center gap-2 px-4 py-2 bg-surface hover:bg-error/10 text-text-secondary hover:text-error transition-colors border border-accent-track hover:border-error"
+					>
+						<Trash weight="bold" size={14} class="text-error" />
+						<span class="font-body text-sm uppercase tracking-wider hidden sm:inline">Delete</span>
+					</button>
+				</form>
 			{/if}
 			<button
 				onclick={handleBack}
@@ -303,7 +323,7 @@
 					onclick={handleBack}
 					class="inline-flex items-center gap-2 text-text-muted hover:text-accent-primary transition-colors font-body uppercase tracking-wider text-sm"
 				>
-					<ArrowLeft weight="bold" size={16} />
+				<ArrowLeft weight="bold" size={14} />
 					Back to Routines
 				</button>
 

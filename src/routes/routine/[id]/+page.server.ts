@@ -138,4 +138,24 @@ export const actions = {
 
     redirect(302, `/practice/${practiceLogId}`);
   },
+
+  deleteRoutine: async ({ params, locals }: RequestEvent) => {
+    // Check if user is authenticated and owns the routine
+    const routine = await db.query.routines.findFirst({
+      where: eq(routines.id, params.id),
+    });
+
+    if (!routine) {
+      return fail(404, { error: "Routine not found" });
+    }
+
+    if (!locals.user || locals.user.id !== routine.userId) {
+      return fail(403, { error: "Not authorized to delete this routine" });
+    }
+
+    // Delete the routine (cascade will handle routine_movements)
+    await db.delete(routines).where(eq(routines.id, params.id));
+
+    redirect(302, "/routines");
+  },
 };
