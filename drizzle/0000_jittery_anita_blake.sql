@@ -1,4 +1,4 @@
-CREATE TABLE `account` (
+CREATE TABLE IF NOT EXISTS `account` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`provider_id` text NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE `account` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `movements` (
+CREATE TABLE IF NOT EXISTS `movements` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
@@ -26,7 +26,7 @@ CREATE TABLE `movements` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `practice_data` (
+CREATE TABLE IF NOT EXISTS `practice_data` (
 	`id` text PRIMARY KEY NOT NULL,
 	`practice_log_id` text NOT NULL,
 	`routine_movement_id` text NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE `practice_data` (
 	FOREIGN KEY (`routine_movement_id`) REFERENCES `routine_movements`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `practice_logs` (
+CREATE TABLE IF NOT EXISTS `practice_logs` (
 	`id` text PRIMARY KEY NOT NULL,
 	`routine_id` text NOT NULL,
 	`user_id` text,
@@ -52,7 +52,7 @@ CREATE TABLE `practice_logs` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `routine_movements` (
+CREATE TABLE IF NOT EXISTS `routine_movements` (
 	`id` text PRIMARY KEY NOT NULL,
 	`routine_id` text NOT NULL,
 	`movement_id` text NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE `routine_movements` (
 	FOREIGN KEY (`movement_id`) REFERENCES `movements`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `routines` (
+CREATE TABLE IF NOT EXISTS `routines` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
@@ -81,7 +81,7 @@ CREATE TABLE `routines` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `session` (
+CREATE TABLE IF NOT EXISTS `session` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`expires_at` integer NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE `session` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `user` (
+CREATE TABLE IF NOT EXISTS `user` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`email_verified` integer DEFAULT false NOT NULL,
@@ -106,8 +106,8 @@ CREATE TABLE `user` (
 	`preferences` text
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
-CREATE TABLE `verification` (
+CREATE UNIQUE INDEX IF NOT EXISTS `user_email_unique` ON `user` (`email`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `verification` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`code` text NOT NULL,

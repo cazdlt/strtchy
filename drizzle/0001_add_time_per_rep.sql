@@ -1,4 +1,4 @@
--- Add timePerRep column to movements table
+-- Add timePerRep column to movements table (only if it doesn't exist)
 ALTER TABLE movements ADD COLUMN time_per_rep INTEGER;
 
 -- Rename resistance to resistance_band
@@ -6,7 +6,7 @@ ALTER TABLE movements ADD COLUMN time_per_rep INTEGER;
 -- Note: SQLite doesn't support ALTER COLUMN, so we need a workaround
 
 -- Create a temporary table with the new schema
-CREATE TABLE movements_new (
+CREATE TABLE IF NOT EXISTS movements_new (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
