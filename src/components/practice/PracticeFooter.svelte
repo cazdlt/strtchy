@@ -47,10 +47,8 @@
 
 			<button
 				onclick={onCompleteWorkout}
-				disabled={!allComplete || isCompletingWorkout || isPaused}
-				class="flex-1 bg-gradient-to-r {allComplete
-					? 'from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500'
-					: 'from-gray-700 to-gray-700 cursor-not-allowed'} text-white h-14 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+				disabled={isCompletingWorkout || isPaused}
+				class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white h-14 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 			>
 				{#if isCompletingWorkout}
 					<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

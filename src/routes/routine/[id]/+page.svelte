@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import PageHeader from '../../../components/ui/PageHeader.svelte';
-	import MovementBlock from '../../../components/practice/MovementBlock.svelte';
+	import PreviewMovementBlock from '../../../components/practice/PreviewMovementBlock.svelte';
 	import { goto } from '$app/navigation';
 
 	let { data }: { data: PageData } = $props();
@@ -145,7 +145,7 @@
 			<h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest px-1">Timeline</h2>
 			
 			{#each data.routine.movements as rm, index (rm.id)}
-				<MovementBlock
+				<PreviewMovementBlock
 					movementIndex={index}
 					routineMovementId={rm.id}
 					movementName={rm.movement.name}
@@ -158,11 +158,6 @@
 					weight={rm.weight}
 					weightUnit={rm.weightUnit}
 					notes={rm.notes}
-					isActive={false}
-					isPreview={true}
-					completedSets={new Set()}
-					onSetComplete={() => {}}
-					onNotesChange={() => {}}
 					restBetweenSetsDuration={data.routine.restBetweenSets}
 					previousStats={data.previousStatsMap?.[rm.id]}
 				/>
