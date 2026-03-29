@@ -1,121 +1,141 @@
-import { db } from '$lib/db';
-import { routines, routineMovements, practiceLogs, practiceData } from '$lib/db/schema';
-import { eq, desc, and, isNull } from 'drizzle-orm';
-import type { PageData, ActionsFailure, RequestEvent } from './$types';
-import { fail, redirect } from '@sveltejs/kit';
-import { nanoid } from 'nanoid';
-import { calculateRoutineDuration } from '$lib/utils/formatting';
+import { db } from "$lib/db";
+import {
+  routines,
+  routineMovements,
+  practiceLogs,
+  practiceData,
+} from "$lib/db/schema";
+import { eq, desc, and, isNull } from "drizzle-orm";
+import type { PageData, ActionsFailure, RequestEvent } from "./$types";
+import { fail, redirect } from "@sveltejs/kit";
+import { nanoid } from "nanoid";
+import { calculateRoutineDuration } from "$lib/utils/formatting";
 
 // Helper to get previous workout stats for a movement
-async function getPreviousStats(movementId: string, userId: string | null | undefined) {
-	// Find the most recent practice log that has data for this movement
-	const lastPracticeData = await db
-		.select({
-			practiceLogId: practiceData.practiceLogId
-		})
-		.from(practiceData)
-		.innerJoin(practiceLogs, eq(practiceData.practiceLogId, practiceLogs.id))
-		.innerJoin(routineMovements, eq(practiceData.routineMovementId, routineMovements.id))
-		.where(
-			and(
-				userId ? eq(practiceLogs.userId, userId) : isNull(practiceLogs.userId),
-				eq(routineMovements.movementId, movementId)
-			)
-		)
-		.orderBy(desc(practiceData.completedAt))
-		.limit(1);
+async function getPreviousStats(
+  movementId: string,
+  userId: string | null | undefined,
+) {
+  // Find the most recent practice log that has data for this movement
+  const lastPracticeData = await db
+    .select({
+      practiceLogId: practiceData.practiceLogId,
+    })
+    .from(practiceData)
+    .innerJoin(practiceLogs, eq(practiceData.practiceLogId, practiceLogs.id))
+    .innerJoin(
+      routineMovements,
+      eq(practiceData.routineMovementId, routineMovements.id),
+    )
+    .where(
+      and(
+        userId ? eq(practiceLogs.userId, userId) : isNull(practiceLogs.userId),
+        eq(routineMovements.movementId, movementId),
+      ),
+    )
+    .orderBy(desc(practiceData.completedAt))
+    .limit(1);
 
-	if (lastPracticeData.length === 0) return null;
+  if (lastPracticeData.length === 0) return null;
 
-	const practiceLogId = lastPracticeData[0].practiceLogId;
+  const practiceLogId = lastPracticeData[0].practiceLogId;
 
-	// Now get all sets for that movement in that specific practice
-	const stats = await db
-		.select({
-			id: practiceData.id,
-			setNumber: practiceData.setNumber,
-			side: practiceData.side,
-			value: practiceData.value,
-			weight: practiceData.weight,
-			weightUnit: practiceData.weightUnit,
-			rating: practiceData.rating,
-			completedAt: practiceData.completedAt
-		})
-		.from(practiceData)
-		.innerJoin(routineMovements, eq(practiceData.routineMovementId, routineMovements.id))
-		.where(
-			and(
-				eq(practiceData.practiceLogId, practiceLogId),
-				eq(routineMovements.movementId, movementId)
-			)
-		);
+  // Now get all sets for that movement in that specific practice
+  const stats = await db
+    .select({
+      id: practiceData.id,
+      setNumber: practiceData.setNumber,
+      side: practiceData.side,
+      value: practiceData.value,
+      weight: practiceData.weight,
+      weightUnit: practiceData.weightUnit,
+      rating: practiceData.rating,
+      completedAt: practiceData.completedAt,
+    })
+    .from(practiceData)
+    .innerJoin(
+      routineMovements,
+      eq(practiceData.routineMovementId, routineMovements.id),
+    )
+    .where(
+      and(
+        eq(practiceData.practiceLogId, practiceLogId),
+        eq(routineMovements.movementId, movementId),
+      ),
+    );
 
-	return stats;
+  return stats;
 }
 
-export async function load({ params, locals }: { params: { id: string }; locals: App.Locals }) {
-	const routine = await db.query.routines.findFirst({
-		where: eq(routines.id, params.id),
-		with: {
-			movements: {
-				with: {
-					movement: true
-				},
-				orderBy: routineMovements.order
-			}
-		}
-	});
+export async function load({
+  params,
+  locals,
+}: {
+  params: { id: string };
+  locals: App.Locals;
+}) {
+  const routine = await db.query.routines.findFirst({
+    where: eq(routines.id, params.id),
+    with: {
+      movements: {
+        with: {
+          movement: true,
+        },
+        orderBy: routineMovements.order,
+      },
+    },
+  });
 
-	if (!routine) {
-		throw new Error('Routine not found');
-	}
+  if (!routine) {
+    throw new Error("Routine not found");
+  }
 
-	const estimatedDuration = calculateRoutineDuration(
-		routine.movements,
-		routine.restBetweenMovements,
-		routine.restBetweenSets
-	);
+  const estimatedDuration = calculateRoutineDuration(
+    routine.movements,
+    routine.restBetweenMovements,
+    routine.restBetweenSets,
+  );
 
-	const allEquipment = new Set<string>();
-	for (const rm of routine.movements) {
-		if (rm.movement.equipment && Array.isArray(rm.movement.equipment)) {
-			for (const item of rm.movement.equipment) {
-				allEquipment.add(item);
-			}
-		}
-	}
+  const allEquipment = new Set<string>();
+  for (const rm of routine.movements) {
+    if (rm.movement.equipment && Array.isArray(rm.movement.equipment)) {
+      for (const item of rm.movement.equipment) {
+        allEquipment.add(item);
+      }
+    }
+  }
 
-	// Fetch previous workout stats for each movement
-	const previousStatsMap: Record<string, any> = {};
-	for (const rm of routine.movements) {
-		const prevStats = await getPreviousStats(rm.movementId, locals.user?.id);
-		if (prevStats) {
-			previousStatsMap[rm.id] = prevStats;
-		}
-	}
+  // Fetch previous workout stats for each movement
+  const previousStatsMap: Record<string, any> = {};
+  for (const rm of routine.movements) {
+    const prevStats = await getPreviousStats(rm.movementId, locals.user?.id);
+    if (prevStats) {
+      previousStatsMap[rm.id] = prevStats;
+    }
+  }
 
-	return {
-		routine,
-		user: locals.user,
-		estimatedDuration,
-		equipment: Array.from(allEquipment).sort(),
-		previousStatsMap
-	};
+  return {
+    routine,
+    user: locals.user,
+    estimatedDuration,
+    equipment: Array.from(allEquipment).sort(),
+    previousStatsMap,
+  };
 }
 
 export const actions = {
-	startPractice: async ({ request, params, locals }: RequestEvent) => {
-		// Create a new practice log
-		const practiceLogId = nanoid();
-		const now = new Date();
+  startPractice: async ({ request, params, locals }: RequestEvent) => {
+    // Create a new practice log
+    const practiceLogId = nanoid();
+    const now = new Date();
 
-		await db.insert(practiceLogs).values({
-			id: practiceLogId,
-			routineId: params.id,
-			userId: locals.user?.id,
-			startedAt: now
-		});
+    await db.insert(practiceLogs).values({
+      id: practiceLogId,
+      routineId: params.id,
+      userId: locals.user?.id,
+      startedAt: now,
+    });
 
-		redirect(302, `/practice/${practiceLogId}`);
-	}
+    redirect(302, `/practice/${practiceLogId}`);
+  },
 };

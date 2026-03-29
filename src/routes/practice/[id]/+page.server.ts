@@ -13,21 +13,28 @@ import type { PageData, PageServerLoad, RequestEvent } from "./$types";
 import { nanoid } from "nanoid";
 
 // Helper to get previous workout stats for a movement
-async function getPreviousStats(movementId: string, userId: string | null | undefined, currentPracticeId: string) {
+async function getPreviousStats(
+  movementId: string,
+  userId: string | null | undefined,
+  currentPracticeId: string,
+) {
   // Find the most recent practice log that has data for this movement (excluding the current practice)
   const lastPracticeData = await db
     .select({
-      practiceLogId: practiceData.practiceLogId
+      practiceLogId: practiceData.practiceLogId,
     })
     .from(practiceData)
     .innerJoin(practiceLogs, eq(practiceData.practiceLogId, practiceLogs.id))
-    .innerJoin(routineMovements, eq(practiceData.routineMovementId, routineMovements.id))
+    .innerJoin(
+      routineMovements,
+      eq(practiceData.routineMovementId, routineMovements.id),
+    )
     .where(
       and(
         userId ? eq(practiceLogs.userId, userId) : isNull(practiceLogs.userId),
         eq(routineMovements.movementId, movementId),
-        ne(practiceLogs.id, currentPracticeId)
-      )
+        ne(practiceLogs.id, currentPracticeId),
+      ),
     )
     .orderBy(desc(practiceData.completedAt))
     .limit(1);
@@ -46,23 +53,26 @@ async function getPreviousStats(movementId: string, userId: string | null | unde
       weight: practiceData.weight,
       weightUnit: practiceData.weightUnit,
       rating: practiceData.rating,
-      completedAt: practiceData.completedAt
+      completedAt: practiceData.completedAt,
     })
     .from(practiceData)
-    .innerJoin(routineMovements, eq(practiceData.routineMovementId, routineMovements.id))
+    .innerJoin(
+      routineMovements,
+      eq(practiceData.routineMovementId, routineMovements.id),
+    )
     .where(
       and(
         eq(practiceData.practiceLogId, practiceLogId),
-        eq(routineMovements.movementId, movementId)
-      )
+        eq(routineMovements.movementId, movementId),
+      ),
     );
 
   return stats;
 }
 
 export const load: PageServerLoad = async ({ params, locals, depends }) => {
-  depends('app:practice');
-  
+  depends("app:practice");
+
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, params.id),
     with: {
@@ -111,7 +121,11 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
   // Fetch previous workout stats for each movement
   const previousStatsMap: Record<string, any> = {};
   for (const rm of allRoutineMovements) {
-    const prevStats = await getPreviousStats(rm.movementId, locals.user?.id, params.id);
+    const prevStats = await getPreviousStats(
+      rm.movementId,
+      locals.user?.id,
+      params.id,
+    );
     if (prevStats) {
       previousStatsMap[rm.id] = prevStats;
     }
@@ -127,7 +141,10 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
   const progress = totalSets > 0 ? completedSetsCount / totalSets : 0;
 
   // Get all available movements for the add modal
-  const allMovements = await db.select().from(movements).orderBy(movements.name);
+  const allMovements = await db
+    .select()
+    .from(movements)
+    .orderBy(movements.name);
 
   // Collect all equipment from movements
   const allEquipment = new Set<string>();
@@ -144,14 +161,17 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     Timed: [],
     Repetitions: [],
     Weighted: [],
-    'Resistance Band': []
+    "Resistance Band": [],
   };
 
   for (const movement of allMovements) {
-    if (movement.type === 'timed') groupedMovements.Timed.push(movement);
-    else if (movement.type === 'reps') groupedMovements.Repetitions.push(movement);
-    else if (movement.type === 'weighted') groupedMovements.Weighted.push(movement);
-    else if (movement.type === 'resistance_band') groupedMovements['Resistance Band'].push(movement);
+    if (movement.type === "timed") groupedMovements.Timed.push(movement);
+    else if (movement.type === "reps")
+      groupedMovements.Repetitions.push(movement);
+    else if (movement.type === "weighted")
+      groupedMovements.Weighted.push(movement);
+    else if (movement.type === "resistance_band")
+      groupedMovements["Resistance Band"].push(movement);
   }
 
   return {
@@ -217,7 +237,8 @@ export const actions = {
       | "bodyweight"
       | null;
     const rating = formData.get("rating");
-    const status = (formData.get("status") as "completed" | "skipped") || "completed";
+    const status =
+      (formData.get("status") as "completed" | "skipped") || "completed";
 
     if (!routineMovementId || !setNumber || !value) {
       return fail(400, { error: "Missing required fields" });
@@ -278,84 +299,86 @@ export const actions = {
     return { success: true };
   },
 
-	updatePracticeSettings: async ({ request, locals }: RequestEvent) => {
-		const formData = await request.formData();
-		const autoPlay = formData.get('autoPlay') === 'true';
-		const audioEnabled = formData.get('audioEnabled') === 'true';
-		const keepAwake = formData.get('keepAwake') === 'true';
-		const practiceId = formData.get('practiceId') as string;
+  updatePracticeSettings: async ({ request, locals }: RequestEvent) => {
+    const formData = await request.formData();
+    const autoPlay = formData.get("autoPlay") === "true";
+    const audioEnabled = formData.get("audioEnabled") === "true";
+    const keepAwake = formData.get("keepAwake") === "true";
+    const practiceId = formData.get("practiceId") as string;
 
-		if (!practiceId) {
-			return fail(400, { error: 'Missing practiceId' });
-		}
+    if (!practiceId) {
+      return fail(400, { error: "Missing practiceId" });
+    }
 
-		const practice = await db.query.practiceLogs.findFirst({
-			where: eq(practiceLogs.id, practiceId),
-			with: { routine: true }
-		});
+    const practice = await db.query.practiceLogs.findFirst({
+      where: eq(practiceLogs.id, practiceId),
+      with: { routine: true },
+    });
 
-		if (!practice) {
-			return fail(404, { error: 'Practice not found' });
-		}
+    if (!practice) {
+      return fail(404, { error: "Practice not found" });
+    }
 
-		await db
-			.update(routines)
-			.set({
-				autoAdvance: autoPlay,
-				audioEnabled,
-				keepAwake
-			})
-			.where(eq(routines.id, practice.routineId));
+    await db
+      .update(routines)
+      .set({
+        autoAdvance: autoPlay,
+        audioEnabled,
+        keepAwake,
+      })
+      .where(eq(routines.id, practice.routineId));
 
-		if (locals.user?.id) {
-			const userData = await db.query.user.findFirst({
-				where: eq(user.id, locals.user.id),
-				columns: { preferences: true }
-			});
+    if (locals.user?.id) {
+      const userData = await db.query.user.findFirst({
+        where: eq(user.id, locals.user.id),
+        columns: { preferences: true },
+      });
 
-			const currentPrefs = userData?.preferences || {};
-			await db
-				.update(user)
-				.set({
-					preferences: {
-						...currentPrefs,
-						autoAdvance: autoPlay,
-						audioEnabled,
-						keepAwake
-					}
-				})
-				.where(eq(user.id, locals.user.id));
-		}
+      const currentPrefs = userData?.preferences || {};
+      await db
+        .update(user)
+        .set({
+          preferences: {
+            ...currentPrefs,
+            autoAdvance: autoPlay,
+            audioEnabled,
+            keepAwake,
+          },
+        })
+        .where(eq(user.id, locals.user.id));
+    }
 
-		return { success: true };
-	},
+    return { success: true };
+  },
 
-	uncompleteSet: async ({ request, params }: RequestEvent) => {
-		const formData = await request.formData();
-		const routineMovementId = formData.get('routineMovementId') as string;
-		const setNumber = parseInt(formData.get('setNumber') as string);
-		const side = formData.get('side') as 'left' | 'right' | null;
+  uncompleteSet: async ({ request, params }: RequestEvent) => {
+    const formData = await request.formData();
+    const routineMovementId = formData.get("routineMovementId") as string;
+    const setNumber = parseInt(formData.get("setNumber") as string);
+    const side = formData.get("side") as "left" | "right" | null;
 
-		if (!routineMovementId || isNaN(setNumber)) {
-			return fail(400, { error: 'Missing required fields' });
-		}
+    if (!routineMovementId || isNaN(setNumber)) {
+      return fail(400, { error: "Missing required fields" });
+    }
 
-		// Delete the practice data entry
-		await db
-			.delete(practiceData)
-			.where(
-				and(
-					eq(practiceData.practiceLogId, params.id),
-					eq(practiceData.routineMovementId, routineMovementId),
-					eq(practiceData.setNumber, setNumber),
-					side ? eq(practiceData.side, side) : sql`${practiceData.side} IS NULL`
-				)
-			);
+    // Delete the practice data entry
+    await db
+      .delete(practiceData)
+      .where(
+        and(
+          eq(practiceData.practiceLogId, params.id),
+          eq(practiceData.routineMovementId, routineMovementId),
+          eq(practiceData.setNumber, setNumber),
+          side
+            ? eq(practiceData.side, side)
+            : sql`${practiceData.side} IS NULL`,
+        ),
+      );
 
-		return { success: true };
-	},
+    return { success: true };
+  },
 
-	adjustSets: async ({ request, params }: RequestEvent) => {
+  adjustSets: async ({ request, params }: RequestEvent) => {
     const formData = await request.formData();
     const routineMovementId = formData.get("routineMovementId") as string;
     const direction = formData.get("direction") as "up" | "down";
@@ -442,7 +465,9 @@ export const actions = {
       orderBy: routineMovements.order,
     });
 
-    const currentIndex = allMovements.findIndex(m => m.id === routineMovementId);
+    const currentIndex = allMovements.findIndex(
+      (m) => m.id === routineMovementId,
+    );
     if (currentIndex === -1) {
       return fail(404, { error: "Movement not found in routine" });
     }
@@ -455,11 +480,13 @@ export const actions = {
     const currentOrder = allMovements[currentIndex].order;
     const targetOrder = allMovements[newIndex].order;
 
-    await db.update(routineMovements)
+    await db
+      .update(routineMovements)
       .set({ order: targetOrder })
       .where(eq(routineMovements.id, routineMovementId));
 
-    await db.update(routineMovements)
+    await db
+      .update(routineMovements)
       .set({ order: currentOrder })
       .where(eq(routineMovements.id, allMovements[newIndex].id));
 
@@ -475,12 +502,14 @@ export const actions = {
     }
 
     // First delete any practice_data records referencing this routine_movement
-    await db.delete(practiceData).where(
-      eq(practiceData.routineMovementId, routineMovementId)
-    );
+    await db
+      .delete(practiceData)
+      .where(eq(practiceData.routineMovementId, routineMovementId));
 
     // Then delete the routine_movement
-    await db.delete(routineMovements).where(eq(routineMovements.id, routineMovementId));
+    await db
+      .delete(routineMovements)
+      .where(eq(routineMovements.id, routineMovementId));
 
     return { success: true };
   },
@@ -514,15 +543,16 @@ export const actions = {
       orderBy: routineMovements.order,
     });
 
-    const maxOrder = existingMovements.length > 0 
-      ? Math.max(...existingMovements.map(m => m.order)) 
-      : -1;
+    const maxOrder =
+      existingMovements.length > 0
+        ? Math.max(...existingMovements.map((m) => m.order))
+        : -1;
 
     const targetTypeMap = {
-      timed: 'time' as const,
-      reps: 'reps' as const,
-      weighted: 'reps' as const,
-      resistance_band: 'reps' as const
+      timed: "time" as const,
+      reps: "reps" as const,
+      weighted: "reps" as const,
+      resistance_band: "reps" as const,
     };
 
     const defaultTarget = movement.metadata?.defaultTarget;
@@ -535,14 +565,14 @@ export const actions = {
       target: {
         type: targetTypeMap[movement.type as keyof typeof targetTypeMap],
         value: defaultTarget?.value || 30,
-        unit: defaultTarget?.unit
+        unit: defaultTarget?.unit,
       },
       sets: 1,
       isBilateral: movement.isBilateral ?? false,
       switchSidesDuration: movement.switchSidesDuration ?? 5,
       weight: null,
       weightUnit: movement.weightUnit || null,
-      notes: null
+      notes: null,
     });
 
     return { success: true };

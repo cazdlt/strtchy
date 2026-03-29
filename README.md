@@ -27,19 +27,25 @@ A stretching and recovery routine tracker inspired by Hevy. Create custom moveme
 ## Quick Start
 
 ### Development
+
 ```bash
 ./scripts/dev.sh
 ```
+
 This script will:
+
 - Check/create `.env` file
 - Initialize development database if needed (migrations + seeding)
 - Start the development server
 
 ### Production
+
 ```bash
 ./scripts/prod.sh
 ```
+
 This script will:
+
 - Check/create `.env.production` file
 - Initialize production database if needed (migrations + seeding)
 - Build the application
@@ -48,6 +54,7 @@ This script will:
 ## Database Structure
 
 The app uses separate databases for different environments:
+
 - **Development**: `./data/dev/local.db`
 - **Production**: `./data/prod/local.db`
 

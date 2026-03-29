@@ -91,12 +91,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -179,12 +175,8 @@
           "name": "movements_user_id_user_id_fk",
           "tableFrom": "movements",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -266,12 +258,8 @@
           "name": "practice_data_practice_log_id_practice_logs_id_fk",
           "tableFrom": "practice_data",
           "tableTo": "practice_logs",
-          "columnsFrom": [
-            "practice_log_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["practice_log_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -279,12 +267,8 @@
           "name": "practice_data_routine_movement_id_routine_movements_id_fk",
           "tableFrom": "practice_data",
           "tableTo": "routine_movements",
-          "columnsFrom": [
-            "routine_movement_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["routine_movement_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -352,12 +336,8 @@
           "name": "practice_logs_routine_id_routines_id_fk",
           "tableFrom": "practice_logs",
           "tableTo": "routines",
-          "columnsFrom": [
-            "routine_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["routine_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -365,12 +345,8 @@
           "name": "practice_logs_user_id_user_id_fk",
           "tableFrom": "practice_logs",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -455,12 +431,8 @@
           "name": "routine_movements_routine_id_routines_id_fk",
           "tableFrom": "routine_movements",
           "tableTo": "routines",
-          "columnsFrom": [
-            "routine_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["routine_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -468,12 +440,8 @@
           "name": "routine_movements_movement_id_movements_id_fk",
           "tableFrom": "routine_movements",
           "tableTo": "movements",
-          "columnsFrom": [
-            "movement_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["movement_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -575,12 +543,8 @@
           "name": "routines_user_id_user_id_fk",
           "tableFrom": "routines",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -655,12 +619,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -747,9 +707,7 @@
       "indexes": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -803,12 +761,8 @@
           "name": "verification_user_id_user_id_fk",
           "tableFrom": "verification",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

@@ -1,31 +1,36 @@
-import { db } from '$lib/db';
-import { practiceLogs, practiceData, routineMovements, movements } from '$lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
-import type { PageData } from '../$types';
+import { db } from "$lib/db";
+import {
+  practiceLogs,
+  practiceData,
+  routineMovements,
+  movements,
+} from "$lib/db/schema";
+import { eq, desc } from "drizzle-orm";
+import type { PageData } from "../$types";
 
 export async function load({ params }: { params: { id: string } }) {
-	const practice = await db.query.practiceLogs.findFirst({
-		where: eq(practiceLogs.id, params.id),
-		with: {
-			routine: true,
-			practiceData: {
-				with: {
-					routineMovement: {
-						with: {
-							movement: true
-						}
-					}
-				},
-				orderBy: practiceData.completedAt
-			}
-		}
-	});
+  const practice = await db.query.practiceLogs.findFirst({
+    where: eq(practiceLogs.id, params.id),
+    with: {
+      routine: true,
+      practiceData: {
+        with: {
+          routineMovement: {
+            with: {
+              movement: true,
+            },
+          },
+        },
+        orderBy: practiceData.completedAt,
+      },
+    },
+  });
 
-	if (!practice) {
-		throw new Error('Practice not found');
-	}
+  if (!practice) {
+    throw new Error("Practice not found");
+  }
 
-	return {
-		practice
-	};
+  return {
+    practice,
+  };
 }

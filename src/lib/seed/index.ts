@@ -5,7 +5,11 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { generateMovementId, generateRoutineId, generateRoutineMovementId } from "../utils/id";
+import {
+  generateMovementId,
+  generateRoutineId,
+  generateRoutineMovementId,
+} from "../utils/id";
 import seedData from "./data.json";
 
 const auth = betterAuth({
@@ -107,14 +111,21 @@ export async function seedDatabase() {
         name: m.name,
         description: m.description,
         type: m.type as "timed" | "reps" | "weighted" | "resistance_band",
-        illustrationPath: svgMap[m.illustrationKey as keyof typeof svgMap] || null,
+        illustrationPath:
+          svgMap[m.illustrationKey as keyof typeof svgMap] || null,
         isCustom: false,
         weightUnit: m.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,
         isBilateral: m.isBilateral ?? false,
         switchSidesDuration: m.switchSidesDuration ?? 5,
-        timePerRep: m.timePerRep ?? (m.type !== 'timed' ? 3 : null),
+        timePerRep: m.timePerRep ?? (m.type !== "timed" ? 3 : null),
         equipment: m.equipment ?? null,
-        metadata: { defaultTarget: m.defaultTarget as { type: "time" | "reps"; value: number; unit?: string } },
+        metadata: {
+          defaultTarget: m.defaultTarget as {
+            type: "time" | "reps";
+            value: number;
+            unit?: string;
+          },
+        },
         createdAt: new Date(),
       };
       await db.insert(schema.movements).values(movement).onConflictDoNothing();
@@ -146,22 +157,34 @@ export async function seedDatabase() {
       const movementId = movementIdMap.get(rm.movementName);
       const routineId = routineIdMap.get(rm.routineName);
       if (movementId && routineId) {
-        const movement = seedData.movements.find((m: any) => m.name === rm.movementName);
-        const routine = seedData.routines.find((r: any) => r.name === rm.routineName);
+        const movement = seedData.movements.find(
+          (m: any) => m.name === rm.movementName,
+        );
+        const routine = seedData.routines.find(
+          (r: any) => r.name === rm.routineName,
+        );
         const id = generateRoutineMovementId(
-          routine?.name || 'unknown',
-          movement?.name || 'unknown',
-          rm.order
+          routine?.name || "unknown",
+          movement?.name || "unknown",
+          rm.order,
         );
         const routineMovement: typeof routineMovements.$inferInsert = {
           id,
           routineId,
           movementId,
           order: rm.order,
-          target: rm.target as { type: "time" | "reps"; value: number; unit?: string },
+          target: rm.target as {
+            type: "time" | "reps";
+            value: number;
+            unit?: string;
+          },
           sets: rm.sets,
-          isBilateral: rm.isBilateral ?? (movement as SeedMovement)?.isBilateral ?? false,
-          switchSidesDuration: rm.switchSidesDuration ?? (movement as SeedMovement)?.switchSidesDuration ?? 5,
+          isBilateral:
+            rm.isBilateral ?? (movement as SeedMovement)?.isBilateral ?? false,
+          switchSidesDuration:
+            rm.switchSidesDuration ??
+            (movement as SeedMovement)?.switchSidesDuration ??
+            5,
           notes: rm.notes,
           weight: rm.weight,
           weightUnit: rm.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,
