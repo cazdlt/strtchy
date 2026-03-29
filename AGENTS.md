@@ -4,6 +4,10 @@
 
 Strtchy is a SvelteKit app for tracking stretching and recovery routines. It's built with Svelte 5 (runes), SQLite (Drizzle ORM), Tailwind CSS v4, and BetterAuth v1 for auth.
 
+## Design System
+
+**Critical**: Always consult `design-system.md` for visual direction. The design philosophy is **"Zen Athletic 80s"** - warm, geometric, retro athletic aesthetics inspired by 80s gymnasiums and Nike campaigns. See `design-system.md` for complete specs including color variables, typography scale, component patterns, and motion guidelines.
+
 ## Tech Stack & Versions
 
 - **SvelteKit**: Latest with Svelte 5 runes mode

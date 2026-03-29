@@ -36,7 +36,7 @@
 					</a>
 				{:else}
 					<a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-150">
-						<span class="font-display text-xl font-bold tracking-wider text-text-primary">STRTCHY</span>
+						<span class="font-display text-2xl tracking-wider text-text-primary">STRTCHY</span>
 					</a>
 				{/if}
 
@@ -65,7 +65,7 @@
 				<!-- Theme Toggle -->
 				<button
 					onclick={() => theme.toggle()}
-					class="p-2 text-text-secondary hover:text-accent-blue hover:bg-surface transition-all duration-150"
+					class="p-2 text-text-secondary hover:text-accent-primary hover:bg-surface transition-all duration-150"
 					aria-label="Toggle theme"
 					title="Toggle dark/light mode"
 				>
@@ -79,18 +79,13 @@
 				{#if !showNav && user}
 					<a
 						href="/profile"
-						class="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-accent-blue hover:bg-surface transition-all duration-150"
+						class="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-accent-primary hover:bg-surface transition-all duration-150"
 						aria-label="Profile"
 					>
 						<User weight="duotone" size={20} />
 					</a>
 				{:else if !showNav && !user}
-					<a
-						href="/login"
-						class="px-4 py-2 bg-accent-blue hover:bg-accent-blue-light text-cream-white transition-all duration-150 text-sm font-bold uppercase tracking-wider"
-					>
-						Sign in
-					</a>
+					<!-- No sign in button here - home page body has it -->
 				{/if}
 
 				{#if showNav}
@@ -116,12 +111,12 @@
 								<span class="hidden lg:inline">Profile</span>
 							</a>
 						{:else}
-							<a
-								href="/login"
-								class="px-4 py-2 bg-accent-blue hover:bg-accent-blue-light text-cream-white transition-all duration-150 text-sm font-bold uppercase tracking-wider ml-2"
-							>
-								Sign in
-							</a>
+						<a
+							href="/login"
+							class="px-4 py-2 bg-accent-primary hover:bg-accent-primary-light text-white transition-all duration-150 text-sm font-bold uppercase tracking-wider ml-2"
+						>
+							Sign in
+						</a>
 						{/if}
 					</nav>
 

@@ -19,20 +19,20 @@
   --color-inset-hover: #1a1a1a;
 
   --color-text-primary: #faf8f5;
-  --color-text-secondary: #b8b4ad;
-  --color-text-muted: #6b6862;
+  --color-text-secondary: #d4d0c7;
+  --color-text-muted: #a09b92;
 
-  /* WARM ACCENT PALETTE */
-  --color-accent-primary: #e07a5f;
-  --color-accent-primary-light: #f4a688;
-  --color-accent-secondary: #f2cc8f;
-  --color-accent-warm: #d4a574;
+  /* PRIMARY BLUE PALETTE - Main accent for CTAs */
+  --color-accent-primary: #5b8db8;
+  --color-accent-primary-light: #7ba3c4;
+  --color-accent-secondary: #8ab4d9;
+  --color-accent-warm: #e07a5f;
   --color-accent-cream: #e8e4dd;
   --color-accent-track: #3d3a36;
 
-  /* BLUE ACCENTS - Subtle */
-  --color-accent-blue: #5b8db8;
-  --color-accent-blue-light: #7ba3c4;
+  /* WARM ACCENTS - Secondary/tertiary hints */
+  --color-accent-orange: #e07a5f;
+  --color-accent-orange-light: #f4a688;
 
   --color-success: #7aa87a;
   --color-success-light: #9bc99b;
@@ -57,20 +57,20 @@ html.theme-light {
   --color-inset-hover: #e0dad1;
 
   --color-text-primary: #1a1814;
-  --color-text-secondary: #5c5850;
-  --color-text-muted: #8a847a;
+  --color-text-secondary: #4a4640;
+  --color-text-muted: #7a756b;
 
-  /* WARM ACCENT PALETTE - Light */
-  --color-accent-primary: #d46a4f;
-  --color-accent-primary-light: #e89276;
-  --color-accent-secondary: #e8b76d;
-  --color-accent-warm: #c49a6c;
+  /* PRIMARY BLUE PALETTE - Main accent for CTAs */
+  --color-accent-primary: #2d5a85;
+  --color-accent-primary-light: #4a7ba7;
+  --color-accent-secondary: #6a9bc7;
+  --color-accent-warm: #c55a40;
   --color-accent-cream: #d4cfc4;
   --color-accent-track: #e0d9d0;
 
-  /* BLUE ACCENTS - Light */
-  --color-accent-blue: #4a7a9e;
-  --color-accent-blue-light: #6b9ab8;
+  /* WARM ACCENTS - Secondary/tertiary hints */
+  --color-accent-orange: #c55a40;
+  --color-accent-orange-light: #e07a5f;
 
   --color-success: #5a9a5a;
   --color-success-light: #7bbb7b;
@@ -79,9 +79,9 @@ html.theme-light {
 
   /* Warm-tinted Shadows - Light Mode */
   --shadow-elevated:
-    0 4px 24px rgba(212, 106, 79, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+    0 4px 24px rgba(197, 90, 64, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-floating:
-    0 8px 40px rgba(212, 106, 79, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+    0 8px 40px rgba(197, 90, 64, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
@@ -93,7 +93,7 @@ body {
   background: var(--color-base);
   color: var(--color-text-primary);
   min-height: 100vh;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -101,19 +101,19 @@ body {
 
 /* Typography utilities */
 .font-display {
-  font-family: "Archivo Black", sans-serif;
+  font-family: "Bebas Neue", sans-serif;
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.05em;
 }
 
 .font-title {
-  font-family: "Syne", sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .font-body {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .font-mono {
@@ -127,11 +127,11 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Syne", sans-serif;
-  font-weight: 600;
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 400;
   line-height: 1.1;
   color: var(--color-text-primary);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.05em;
 }
 
 /* Track line utility */
@@ -194,16 +194,20 @@ h6 {
   box-shadow: var(--shadow-inner);
 }
 
-/* Button reset for geometric styling */
+/* Button reset for athletic styling */
 button {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Bebas Neue", sans-serif;
   cursor: pointer;
+  font-weight: 400;
+  letter-spacing: 0.08em;
 }
 
 /* Link styles */
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* Focus styles */

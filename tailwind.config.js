@@ -36,9 +36,9 @@ export default {
         error: "var(--color-error)",
       },
       fontFamily: {
-        display: ["Archivo Black", "sans-serif"],
-        title: ["Syne", "sans-serif"],
-        body: ["DM Sans", "sans-serif"],
+        display: ["Bebas Neue", "sans-serif"],
+        title: ["Plus Jakarta Sans", "sans-serif"],
+        body: ["Plus Jakarta Sans", "sans-serif"],
         mono: ["DM Mono", "monospace"],
       },
       borderRadius: {
