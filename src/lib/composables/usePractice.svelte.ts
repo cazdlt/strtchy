@@ -400,22 +400,27 @@ export function usePractice(data: PageData) {
       body: formData,
     });
 
-    if (response.ok) {
-      const key = generateSetKey(rm.id, setNumber, side);
-      if (skipped) {
-        skippedSets.add(key);
-        skippedSets = new Set(skippedSets);
-      } else {
-        completedSets.add(key);
-        completedSets = new Set(completedSets);
-        completedValues[key] = setData.value;
-      }
-      currentActiveSetKey = null;
-      audio.play("setComplete");
+    if (!response.ok) {
+      console.error("Failed to complete set:", await response.text());
+      alert("Failed to save set. Please try again.");
+      isCompletingSet = false;
+      return;
+    }
 
-      if (settings.autoPlay) {
-        handleAutoPlay(rm, setNumber, side, movementIndex);
-      }
+    const key = generateSetKey(rm.id, setNumber, side);
+    if (skipped) {
+      skippedSets.add(key);
+      skippedSets = new Set(skippedSets);
+    } else {
+      completedSets.add(key);
+      completedSets = new Set(completedSets);
+      completedValues[key] = setData.value;
+    }
+    currentActiveSetKey = null;
+    audio.play("setComplete");
+
+    if (settings.autoPlay) {
+      handleAutoPlay(rm, setNumber, side, movementIndex);
     }
 
     isCompletingSet = false;

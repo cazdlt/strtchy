@@ -26,11 +26,11 @@
 	});
 </script>
 
-<div class="fixed inset-0 bg-gray-950/95 z-50 flex flex-col items-center justify-center p-6">
+<div class="fixed inset-0 bg-base/98 z-50 flex flex-col items-center justify-center p-6">
 	<!-- Back button -->
 	<button
 		onclick={() => window.history.back()}
-		class="absolute top-4 left-4 p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all active:scale-95 z-50"
+		class="absolute top-4 left-4 p-3 text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors active:scale-95 z-50"
 		aria-label="Back"
 	>
 		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -39,17 +39,17 @@
 	</button>
 	<div class="text-center max-w-md">
 		<div class="mb-8">
-			<div class="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-blue-500/30">
+			<div class="w-24 h-24 mx-auto bg-accent-primary flex items-center justify-center mb-6" style="box-shadow: var(--shadow-floating);">
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-12 h-12 text-white">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
 				</svg>
 			</div>
-			<h1 class="text-3xl font-bold text-white mb-2">{routineName}</h1>
-			<p class="text-gray-400">Ready to begin?</p>
+			<h1 class="text-3xl font-bold text-text-primary font-display tracking-wide mb-2">{routineName}</h1>
+			<p class="text-text-secondary font-body">Ready to begin?</p>
 		</div>
 		
 		<div class="space-y-4 mb-8">
-			<div class="flex items-center justify-center gap-6 text-sm text-gray-400">
+			<div class="flex items-center justify-center gap-6 text-sm text-text-secondary font-body">
 				<div class="flex items-center gap-2">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75Z" />
@@ -76,8 +76,8 @@
 			</div>
 			
 			{#if equipment.length > 0}
-				<div class="mt-6 pt-6 border-t border-gray-800">
-					<div class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-3">
+				<div class="mt-6 pt-6 border-t border-accent-track">
+					<div class="flex items-center justify-center gap-2 text-sm text-text-muted mb-3 font-body">
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
 						</svg>
@@ -85,7 +85,7 @@
 					</div>
 					<div class="flex flex-wrap justify-center gap-2">
 						{#each equipment as item}
-							<span class="px-3 py-1.5 bg-gray-800/80 border border-gray-700 rounded-lg text-sm text-gray-300">
+							<span class="px-3 py-1.5 bg-surface border border-accent-track text-sm text-text-secondary">
 								{item}
 							</span>
 						{/each}
@@ -96,7 +96,7 @@
 		
 		<button
 			onclick={onStart}
-			class="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] hover:bg-right text-white h-16 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98]"
+			class="w-full bg-accent-primary hover:bg-accent-primary-light text-white h-16 font-display text-xl tracking-widest uppercase transition-colors active:scale-[0.98]"
 		>
 			Start Practice
 		</button>

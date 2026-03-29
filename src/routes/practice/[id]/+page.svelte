@@ -51,7 +51,7 @@
 	<title>Practice - Strtchy</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
+<div class="min-h-screen bg-base text-text-primary">
 	{#if !practice.hasStarted && !practice.isReadOnly}
 		<StartPracticeOverlay
 			routineName={data.practice.routine.name}
@@ -97,12 +97,12 @@
 
 		{#if data.allRoutineMovements.length === 0}
 			<div class="text-center py-12">
-				<p class="text-gray-400">No movements in this routine</p>
+				<p class="text-text-secondary font-body">No movements in this routine</p>
 			</div>
 		{:else if practice.isReadOnly}
-			<div class="mb-6 p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg">
-				<p class="text-yellow-200">
-					<strong>Read-only mode:</strong> This practice has already been completed and cannot be modified.
+			<div class="mb-6 p-4 bg-warning/10 border border-warning">
+				<p class="text-warning font-body">
+					<strong class="font-title font-bold">Read-only mode:</strong> This practice has already been completed and cannot be modified.
 				</p>
 			</div>
 		{/if}
@@ -158,7 +158,7 @@
 			<button
 				onclick={() => (showAddMovementModal = true)}
 				disabled={practice.isPaused}
-				class="w-full p-4 bg-gray-800/30 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 hover:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-800/30 disabled:hover:text-gray-400 disabled:hover:border-gray-600 transition-all flex items-center justify-center gap-2"
+				class="w-full p-4 bg-surface-elevated border-2 border-dashed border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated disabled:hover:text-text-secondary disabled:hover:border-accent-track transition-colors flex items-center justify-center gap-2 font-body"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -211,6 +211,6 @@
 
 <style>
 	:global(body) {
-		background: #0a0a0a;
+		background: var(--color-base);
 	}
 </style>

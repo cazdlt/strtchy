@@ -12,17 +12,17 @@
 	const allComplete = $derived(completedSets >= totalSets);
 </script>
 
-<div class="fixed bottom-0 left-0 right-0 bg-gray-950/95 border-t border-gray-800 backdrop-blur z-50">
+<div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-accent-track backdrop-blur z-50">
 	<div class="max-w-4xl mx-auto p-4">
 		<div class="flex items-center justify-between mb-3 text-sm">
-			<span class="text-gray-400">
+			<span class="text-text-secondary">
 				{completedSets} / {totalSets} sets • {Math.round(progress)}%
 			</span>
 		</div>
 
-		<div class="h-1 bg-gray-800 rounded-full mb-4 overflow-hidden">
+		<div class="h-1 bg-accent-track mb-4 overflow-hidden">
 			<div
-				class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
+				class="h-full bg-accent-primary transition-all duration-300"
 				style="width: {progress}%"
 			></div>
 		</div>
@@ -31,7 +31,7 @@
 			<!-- Pause/Resume Button -->
 			<button
 				onclick={onTogglePause}
-				class="flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl {isPaused ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'} transition-all"
+				class="flex-shrink-0 w-14 h-14 flex items-center justify-center {isPaused ? 'bg-success hover:bg-success-light text-base' : 'bg-surface-elevated hover:bg-accent-track text-text-secondary'} transition-colors"
 				aria-label={isPaused ? 'Resume workout' : 'Pause workout'}
 			>
 				{#if isPaused}
@@ -48,7 +48,7 @@
 			<button
 				onclick={onCompleteWorkout}
 				disabled={isCompletingWorkout || isPaused}
-				class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white h-14 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+				class="flex-1 bg-accent-primary hover:bg-accent-primary-light text-white h-14 px-6 font-display text-lg tracking-widest uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 			>
 				{#if isCompletingWorkout}
 					<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

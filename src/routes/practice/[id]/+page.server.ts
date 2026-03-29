@@ -240,7 +240,13 @@ export const actions = {
     const status =
       (formData.get("status") as "completed" | "skipped") || "completed";
 
-    if (!routineMovementId || !setNumber || !value) {
+    if (
+      !routineMovementId ||
+      !setNumber ||
+      value === undefined ||
+      value === null ||
+      isNaN(value)
+    ) {
       return fail(400, { error: "Missing required fields" });
     }
 

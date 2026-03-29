@@ -195,13 +195,13 @@
 	}
 </script>
 
-<div class="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden mb-4">
+<div class="bg-surface border-t-4 border-t-accent-primary mb-4" style="box-shadow: var(--shadow-elevated);">
 	<div class="w-full p-4 flex items-start gap-3">
 		<div class="flex flex-col items-center flex-shrink-0">
 			<button
 				onclick={() => onMoveUp?.()}
 				disabled={isFirst}
-				class="w-10 h-6 flex items-center justify-center rounded-t-lg bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+				class="w-10 h-6 flex items-center justify-center bg-surface-elevated text-text-muted hover:bg-accent-track hover:text-text-primary disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
 				aria-label="Move up"
 				title="Move up"
 			>
@@ -211,7 +211,7 @@
 			</button>
 			<button
 				onclick={() => (collapsed = !collapsed)}
-				class="w-10 h-10 bg-gray-700/80 flex items-center justify-center text-sm font-semibold text-white hover:bg-gray-600 transition-colors rounded-none"
+				class="w-10 h-10 bg-accent-primary flex items-center justify-center text-sm font-display text-white hover:bg-accent-primary-light transition-colors"
 				aria-label={collapsed ? 'Expand' : 'Collapse'}
 			>
 				{index + 1}
@@ -219,7 +219,7 @@
 			<button
 				onclick={() => onMoveDown?.()}
 				disabled={isLast}
-				class="w-10 h-6 flex items-center justify-center rounded-b-lg bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+				class="w-10 h-6 flex items-center justify-center bg-surface-elevated text-text-muted hover:bg-accent-track hover:text-text-primary disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
 				aria-label="Move down"
 				title="Move down"
 			>
@@ -230,27 +230,27 @@
 		</div>
 		<button
 			onclick={() => (collapsed = !collapsed)}
-			class="flex-1 min-w-0 text-left hover:bg-gray-700/30 transition-colors rounded-lg p-2 -m-2"
+			class="flex-1 min-w-0 text-left hover:bg-surface-elevated transition-colors p-2 -m-2"
 		>
 			<div class="flex items-center gap-2 flex-wrap">
-				<h3 class="font-semibold text-white">{movement.movement.name}</h3>
-				<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700/80 text-gray-300">
+				<h3 class="font-title font-bold text-text-primary">{movement.movement.name}</h3>
+				<span class="inline-flex items-center px-2 py-0.5 text-xs font-body uppercase tracking-wider bg-surface-elevated text-text-secondary border border-accent-track">
 					{movement.movement.type}
 				</span>
 				{#if movement.isBilateral}
-					<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/50 text-blue-400">
+					<span class="inline-flex items-center px-2 py-0.5 text-xs font-body uppercase tracking-wider bg-accent-primary/20 text-accent-primary border border-accent-primary/30">
 						L/R
 					</span>
 				{/if}
 			</div>
 			{#if movement.movement.description}
-				<p class="text-gray-400 text-sm mt-1 line-clamp-2">{movement.movement.description}</p>
+				<p class="text-text-secondary text-sm mt-1 line-clamp-2 font-body">{movement.movement.description}</p>
 			{/if}
 		</button>
 		<div class="flex items-center gap-1 flex-shrink-0">
 			<button
 				onclick={() => onRemove?.()}
-				class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-all"
+				class="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-error/20 hover:text-error transition-colors"
 				aria-label="Remove movement"
 				title="Remove movement"
 			>
@@ -260,7 +260,7 @@
 			</button>
 			<button
 				onclick={() => (collapsed = !collapsed)}
-				class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+				class="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
 				aria-label={collapsed ? 'Expand' : 'Collapse'}
 			>
 				<svg
@@ -276,14 +276,14 @@
 	</div>
 
 	{#if !collapsed}
-		<div class="border-t border-gray-700 p-2 space-y-2">
+		<div class="border-t border-accent-track p-2 space-y-2">
 			<!-- Notes Section -->
-			<div class="px-2 pb-2 mb-2 border-b border-gray-700/50">
+			<div class="px-2 pb-2 mb-2 border-b border-accent-track">
 				<div class="mb-2 flex items-center gap-2">
-					<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Notes</span>
+					<span class="text-[10px] font-bold uppercase tracking-wider text-text-muted">Notes</span>
 					{#if practice.notesSavingStates[movement.id]}
 						<svg
-							class="animate-spin h-3 w-3 text-blue-400"
+							class="animate-spin h-3 w-3 text-accent-primary"
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
 							viewBox="0 0 24 24"
@@ -301,33 +301,33 @@
 					bind:value={currentNotes}
 					oninput={(e) => handleNotesChange(e.currentTarget.value)}
 					rows="2"
-					class="w-full bg-gray-900/50 border border-gray-700 rounded-lg text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none placeholder:text-gray-700"
+					class="w-full bg-inset border-2 border-accent-track text-text-primary text-sm px-3 py-2 focus:outline-none focus:border-accent-primary resize-none placeholder:text-text-muted font-body"
 					placeholder="Add notes about this movement..."
 					aria-label="Movement notes"
 				></textarea>
 			</div>
 
 			<!-- Set Controller (Adjust Sets) -->
-			<div class="px-2 pb-2 mb-2 flex items-center justify-between border-b border-gray-700/50">
-				<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Adjust Sets</span>
+			<div class="px-2 pb-2 mb-2 flex items-center justify-between border-b border-accent-track">
+				<span class="text-[10px] font-bold uppercase tracking-wider text-text-muted">Adjust Sets</span>
 				<div class="flex items-center gap-3">
 					<button
 						onclick={() => practice.adjustSets(movement.id, 'down')}
 						disabled={practice.isAdjustingSets[movement.id] || (practice.setOverrides[movement.id] ?? movement.sets) <= 1}
-						class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
+						class="w-8 h-8 flex items-center justify-center bg-surface-elevated border border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary disabled:opacity-50 transition-colors"
 						aria-label="Remove set"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
 						</svg>
 					</button>
-					<span class="text-sm font-bold text-blue-400 min-w-[3rem] text-center">
+					<span class="text-sm font-bold text-accent-primary min-w-[3rem] text-center font-display">
 						{practice.setOverrides[movement.id] ?? movement.sets} Sets
 					</span>
 					<button
 						onclick={() => practice.adjustSets(movement.id, 'up')}
 						disabled={practice.isAdjustingSets[movement.id]}
-						class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 transition-all"
+						class="w-8 h-8 flex items-center justify-center bg-surface-elevated border border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary disabled:opacity-50 transition-colors"
 						aria-label="Add set"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">

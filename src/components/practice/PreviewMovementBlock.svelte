@@ -90,12 +90,12 @@
 	const items = $derived(generateItems());
 </script>
 
-<div class="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden mb-4">
+<div class="bg-surface border-t-4 border-t-accent-primary mb-4" style="box-shadow: var(--shadow-elevated);">
 	<div class="w-full p-4 flex items-start gap-3">
 		<div class="flex flex-col items-center flex-shrink-0">
 			<button
 				onclick={() => (collapsed = !collapsed)}
-				class="w-10 h-10 bg-gray-700/80 flex items-center justify-center text-sm font-semibold text-white hover:bg-gray-600 transition-colors"
+				class="w-10 h-10 bg-accent-primary flex items-center justify-center text-sm font-display text-white hover:bg-accent-primary-light transition-colors"
 				aria-label={collapsed ? 'Expand' : 'Collapse'}
 			>
 				{movementIndex + 1}
@@ -103,26 +103,26 @@
 		</div>
 		<button
 			onclick={() => (collapsed = !collapsed)}
-			class="flex-1 min-w-0 text-left hover:bg-gray-700/30 transition-colors rounded-lg p-2 -m-2"
+			class="flex-1 min-w-0 text-left hover:bg-surface-elevated transition-colors p-2 -m-2"
 		>
 			<div class="flex items-center gap-2 flex-wrap">
-				<h3 class="font-semibold text-white">{movementName}</h3>
-				<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700/80 text-gray-300">
+				<h3 class="font-title font-bold text-text-primary">{movementName}</h3>
+				<span class="inline-flex items-center px-2 py-0.5 text-xs font-body uppercase tracking-wider bg-surface-elevated text-text-secondary border border-accent-track">
 					{movementType}
 				</span>
 				{#if isBilateral}
-					<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/50 text-blue-400">
+					<span class="inline-flex items-center px-2 py-0.5 text-xs font-body uppercase tracking-wider bg-accent-primary/20 text-accent-primary border border-accent-primary/30">
 						L/R
 					</span>
 				{/if}
 			</div>
 			{#if description}
-				<p class="text-gray-400 text-sm mt-1 line-clamp-2">{description}</p>
+				<p class="text-text-secondary text-sm mt-1 line-clamp-2 font-body">{description}</p>
 			{/if}
 		</button>
 		<button
 			onclick={() => (collapsed = !collapsed)}
-			class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+			class="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
 			aria-label={collapsed ? 'Expand' : 'Collapse'}
 		>
 			<svg
@@ -137,14 +137,14 @@
 	</div>
 
 	{#if !collapsed}
-		<div class="border-t border-gray-700 p-2 space-y-2">
+		<div class="border-t border-accent-track p-2 space-y-2">
 			<!-- Notes Section -->
 			{#if notes}
-				<div class="px-2 pb-2 mb-2 border-b border-gray-700/50">
+				<div class="px-2 pb-2 mb-2 border-b border-accent-track">
 					<div class="flex items-center gap-2 mb-1">
-						<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Notes</span>
+						<span class="text-[10px] font-bold uppercase tracking-wider text-text-muted">Notes</span>
 					</div>
-					<p class="text-sm text-gray-300 italic">"{notes}"</p>
+					<p class="text-sm text-text-secondary italic font-body">"{notes}"</p>
 				</div>
 			{/if}
 

@@ -40,31 +40,31 @@
 </script>
 
 {#if show}
-	<div class="fixed inset-0 bg-gray-950/95 backdrop-blur z-50 flex items-center justify-center p-4">
-		<div class="bg-gray-800 rounded-2xl border border-gray-700 max-w-md w-full">
+	<div class="fixed inset-0 bg-base/95 backdrop-blur z-50 flex items-center justify-center p-4">
+		<div class="bg-surface border-t-4 border-t-accent-primary max-w-md w-full" style="box-shadow: var(--shadow-floating);">
 			<div class="p-6">
-				<h2 class="text-2xl font-bold text-white mb-6">Practice Settings</h2>
+				<h2 class="text-2xl font-display text-text-primary tracking-wider mb-6">Practice Settings</h2>
 
 				<div class="space-y-6">
 					{#if error}
-						<div class="p-3 bg-red-900/30 border border-red-700 rounded-lg">
-							<p class="text-red-200 text-sm">{error}</p>
+						<div class="p-3 bg-error/20 border border-error">
+							<p class="text-error text-sm">{error}</p>
 						</div>
 					{/if}
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-white font-medium">Auto-play</p>
-							<p class="text-gray-400 text-sm">Automatically advance to next set</p>
+							<p class="text-text-primary font-title font-bold">Auto-play</p>
+							<p class="text-text-secondary text-sm font-body">Automatically advance to next set</p>
 						</div>
 					<button
 						onclick={() => (localSettings.autoPlay = !localSettings.autoPlay)}
 						aria-label="Toggle auto-play"
-						class="w-12 h-7 rounded-full transition-colors {localSettings.autoPlay
-								? 'bg-blue-600'
-								: 'bg-gray-600'} relative"
+						class="w-12 h-7 transition-colors {localSettings.autoPlay
+								? 'bg-accent-primary'
+								: 'bg-accent-track'} relative"
 						>
 							<div
-								class="w-5 h-5 bg-white rounded-full absolute top-1 transition-transform {localSettings.autoPlay
+								class="w-5 h-5 bg-white absolute top-1 transition-transform {localSettings.autoPlay
 									? 'translate-x-6'
 									: 'translate-x-1'}"
 							></div>
@@ -73,18 +73,18 @@
 
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-white font-medium">Audio cues</p>
-							<p class="text-gray-400 text-sm">Play sounds for timer and completion</p>
+							<p class="text-text-primary font-title font-bold">Audio cues</p>
+							<p class="text-text-secondary text-sm font-body">Play sounds for timer and completion</p>
 						</div>
 					<button
 						onclick={() => (localSettings.audioEnabled = !localSettings.audioEnabled)}
 						aria-label="Toggle audio cues"
-						class="w-12 h-7 rounded-full transition-colors {localSettings.audioEnabled
-								? 'bg-blue-600'
-								: 'bg-gray-600'} relative"
+						class="w-12 h-7 transition-colors {localSettings.audioEnabled
+								? 'bg-accent-primary'
+								: 'bg-accent-track'} relative"
 						>
 							<div
-								class="w-5 h-5 bg-white rounded-full absolute top-1 transition-transform {localSettings.audioEnabled
+								class="w-5 h-5 bg-white absolute top-1 transition-transform {localSettings.audioEnabled
 									? 'translate-x-6'
 									: 'translate-x-1'}"
 							></div>
@@ -93,18 +93,18 @@
 
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-white font-medium">Keep screen awake</p>
-							<p class="text-gray-400 text-sm">Prevent screen from turning off</p>
+							<p class="text-text-primary font-title font-bold">Keep screen awake</p>
+							<p class="text-text-secondary text-sm font-body">Prevent screen from turning off</p>
 						</div>
 					<button
 						onclick={() => (localSettings.keepAwake = !localSettings.keepAwake)}
 						aria-label="Toggle keep screen awake"
-						class="w-12 h-7 rounded-full transition-colors {localSettings.keepAwake
-								? 'bg-blue-600'
-								: 'bg-gray-600'} relative"
+						class="w-12 h-7 transition-colors {localSettings.keepAwake
+								? 'bg-accent-primary'
+								: 'bg-accent-track'} relative"
 						>
 							<div
-								class="w-5 h-5 bg-white rounded-full absolute top-1 transition-transform {localSettings.keepAwake
+								class="w-5 h-5 bg-white absolute top-1 transition-transform {localSettings.keepAwake
 									? 'translate-x-6'
 									: 'translate-x-1'}"
 							></div>
@@ -115,14 +115,14 @@
 				<div class="flex gap-3 mt-8">
 					<button
 						onclick={onCancel}
-						class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold transition-all"
+						class="flex-1 bg-surface-elevated hover:bg-accent-track text-text-primary py-3 px-6 font-display text-lg tracking-widest uppercase transition-colors border-2 border-accent-track"
 					>
 						Cancel
 					</button>
 					<button
 						onclick={handleSave}
 						disabled={isSaving}
-						class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+						class="flex-1 bg-accent-primary hover:bg-accent-primary-light text-white py-3 px-6 font-display text-lg tracking-widest uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 					>
 						{#if isSaving}
 							<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

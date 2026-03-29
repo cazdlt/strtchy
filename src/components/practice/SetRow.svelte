@@ -183,17 +183,17 @@
 
 <div
 	{id}
-	class="flex items-center gap-3 p-3 rounded-lg border transition-all {isActive
-		? 'border-blue-500 bg-blue-500/5'
-		: 'border-gray-700 hover:border-gray-600'}"
+	class="flex items-center gap-3 p-3 border transition-all {isActive
+		? 'border-accent-primary bg-accent-primary/5'
+		: 'border-accent-track hover:border-accent-primary'}"
 >
-	<div class="w-12 text-sm font-semibold text-gray-400">
+	<div class="w-12 text-sm font-display text-text-secondary">
 		{getSetDisplay()}
 	</div>
 
 	<div class="flex-1">
 		{#if previousStats}
-			<div class="text-sm text-gray-500 mb-1">
+			<div class="text-sm text-text-secondary mb-1 font-body">
 				{#if movementType === 'timed'}
 					{formatTime(previousStats.value)}{#if previousStats.rating} @ {previousStats.rating}{/if}
 				{:else if movementType === 'reps'}
@@ -206,7 +206,7 @@
 				{/if}
 			</div>
 		{:else}
-			<div class="text-sm text-gray-600 mb-1">No previous data</div>
+			<div class="text-sm text-text-muted mb-1 font-body">No previous data</div>
 		{/if}
 
 		<div class="flex items-center gap-2">
@@ -215,7 +215,7 @@
 					<div class="flex items-center gap-2">
 						<button
 							onclick={() => onToggleTimerPaused?.()}
-							class="w-8 h-8 bg-blue-600 hover:bg-blue-500 rounded flex items-center justify-center text-white"
+							class="w-8 h-8 bg-accent-primary hover:bg-accent-primary-light flex items-center justify-center text-white"
 							aria-label={activeSetTimerPaused ? 'Resume timer' : 'Pause timer'}
 						>
 							{#if activeSetTimerPaused}
@@ -230,7 +230,7 @@
 						</button>
 						<button
 							onclick={() => onResetTimer?.()}
-							class="w-8 h-8 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+							class="w-8 h-8 bg-surface-elevated hover:bg-accent-track border border-accent-track flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
 							aria-label="Reset timer"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -238,9 +238,9 @@
 							</svg>
 						</button>
 						<div class="font-bold w-24 text-center transition-all">
-							<span class="text-3xl {activeSetTimerPaused ? 'text-yellow-400' : 'text-white'}">{formatTime(activeSetTimer)}</span>
-							<span class="text-gray-500 text-lg mx-1">/</span>
-							<span class="text-gray-400 text-lg">{formatTime(targetValue)}</span>
+							<span class="text-3xl {activeSetTimerPaused ? 'text-warning' : 'text-text-primary'}">{formatTime(activeSetTimer)}</span>
+							<span class="text-text-muted text-lg mx-1">/</span>
+							<span class="text-text-secondary text-lg">{formatTime(targetValue)}</span>
 						</div>
 					</div>
 				{:else}
@@ -249,21 +249,21 @@
 					<button
 						onclick={() => handleValueChange(Math.max(0, currentValue - 5))}
 						disabled={isPaused}
-						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+						class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 					>
 						-
 					</button>
 				{/if}
-				<div class="font-bold w-24 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">
+				<div class="font-bold w-24 text-center transition-all {!isPreview && isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
 					<span class="text-current">{formatTime(displayValue)}</span>
-					<span class="text-gray-500 text-lg mx-1">/</span>
-					<span class="text-gray-400 text-lg">{formatTime(targetValue)}</span>
+					<span class="text-text-muted text-lg mx-1">/</span>
+					<span class="text-text-secondary text-lg">{formatTime(targetValue)}</span>
 				</div>
 					{#if !isPreview}
 					<button
 						onclick={() => handleValueChange(currentValue + 5)}
 						disabled={isPaused}
-						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+						class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 					>
 						+
 					</button>
@@ -276,27 +276,27 @@
 					<button
 						onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
 						disabled={isPaused}
-						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+						class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 					>
 						-
 					</button>
 				{/if}
-				<div class="font-bold w-20 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">
+				<div class="font-bold w-20 text-center transition-all {!isPreview && isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
 					<span class="text-current">{displayValue}</span>
-					<span class="text-gray-500 text-lg mx-1">/</span>
-					<span class="text-gray-400 text-lg">{targetValue}</span>
+					<span class="text-text-muted text-lg mx-1">/</span>
+					<span class="text-text-secondary text-lg">{targetValue}</span>
 				</div>
 				{#if !isPreview}
 					<button
 						onclick={() => handleValueChange(currentValue + 1)}
 						disabled={isPaused}
-						class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+						class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 					>
 						+
 					</button>
 				{/if}
 				{#if isActive && timePerRep && timePerRep > 0}
-					<span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded ml-1">
+					<span class="text-xs text-success bg-success/10 px-2 py-0.5 ml-1">
 						{timePerRep}s/rep
 					</span>
 				{/if}
@@ -307,42 +307,42 @@
 						<button
 							onclick={() => handleWeightChange(Math.max(0, currentWeight - 5))}
 							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+							class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 						>
 							-
 						</button>
 					{/if}
-					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">{currentWeight}</span>
+					<span class="font-bold w-16 text-center transition-all {!isPreview && isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">{currentWeight}</span>
 					{#if !isPreview}
 						<button
 							onclick={() => handleWeightChange(currentWeight + 5)}
 							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+							class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 						>
 							+
 						</button>
 					{/if}
-					<span class="text-gray-400 text-sm">{weightUnit}</span>
-					<span class="text-gray-500 mx-1">×</span>
+					<span class="text-text-secondary text-sm">{weightUnit}</span>
+					<span class="text-text-muted mx-1">×</span>
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
 							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+							class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 						>
 							-
 						</button>
 					{/if}
-					<div class="font-bold w-20 text-center transition-all {!isPreview && isActive ? 'text-3xl text-blue-400' : 'text-2xl text-white'}">
+					<div class="font-bold w-20 text-center transition-all {!isPreview && isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
 						<span class="text-current">{displayValue}</span>
-						<span class="text-gray-500 text-lg mx-1">/</span>
-						<span class="text-gray-400 text-lg">{targetValue}</span>
+						<span class="text-text-muted text-lg mx-1">/</span>
+						<span class="text-text-secondary text-lg">{targetValue}</span>
 					</div>
 					{#if !isPreview}
 						<button
 							onclick={() => handleValueChange(currentValue + 1)}
 							disabled={isPaused}
-							class="w-8 h-8 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded flex items-center justify-center text-white"
+							class="w-8 h-8 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 						>
 							+
 						</button>
@@ -352,7 +352,7 @@
 
 			{#if !isPreview}
 				<div class="flex items-center gap-2 ml-4">
-					<span class="text-sm text-gray-400">Effort</span>
+					<span class="text-sm text-text-secondary font-body">Effort</span>
 					<input
 						type="number"
 						bind:value={effortRating}
@@ -360,7 +360,7 @@
 						max="10"
 						placeholder="-"
 						disabled={isPaused}
-						class="w-12 bg-gray-800 border border-gray-600 rounded text-center text-white text-sm py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						class="w-12 bg-inset border-2 border-accent-track text-center text-text-primary text-sm py-1 focus:outline-none focus:border-accent-primary disabled:opacity-50 disabled:cursor-not-allowed [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 					/>
 				</div>
 			{/if}
@@ -373,7 +373,7 @@
 				<button
 					onclick={onSkip}
 					disabled={isCompleting || isPaused}
-					class="text-xs font-semibold py-1 px-3 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-700 rounded-md transition-colors text-gray-300 w-full text-center"
+					class="text-xs font-title font-bold uppercase tracking-wider py-1 px-3 bg-surface-elevated hover:bg-accent-track disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated transition-colors text-text-secondary w-full text-center"
 				>
 					Skip
 				</button>
@@ -381,13 +381,13 @@
 			<button
 				onclick={handleComplete}
 				disabled={isCompleting || isPaused}
-				class="px-4 h-11 rounded-lg flex items-center justify-center font-semibold transition-all shadow-sm {isCompleted
-					? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30'
+				class="px-4 h-11 flex items-center justify-center font-display text-lg tracking-widest uppercase transition-colors {isCompleted
+					? 'bg-success/20 text-success border border-success/30 hover:bg-success/30'
 					: isSkipped
-					? 'bg-gray-600/30 text-gray-400 border border-gray-600/30'
+					? 'bg-surface-elevated text-text-muted border border-accent-track'
 					: isActive
-					? 'bg-blue-600 hover:bg-blue-500 text-white'
-					: 'bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-400'} disabled:opacity-50 disabled:cursor-not-allowed"
+					? 'bg-accent-primary hover:bg-accent-primary-light text-white'
+					: 'bg-surface-elevated border border-accent-track hover:border-accent-primary text-text-secondary'} disabled:opacity-50 disabled:cursor-not-allowed"
 				aria-label={isCompleted || isSkipped ? "Un-complete set {setNumber}" : isActive ? "Complete set {setNumber}" : "Start set {setNumber}"}
 			>
 				{#if isCompleting}

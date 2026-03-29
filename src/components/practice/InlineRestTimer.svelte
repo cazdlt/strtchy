@@ -28,26 +28,26 @@
 
 <div
 	id={isActive ? "active-rest-timer" : ""}
-	class="border rounded-lg overflow-hidden mb-4 relative transition-all {isActive
-		? 'bg-blue-500/5 border-blue-500 shadow-lg shadow-blue-500/10'
+	class="border overflow-hidden mb-4 relative transition-all {isActive
+		? 'bg-accent-primary/5 border-accent-primary'
 		: isCompleted
-		? 'bg-gray-900/20 border-gray-800 opacity-60'
-		: 'bg-gray-800/20 border-gray-700 border-dashed opacity-50'}"
+		? 'bg-surface/20 border-accent-track opacity-60'
+		: 'bg-surface/20 border-accent-track border-dashed opacity-50'}"
 >
 	<div class="p-4 flex items-center justify-between relative z-10">
 		<div class="flex items-center gap-4">
 			<span class="text-2xl">{icon}</span>
 			<div>
 				<div class="flex items-center gap-3">
-					<span class="font-semibold {isActive ? 'text-white' : 'text-gray-400'}">{label}</span>
+					<span class="font-title font-bold {isActive ? 'text-text-primary' : 'text-text-secondary'}">{label}</span>
 					{#if isActive}
-						<span class="text-3xl font-bold text-blue-400 w-16 text-center tabular-nums">{formatTime(remainingTime)}</span>
+						<span class="text-3xl font-display text-accent-primary w-16 text-center tabular-nums">{formatTime(remainingTime)}</span>
 					{:else if !isCompleted}
-						<span class="text-gray-500">({formatTime(totalDuration)})</span>
+						<span class="text-text-muted">({formatTime(totalDuration)})</span>
 					{/if}
 				</div>
 				{#if type === 'between-movements' && nextExerciseName}
-					<div class="text-gray-400 text-sm mt-1">Next: {nextExerciseName}</div>
+					<div class="text-text-secondary text-sm mt-1 font-body">Next: {nextExerciseName}</div>
 				{/if}
 			</div>
 		</div>
@@ -55,13 +55,13 @@
 			<button
 				onclick={onSkip}
 				disabled={isPaused}
-				class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+				class="bg-accent-primary hover:bg-accent-primary-light disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-accent-primary text-white px-4 py-2 font-display text-lg tracking-widest uppercase transition-colors"
 				aria-label="Skip rest"
 			>
 				Skip
 			</button>
 		{:else if isCompleted}
-			<div class="text-emerald-500">
+			<div class="text-success">
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-6 h-6">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
 				</svg>
@@ -71,10 +71,10 @@
 
 	{#if isActive}
 		<!-- Progress bar background -->
-		<div class="absolute bottom-0 left-0 w-full h-1 bg-gray-700/50">
+		<div class="absolute bottom-0 left-0 w-full h-1 bg-accent-track">
 			<!-- Progress fill -->
 			<div
-				class="h-full bg-blue-500 transition-all duration-1000 ease-linear"
+				class="h-full bg-accent-primary transition-all duration-1000 ease-linear"
 				style="width: {progress}%"
 			></div>
 		</div>

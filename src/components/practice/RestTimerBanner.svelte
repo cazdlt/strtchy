@@ -57,7 +57,7 @@
 </script>
 
 {#if show}
-	<div class="fixed left-0 right-0 z-50 bg-gradient-to-r from-indigo-900/90 via-purple-900/90 to-indigo-900/90 backdrop-blur-lg border-b border-indigo-500/30 shadow-lg" style="height: 80px; top: 88px;">
+	<div class="fixed left-0 right-0 z-50 bg-surface border-b border-accent-track" style="height: 80px; top: 88px; box-shadow: var(--shadow-floating);">
 		<div class="h-full max-w-4xl mx-auto px-4 flex items-center justify-between">
 			<div class="flex items-center gap-4 flex-1">
 				<div class="relative w-16 h-16 flex items-center justify-center">
@@ -69,41 +69,35 @@
 							fill="none"
 							stroke="currentColor"
 							stroke-width="2.5"
-							class="text-indigo-500/30"
+							class="text-accent-track"
 						/>
 						<circle
 							cx="32"
 							cy="32"
 							r="28"
 							fill="none"
-							stroke="url(#gradient)"
+							stroke="currentColor"
 							stroke-width="2.5"
 							stroke-dasharray="175.9"
 							stroke-dashoffset={175.9 - (175.9 * progress) / 100}
 							stroke-linecap="round"
-							class="drop-shadow-lg"
+							class="text-accent-primary"
 						/>
-						<defs>
-							<linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-								<stop offset="0%" stop-color="#6366f1" />
-								<stop offset="100%" stop-color="#a855f7" />
-							</linearGradient>
-						</defs>
 					</svg>
-					<span class="absolute text-lg font-bold text-white drop-shadow">{formatTime(remaining)}</span>
+					<span class="absolute text-lg font-bold text-text-primary drop-shadow font-display">{formatTime(remaining)}</span>
 				</div>
 				<div class="flex flex-col">
-					<span class="text-white font-semibold text-base">
-						{isBetweenMovements ? '🌿 Rest' : '💪 Rest between sets'}
+					<span class="text-text-primary font-display text-xl tracking-wider">
+						{isBetweenMovements ? 'REST' : 'REST BETWEEN SETS'}
 					</span>
 					{#if nextExerciseName}
-						<span class="text-indigo-200/80 text-sm">Next: {nextExerciseName}</span>
+						<span class="text-text-secondary text-sm font-body">Next: {nextExerciseName}</span>
 					{/if}
 				</div>
 			</div>
 			<button
 				onclick={onSkip}
-				class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl font-semibold border border-white/20 backdrop-blur transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+				class="bg-accent-primary hover:bg-accent-primary-light text-white px-5 py-2.5 font-display text-lg tracking-widest uppercase transition-colors"
 			>
 				Skip
 			</button>

@@ -30,11 +30,11 @@
 	}
 </script>
 
-<header class="sticky top-0 z-40 w-full border-b border-white/5 bg-gray-950/80 backdrop-blur-md">
+<header class="sticky top-0 z-40 w-full border-b border-accent-track bg-base/95 backdrop-blur-md">
 	<!-- Thin progress bar at the very top -->
-	<div class="h-1 w-full bg-gray-900/50">
+	<div class="h-1 w-full bg-surface">
 		<div
-			class="h-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-500 ease-out"
+			class="h-full bg-success transition-all duration-500 ease-out"
 			style="width: {progress}%"
 		></div>
 	</div>
@@ -44,7 +44,7 @@
 		<div class="flex-shrink-0 w-10">
 			<button
 				onclick={onExit}
-				class="p-2 -ml-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-full transition-all active:scale-95"
+				class="p-2 -ml-2 text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors active:scale-95"
 				aria-label={isPreview ? 'Back' : 'Exit practice'}
 			>
 				{#if isPreview}
@@ -75,24 +75,24 @@
 
 		<!-- Center: Routine Info & Timer -->
 		<div class="flex flex-col items-center text-center min-w-0 flex-1">
-			<h1 class="text-xs font-semibold text-gray-500 uppercase tracking-widest truncate w-full mb-0.5">
+			<h1 class="text-xs font-semibold text-text-muted uppercase tracking-widest truncate w-full mb-0.5">
 				{routineName}
 			</h1>
 			<div class="flex items-center gap-3">
 				{#if totalMovements > 0}
-					<span class="text-[10px] font-bold text-gray-400 bg-white/5 px-1.5 py-0.5 rounded uppercase tracking-wider">
-						{currentMovementIndex + 1}<span class="text-gray-600 mx-0.5">/</span>{totalMovements}
+					<span class="text-[10px] font-bold text-text-secondary bg-surface px-1.5 py-0.5 uppercase tracking-wider">
+						{currentMovementIndex + 1}<span class="text-text-muted mx-0.5">/</span>{totalMovements}
 					</span>
-					<span class="h-3 w-px bg-white/10"></span>
+					<span class="h-3 w-px bg-accent-track"></span>
 				{/if}
 				{#if !isPreview}
-					<span class="text-xl font-bold font-mono tracking-tight text-white tabular-nums">
+					<span class="text-xl font-bold font-mono tracking-tight text-text-primary tabular-nums">
 						{formatDuration(duration)}
 					</span>
-					<span class="h-3 w-px bg-white/10"></span>
+					<span class="h-3 w-px bg-accent-track"></span>
 				{/if}
-				<span class="text-xs font-bold text-emerald-400 tabular-nums">
-					{completedSets}<span class="text-gray-600 mx-0.5">/</span>{totalSets} <span class="text-[10px] uppercase tracking-wider text-gray-500 ml-0.5">Sets</span>
+				<span class="text-xs font-bold text-success tabular-nums">
+					{completedSets}<span class="text-text-muted mx-0.5">/</span>{totalSets} <span class="text-[10px] uppercase tracking-wider text-text-muted ml-0.5">Sets</span>
 				</span>
 			</div>
 		</div>
@@ -102,7 +102,7 @@
 			{#if !isPreview}
 				<button
 					onclick={onSettings}
-					class="p-2 -mr-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-full transition-all active:scale-95"
+					class="p-2 -mr-2 text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors active:scale-95"
 					aria-label="Settings"
 				>
 					<svg
