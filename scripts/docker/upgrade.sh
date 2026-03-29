@@ -33,20 +33,20 @@ git pull origin main || git pull origin master
 echo ""
 
 echo -e "${BLUE}→ Stopping current containers...${NC}"
-docker-compose down
+docker compose down
 echo ""
 
 echo -e "${BLUE}→ Rebuilding Docker image with latest code...${NC}"
-docker-compose build --no-cache
+docker compose build --no-cache
 echo ""
 
 echo -e "${BLUE}→ Starting updated containers...${NC}"
-docker-compose up -d
+docker compose up -d
 echo ""
 
 echo -e "${BLUE}→ Running database migrations...${NC}"
 # Run migrations only (no seed for existing database)
-docker-compose exec -T strtchy sh -c "DATABASE_URL=./data/prod/local.db npx tsx scripts/db/migrate.ts"
+docker compose exec -T strtchy sh -c "DATABASE_URL=./data/prod/local.db npx tsx scripts/db/migrate.ts"
 echo ""
 
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -56,5 +56,5 @@ echo ""
 echo -e "Your updated app is running at: ${BLUE}http://localhost:4173${NC}"
 echo ""
 echo "Useful commands:"
-echo "  docker-compose logs -f    # View logs"
-echo "  docker-compose down       # Stop the app"
+echo "  docker compose logs -f    # View logs"
+echo "  docker compose down       # Stop the app"
