@@ -48,6 +48,12 @@ export default defineConfig({
     noExternal: ["phosphor-svelte"],
   },
   preview: {
-    allowedHosts: ["localhost", "floresta.local", "floresta"],
+    allowedHosts: [
+      "localhost",
+      "floresta.local",
+      "floresta",
+      "strtchy.zamoradelatorre.com",
+      "*.zamoradelatorre.com",
+    ],
   },
 });
