@@ -21,8 +21,11 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	
 	// Profile form state
+	// svelte-ignore state_referenced_locally
 	let name = $state(data.user.name || '');
+	// svelte-ignore state_referenced_locally
 	let username = $state(data.user.username || '');
+	// svelte-ignore state_referenced_locally
 	let avatar = $state(data.user.image || '🧘');
 	
 	// Password form state
@@ -32,6 +35,7 @@
 	let showPasswordForm = $state(false);
 	
 	// Preferences state
+	// svelte-ignore state_referenced_locally
 	let preferences = $state({
 		autoAdvance: data.user.preferences?.autoAdvance ?? true,
 		audioEnabled: data.user.preferences?.audioEnabled ?? true,

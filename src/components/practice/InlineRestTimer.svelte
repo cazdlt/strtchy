@@ -13,7 +13,7 @@
 	} = $props<{
 		remainingTime: number;
 		totalDuration: number;
-		type: 'between-sets' | 'between-movements';
+		type: 'between-sets' | 'between-movements' | 'get-ready';
 		nextExerciseName?: string;
 		onSkip?: () => void;
 		isActive?: boolean;
@@ -21,8 +21,16 @@
 		isPaused?: boolean;
 	}>();
 
-	const label = $derived(type === 'between-sets' ? 'Rest between sets' : 'Rest before next exercise');
-	const icon = $derived(type === 'between-sets' ? '💪' : '🌿');
+	const label = $derived(
+		type === 'get-ready' ? 'Get Ready' :
+		type === 'between-sets' ? 'Rest between sets' :
+		'Rest before next exercise'
+	);
+	const icon = $derived(
+		type === 'get-ready' ? '🏁' :
+		type === 'between-sets' ? '💪' :
+		'🌿'
+	);
 	const progress = $derived(totalDuration > 0 ? ((totalDuration - remainingTime) / totalDuration) * 100 : 0);
 </script>
 
@@ -46,7 +54,7 @@
 						<span class="text-text-muted">({formatTime(totalDuration)})</span>
 					{/if}
 				</div>
-				{#if type === 'between-movements' && nextExerciseName}
+				{#if (type === 'between-movements' || type === 'get-ready') && nextExerciseName}
 					<div class="text-text-secondary text-sm mt-1 font-body">Next: {nextExerciseName}</div>
 				{/if}
 			</div>

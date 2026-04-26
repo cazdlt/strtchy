@@ -154,9 +154,6 @@ export const practiceLogs = sqliteTable("practice_logs", {
   completedAt: integer("completed_at", { mode: "timestamp" }),
   duration: integer("duration"), // in seconds
   notes: text("notes"),
-  setOverrides: text("set_overrides", { mode: "json" }).$type<
-    Record<string, number>
-  >(), // Map of routineMovementId to set count override
 });
 
 export const practiceData = sqliteTable("practice_data", {
@@ -164,19 +161,22 @@ export const practiceData = sqliteTable("practice_data", {
   practiceLogId: text("practice_log_id")
     .references(() => practiceLogs.id, { onDelete: "cascade" })
     .notNull(),
-  routineMovementId: text("routine_movement_id")
-    .references(() => routineMovements.id)
-    .notNull(),
+  // Snapshot of movement metadata at practice time (self-contained historical record)
+  movementId: text("movement_id").notNull(),
+  movementName: text("movement_name").notNull(),
+  movementType: text("movement_type", {
+    enum: ["timed", "reps", "weighted", "resistance_band"],
+  }).notNull(),
+  targetType: text("target_type", { enum: ["time", "reps"] }).notNull(),
+  targetValue: integer("target_value").notNull(),
+  order: integer("order").notNull(),
   setNumber: integer("set_number").notNull(),
   side: text("side", { enum: ["left", "right"] }),
-  value: integer("value").notNull(), // time in seconds or reps count
-  measurementType: text("measurement_type", {
-    enum: ["time", "reps"],
-  }).notNull(),
-  weight: integer("weight"), // weight value used for weighted/resistance exercises
+  value: integer("value").notNull(),
+  weight: integer("weight"),
   weightUnit: text("weight_unit", { enum: ["lbs", "kg", "bodyweight"] }),
-  customMeasurement: text("custom_measurement"), // e.g., band color
-  rating: integer("rating"), // 1-10 rating after completing movement
+  customMeasurement: text("custom_measurement"),
+  rating: integer("rating"),
   status: text("status", { enum: ["completed", "skipped"] })
     .notNull()
     .default("completed"),
@@ -210,7 +210,7 @@ export const routinesRelations = relations(routines, ({ one, many }) => ({
 
 export const routineMovementsRelations = relations(
   routineMovements,
-  ({ one, many }) => ({
+  ({ one }) => ({
     routine: one(routines, {
       fields: [routineMovements.routineId],
       references: [routines.id],
@@ -219,7 +219,6 @@ export const routineMovementsRelations = relations(
       fields: [routineMovements.movementId],
       references: [movements.id],
     }),
-    practiceData: many(practiceData),
   }),
 );
 
@@ -249,9 +248,5 @@ export const practiceDataRelations = relations(practiceData, ({ one }) => ({
   practiceLog: one(practiceLogs, {
     fields: [practiceData.practiceLogId],
     references: [practiceLogs.id],
-  }),
-  routineMovement: one(routineMovements, {
-    fields: [practiceData.routineMovementId],
-    references: [routineMovements.id],
   }),
 }));

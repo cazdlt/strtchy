@@ -6,7 +6,7 @@
 </script>
 
 {#if show}
-	<div class="fixed top-0 left-0 right-0 z-50 bg-warning/90 backdrop-blur-sm border-b border-warning-light shadow-lg" style="box-shadow: var(--shadow-elevated);">
+	<div class="bg-warning/90 backdrop-blur-sm border-b border-warning-light" style="box-shadow: var(--shadow-elevated);">
 		<div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
 			<div class="flex items-center gap-3">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-base">

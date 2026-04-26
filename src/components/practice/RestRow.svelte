@@ -7,27 +7,22 @@
 		remainingTime = 0,
 		isActive = false,
 		isCompleted = false,
-		isPreview = false,
 		onSkip,
-		id = '',
 		isPaused = false
-	} = $props<{
+	}: {
 		label?: string;
 		duration: number;
 		remainingTime?: number;
 		isActive?: boolean;
 		isCompleted?: boolean;
-		isPreview?: boolean;
 		onSkip?: () => void;
-		id?: string;
 		isPaused?: boolean;
-	}>();
+	} = $props();
 
 	const progress = $derived(duration > 0 ? ((duration - (remainingTime || 0)) / duration) * 100 : 0);
 </script>
 
 <div
-	id={isActive ? 'active-rest-timer' : id}
 	class="flex items-center gap-2 py-2 px-3 border transition-all relative overflow-hidden {isActive
 		? 'border-accent-primary bg-accent-primary/5'
 		: 'border-transparent'}"
@@ -52,7 +47,7 @@
 			</div>
 		{/if}
 
-		<span class="text-[10px] font-bold uppercase tracking-widest {isActive ? 'text-accent-primary-light' : 'text-text-muted'}">
+		<span class="text-[10px] font-bold uppercase tracking-widest {isActive ? 'text-accent-primary' : 'text-text-muted'}">
 			{label}
 		</span>
 

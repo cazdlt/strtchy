@@ -91,28 +91,8 @@ export async function updateRoutine(
     .where(eq(routines.id, routineId));
 
   // Delete and re-insert movements
-  // First, delete practice_data records that reference this routine's movements
-  const existingMovements = await db.query.routineMovements.findMany({
-    where: eq(routineMovements.routineId, routineId),
-    columns: { id: true },
-  });
   console.log(
-    `[updateRoutine] Found ${existingMovements.length} existing movements for routine ${routineId}`,
-  );
-
-  if (existingMovements.length > 0) {
-    const movementIds = existingMovements.map((m) => m.id);
-    console.log(
-      `[updateRoutine] Deleting practice_data for ${movementIds.length} routine movements`,
-    );
-    const deletedPracticeData = await db
-      .delete(practiceData)
-      .where(inArray(practiceData.routineMovementId, movementIds));
-    console.log(`[updateRoutine] Deleted practice_data records`);
-  }
-
-  console.log(
-    `[updateRoutine] Deleting ${existingMovements.length} routine_movements for routine ${routineId}`,
+    `[updateRoutine] Deleting old movements for routine ${routineId}`,
   );
   await db
     .delete(routineMovements)

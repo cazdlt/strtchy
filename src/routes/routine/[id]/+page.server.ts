@@ -23,14 +23,10 @@ async function getPreviousStats(
     })
     .from(practiceData)
     .innerJoin(practiceLogs, eq(practiceData.practiceLogId, practiceLogs.id))
-    .innerJoin(
-      routineMovements,
-      eq(practiceData.routineMovementId, routineMovements.id),
-    )
     .where(
       and(
         userId ? eq(practiceLogs.userId, userId) : isNull(practiceLogs.userId),
-        eq(routineMovements.movementId, movementId),
+        eq(practiceData.movementId, movementId),
       ),
     )
     .orderBy(desc(practiceData.completedAt))
@@ -40,7 +36,7 @@ async function getPreviousStats(
 
   const practiceLogId = lastPracticeData[0].practiceLogId;
 
-  // Now get all sets for that movement in that specific practice
+  // Get all sets for that movement in that specific practice
   const stats = await db
     .select({
       id: practiceData.id,
@@ -53,14 +49,10 @@ async function getPreviousStats(
       completedAt: practiceData.completedAt,
     })
     .from(practiceData)
-    .innerJoin(
-      routineMovements,
-      eq(practiceData.routineMovementId, routineMovements.id),
-    )
     .where(
       and(
         eq(practiceData.practiceLogId, practiceLogId),
-        eq(routineMovements.movementId, movementId),
+        eq(practiceData.movementId, movementId),
       ),
     );
 

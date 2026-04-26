@@ -152,19 +152,16 @@
 				{#if item.type === 'set'}
 					<SetRow
 						setNumber={item.setNumber!}
+						movementId={routineMovementId}
 						{movementType}
 						{targetValue}
 						{weight}
 						{weightUnit}
 						isBilateral={isBilateral}
 						side={item.side!}
-						previousStats={Array.isArray(previousStats) 
-							? previousStats.find(ps => ps.setNumber === item.setNumber && (ps.side || null) === (item.side || null)) 
-							: previousStats}
 						isActive={false}
 						isCompleted={false}
 						isSkipped={false}
-						isPreview={true}
 					/>
 				{:else}
 					<RestRow
@@ -172,7 +169,6 @@
 						duration={item.duration!}
 						isActive={false}
 						isCompleted={false}
-						isPreview={true}
 					/>
 				{/if}
 			{/each}
