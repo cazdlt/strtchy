@@ -8,13 +8,13 @@ services:
     ports:
       - "4173:4173"
     volumes:
-      # Persist SQLite database
       - ./data:/app/data
-      # Mount environment file
-      - ./.env.production:/app/.env.production:ro
+    env_file:
+      - .env.production
     environment:
-      # Ensure DATABASE_URL points to the persisted location
-      - DATABASE_URL=./data/prod/local.db
+      - DATABASE_URL=/app/data/prod/local.db # Ruta absoluta corregida (sin el punto)
+      - PORT=4173
+      - HOST=0.0.0.0
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=host
     working_dir: /app
-    # Override the default CMD to ensure it uses the correct database path
-    command: sh -c "export DATABASE_URL=./data/prod/local.db && npx vite preview --host 0.0.0.0 --port 4173"
