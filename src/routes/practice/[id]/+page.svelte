@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, setContext } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { deserialize } from '$app/forms';
 	import type { PageData } from './$types';
 	import { PracticeSession } from '$lib/composables/PracticeSession.svelte';
 	import { formatTime } from '$lib/utils/formatting';
@@ -227,18 +228,41 @@
 		});
 
 		if (response.ok) {
-			// Reload page data to get the new movement
-			// In a real app we'd parse the response, but for simplicity we just invalidate
-			window.location.reload();
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && (result.data as any)?.routineMovement) {
+				const rm = (result.data as any).routineMovement;
+				session.addMovement({
+					id: rm.id,
+					movementId: rm.movementId,
+					name: rm.movement.name,
+					type: rm.movement.type as 'timed' | 'reps' | 'weighted' | 'resistance_band',
+					target: rm.target,
+					sets: rm.sets,
+					isBilateral: rm.isBilateral,
+					switchSidesDuration: rm.switchSidesDuration || 5,
+					weight: rm.weight,
+					weightUnit: rm.weightUnit,
+					timePerRep: rm.movement.timePerRep,
+					notes: rm.notes,
+					order: rm.order,
+				});
+			}
 		} else {
 			alert('Failed to add movement');
-			isAddingMovement = false;
 		}
+		isAddingMovement = false;
 	}
 
 	async function handleRemoveMovement(routineMovementId: string) {
 		if (!confirm('Remove this movement from the routine?')) return;
 		isRemovingMovement = true;
+
+		// Stop any running timer and pause before structural change
+		if (session.hasStarted && !session.timer.isPaused) {
+			session.timer.stopAll();
+			session.timer.pause();
+		}
+
 		// Update local state first
 		session.removeMovement(routineMovementId);
 
@@ -258,6 +282,13 @@
 
 	async function handleReorderMovement(routineMovementId: string, direction: 'up' | 'down') {
 		isReordering = true;
+
+		// Stop any running timer and pause before structural change
+		if (session.hasStarted && !session.timer.isPaused) {
+			session.timer.stopAll();
+			session.timer.pause();
+		}
+
 		session.reorderMovement(routineMovementId, direction);
 
 		const formData = new FormData();
@@ -271,8 +302,6 @@
 
 		if (!response.ok) {
 			alert('Failed to reorder movement');
-			// Revert? For now just reload
-			window.location.reload();
 		}
 		isReordering = false;
 	}
@@ -326,8 +355,8 @@
 
 	// Check if first movement has any completed sets (for initial rest display)
 	let firstMovementCompleted = $derived(
-		data.allRoutineMovements.length > 0
-			? session.isSetCompleted(data.allRoutineMovements[0].id, 1, data.allRoutineMovements[0].isBilateral ? 'left' : null)
+		session.movements.length > 0
+			? session.isSetCompleted(session.movements[0].id, 1, session.movements[0].isBilateral ? 'left' : null)
 			: false
 	);
 </script>
@@ -353,7 +382,7 @@
 		completedSets={completedSetsCount}
 		duration={session.timer.durationSeconds}
 		currentMovementIndex={currentMovementIndex}
-		totalMovements={data.allRoutineMovements.length}
+		totalMovements={session.movements.length}
 		isPreview={false}
 		onExit={() => {
 			if (confirm('Exit practice? Your progress so far is saved.')) {
@@ -378,7 +407,7 @@
 				remainingTime={isRestActive ? (restInfo?.remaining ?? currentDuration) : currentDuration}
 				totalDuration={currentDuration}
 				type="get-ready"
-				nextExerciseName={restInfo?.nextMovementName || data.allRoutineMovements[0]?.movement.name}
+				nextExerciseName={restInfo?.nextMovementName || session.movements[0]?.name || ''}
 				onSkip={isRestActive ? () => session.skipRest() : undefined}
 				isActive={isRestActive}
 				isCompleted={firstMovementCompleted}
@@ -386,7 +415,7 @@
 			/>
 		{/if}
 
-		{#if data.allRoutineMovements.length === 0}
+		{#if session.movements.length === 0}
 			<div class="text-center py-12">
 				<p class="text-text-secondary font-body">No movements in this routine</p>
 			</div>
@@ -398,7 +427,7 @@
 			</div>
 		{/if}
 
-		{#each data.allRoutineMovements as rm, index (rm.id)}
+		{#each session.movements as rm, index (rm.id)}
 			{@const isActive = index === currentMovementIndex && !isReadOnly && session.hasStarted}
 
 			<div id="movement-{rm.id}">
@@ -406,15 +435,15 @@
 					movement={{
 						id: rm.id,
 						movementId: rm.movementId,
-						name: rm.movement.name,
-						type: rm.movement.type,
+						name: rm.name,
+						type: rm.type,
 						target: rm.target,
 						sets: rm.sets,
 						isBilateral: rm.isBilateral,
 						switchSidesDuration: rm.switchSidesDuration || 5,
 						weight: rm.weight,
 						weightUnit: rm.weightUnit,
-						timePerRep: rm.movement.timePerRep,
+						timePerRep: rm.timePerRep,
 						notes: rm.notes,
 						order: rm.order,
 					}}
@@ -426,20 +455,20 @@
 					onNotesChange={(notes) => handleUpdateNotes(rm.id, notes)}
 					onRepIncrement={() => audio.play('rep')}
 					isFirst={index === 0}
-					isLast={index === data.allRoutineMovements.length - 1}
+					isLast={index === session.movements.length - 1}
 				/>
 			</div>
 
-			{#if index < data.allRoutineMovements.length - 1}
+			{#if index < session.movements.length - 1}
 				{@const isRestActive = session.timer.state === 'rest' && session.timer.restInfo?.type === 'between-movements' && session.currentMovementIndex === index}
-				{@const nextMovement = data.allRoutineMovements[index + 1]}
+				{@const nextMovement = session.movements[index + 1]}
 				{@const isNextMovementStarted = session.isSetCompleted(nextMovement.id, 1, nextMovement.isBilateral ? 'left' : null)}
 
 				<InlineRestTimer
 					remainingTime={isRestActive ? (session.timer.restInfo?.remaining ?? data.practice.routine.restBetweenMovements) : data.practice.routine.restBetweenMovements}
 					totalDuration={data.practice.routine.restBetweenMovements}
 					type="between-movements"
-					nextExerciseName={nextMovement.movement.name}
+					nextExerciseName={nextMovement.name}
 					onSkip={isRestActive ? () => session.skipRest() : undefined}
 					isActive={isRestActive}
 					isCompleted={isNextMovementStarted}
@@ -450,9 +479,11 @@
 
 		{#if !isReadOnly}
 			<button
-				onclick={() => (showAddMovementModal = true)}
-				disabled={isPaused}
-				class="w-full p-4 bg-surface-elevated border-2 border-dashed border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated disabled:hover:text-text-secondary disabled:hover:border-accent-track transition-colors flex items-center justify-center gap-2 font-body"
+				onclick={() => {
+					if (session.hasStarted && !isPaused) session.togglePause();
+					showAddMovementModal = true;
+				}}
+				class="w-full p-4 bg-surface-elevated border-2 border-dashed border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary hover:bg-surface transition-colors flex items-center justify-center gap-2 font-body"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

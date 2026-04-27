@@ -245,8 +245,9 @@ export const actions = {
 
     const defaultTarget = movement.metadata?.defaultTarget;
 
+    const newId = nanoid();
     await db.insert(routineMovements).values({
-      id: nanoid(),
+      id: newId,
       routineId: practice.routineId,
       movementId: movement.id,
       order: maxOrder + 1,
@@ -263,7 +264,12 @@ export const actions = {
       notes: null,
     });
 
-    return { success: true };
+    const newRow = await db.query.routineMovements.findFirst({
+      where: eq(routineMovements.id, newId),
+      with: { movement: true },
+    });
+
+    return { success: true, routineMovement: newRow };
   },
 
   removeMovement: async ({ request }: RequestEvent) => {
