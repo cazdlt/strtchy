@@ -128,7 +128,16 @@
 
 <div class="bg-surface border-t-4 border-t-accent-primary mb-4" style="box-shadow: var(--shadow-elevated);">
 	<div class="w-full p-4 flex items-start gap-3">
-		<div class="flex flex-col items-center flex-shrink-0">
+		<!-- Mobile-only order badge (also tap target for collapse) -->
+		<button
+			onclick={() => (collapsed = !collapsed)}
+			class="sm:hidden w-10 h-10 bg-accent-primary flex items-center justify-center text-sm font-display text-white hover:bg-accent-primary-light transition-colors flex-shrink-0"
+			aria-label={collapsed ? 'Expand' : 'Collapse'}
+		>
+			{movement.order + 1}
+		</button>
+
+		<div class="hidden sm:flex flex-col items-center flex-shrink-0">
 			<button
 				onclick={() => onMoveUp?.()}
 				disabled={isFirst}
@@ -178,7 +187,7 @@
 		<div class="flex items-center gap-1 flex-shrink-0">
 			<button
 				onclick={() => onRemove?.()}
-				class="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-error/20 hover:text-error transition-colors"
+				class="hidden sm:flex w-8 h-8 items-center justify-center text-text-secondary hover:bg-error/20 hover:text-error transition-colors"
 				aria-label="Remove movement"
 				title="Remove movement"
 			>
@@ -222,7 +231,7 @@
 					<button
 						onclick={() => onAdjustSets?.(-1)}
 						disabled={movement.sets <= 1}
-						class="w-8 h-8 flex items-center justify-center bg-surface-elevated border border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary disabled:opacity-50 transition-colors"
+						class="min-h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center bg-surface-elevated border border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary disabled:opacity-50 transition-colors"
 						aria-label="Remove set"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
@@ -234,7 +243,7 @@
 					</span>
 					<button
 						onclick={() => onAdjustSets?.(1)}
-						class="w-8 h-8 flex items-center justify-center bg-surface-elevated border border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary disabled:opacity-50 transition-colors"
+						class="min-h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center bg-surface-elevated border border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary disabled:opacity-50 transition-colors"
 						aria-label="Add set"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">

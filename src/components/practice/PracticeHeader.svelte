@@ -39,7 +39,7 @@
 		></div>
 	</div>
 
-	<div class="mx-auto max-w-4xl px-4 h-16 flex items-center justify-between gap-4">
+	<div class="mx-auto max-w-4xl px-3 sm:px-4 h-16 flex items-center justify-between gap-4">
 		<!-- Left: Exit/Back -->
 		<div class="flex-shrink-0 w-10">
 			<button
@@ -78,7 +78,7 @@
 			<h1 class="text-xs font-semibold text-text-muted uppercase tracking-widest truncate w-full mb-0.5">
 				{routineName}
 			</h1>
-			<div class="flex items-center gap-3">
+			<div class="flex items-center gap-2 sm:gap-3">
 				{#if totalMovements > 0}
 					<span class="text-[10px] font-bold text-text-secondary bg-surface px-1.5 py-0.5 uppercase tracking-wider">
 						{currentMovementIndex + 1}<span class="text-text-muted mx-0.5">/</span>{totalMovements}

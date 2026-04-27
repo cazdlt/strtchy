@@ -331,7 +331,7 @@
 		onResume={() => session.togglePause()}
 	/>
 
-	<main class="pt-4 pb-32 px-4 max-w-4xl mx-auto">
+	<main class="pt-4 pb-40 sm:pb-32 px-4 max-w-4xl mx-auto">
 		{#if session.hasStarted && session.settings.autoPlay}
 			{@const restInfo = session.timer.restInfo}
 			{@const isRestActive = session.timer.state === 'rest' && (restInfo?.type === 'get-ready' || restInfo?.type === 'between-movements')}
