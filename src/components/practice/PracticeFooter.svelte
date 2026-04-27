@@ -47,7 +47,7 @@
 
 			<button
 				onclick={onCompleteWorkout}
-				disabled={isCompletingWorkout || isPaused}
+				disabled={isCompletingWorkout}
 				class="flex-1 bg-accent-primary hover:bg-accent-primary-light text-white h-14 px-6 font-display text-lg tracking-widest uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 			>
 				{#if isCompletingWorkout}

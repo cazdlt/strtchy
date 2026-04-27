@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 	import { PracticeSession } from '$lib/composables/PracticeSession.svelte';
 	import { formatTime } from '$lib/utils/formatting';
+	import { createAudioController } from '$lib/utils/audio';
 	import type { InferSelectModel } from 'drizzle-orm';
 	import type { routineMovements, movements, practiceData } from '$lib/db/schema';
 
@@ -36,6 +37,7 @@
 			switchSidesDuration: rm.switchSidesDuration || 5,
 			weight: rm.weight,
 			weightUnit: rm.weightUnit,
+			timePerRep: rm.movement.timePerRep,
 			notes: rm.notes,
 			order: rm.order,
 		}));
@@ -60,6 +62,14 @@
 			keepAwake: initialData.practice.routine.keepAwake ?? initialData.userPrefs?.keepAwake ?? true,
 		}
 	);
+
+	// Audio controller
+	const audio = createAudioController(session.settings.audioEnabled);
+	session.setAudio(audio);
+
+	$effect(() => {
+		audio.setEnabled(session.settings.audioEnabled);
+	});
 
 	// Hydrate from existing server data or localStorage
 	if (initialData.existingPracticeData.length > 0) {
@@ -122,6 +132,34 @@
 		if (data.existingPracticeData.length > 0 && !session.hasStarted) {
 			handleStartPractice();
 		}
+	});
+
+	// ── Scroll on rest start ──
+	let prevRestInfo = $state<typeof session.timer.restInfo>(null);
+	$effect(() => {
+		const restInfo = session.timer.restInfo;
+		if (restInfo && !prevRestInfo) {
+			requestAnimationFrame(() => {
+				document.getElementById('active-rest-timer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			});
+		}
+		prevRestInfo = restInfo;
+	});
+
+	// ── Scroll on active set start ──
+	let prevActiveSetInfo = $state<typeof session.timer.activeSetInfo>(null);
+	$effect(() => {
+		const activeSetInfo = session.timer.activeSetInfo;
+		if (activeSetInfo && !prevActiveSetInfo) {
+			const next = session.findNextIncompleteSet();
+			if (next) {
+				const id = `set-${next.movementId}-${next.setNumber}-${next.side || 'none'}`;
+				requestAnimationFrame(() => {
+					document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				});
+			}
+		}
+		prevActiveSetInfo = activeSetInfo;
 	});
 
 	// ── Complete workout ──
@@ -334,13 +372,13 @@
 	<main class="pt-4 pb-40 sm:pb-32 px-4 max-w-4xl mx-auto">
 		{#if session.hasStarted && session.settings.autoPlay}
 			{@const restInfo = session.timer.restInfo}
-			{@const isRestActive = session.timer.state === 'rest' && (restInfo?.type === 'get-ready' || restInfo?.type === 'between-movements')}
-			{@const currentDuration = restInfo?.type === 'get-ready' ? 15 : data.practice.routine.restBetweenMovements}
+			{@const isRestActive = session.timer.state === 'rest' && restInfo?.type === 'get-ready'}
+			{@const currentDuration = 15}
 			<InlineRestTimer
 				remainingTime={isRestActive ? (restInfo?.remaining ?? currentDuration) : currentDuration}
 				totalDuration={currentDuration}
-				type={isRestActive && restInfo?.type === 'get-ready' ? 'get-ready' : 'between-movements'}
-				nextExerciseName={restInfo?.nextMovementName || data.allRoutineMovements[session.currentMovementIndex + 1]?.movement.name || data.allRoutineMovements[0]?.movement.name}
+				type="get-ready"
+				nextExerciseName={restInfo?.nextMovementName || data.allRoutineMovements[0]?.movement.name}
 				onSkip={isRestActive ? () => session.skipRest() : undefined}
 				isActive={isRestActive}
 				isCompleted={firstMovementCompleted}
@@ -376,6 +414,7 @@
 						switchSidesDuration: rm.switchSidesDuration || 5,
 						weight: rm.weight,
 						weightUnit: rm.weightUnit,
+						timePerRep: rm.movement.timePerRep,
 						notes: rm.notes,
 						order: rm.order,
 					}}
@@ -385,6 +424,7 @@
 					onRemove={() => handleRemoveMovement(rm.id)}
 					onAdjustSets={(delta) => handleAdjustSets(rm.id, delta === 1 ? 'up' : 'down')}
 					onNotesChange={(notes) => handleUpdateNotes(rm.id, notes)}
+					onRepIncrement={() => audio.play('rep')}
 					isFirst={index === 0}
 					isLast={index === data.allRoutineMovements.length - 1}
 				/>

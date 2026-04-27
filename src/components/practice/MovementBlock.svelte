@@ -14,6 +14,7 @@
 		onRemove?: () => void;
 		onAdjustSets?: (delta: number) => void;
 		onNotesChange?: (notes: string) => void;
+		onRepIncrement?: () => void;
 	}
 
 	let {
@@ -26,9 +27,12 @@
 		onRemove,
 		onAdjustSets,
 		onNotesChange,
+		onRepIncrement,
 	}: Props = $props();
 
 	const session = getContext<PracticeSession>('practice');
+
+	const liveMovement = $derived(session.movements.find((m) => m.id === movement.id) ?? movement);
 
 	let collapsed = $state(false);
 	let currentNotes = $state('');
@@ -43,6 +47,7 @@
 
 	// Generate the list of sets and rests
 	function generateItems() {
+		const m = liveMovement;
 		const result: Array<{
 			type: 'set' | 'rest';
 			setNumber?: number;
@@ -53,15 +58,15 @@
 			key: string;
 		}> = [];
 
-		for (let i = 1; i <= movement.sets; i++) {
-			if (movement.isBilateral) {
+		for (let i = 1; i <= m.sets; i++) {
+			if (m.isBilateral) {
 				result.push({ type: 'set', setNumber: i, side: 'left', key: `${i}L` });
 
-				if (movement.switchSidesDuration > 0) {
+				if (m.switchSidesDuration > 0) {
 					result.push({
 						type: 'rest',
 						restType: 'switch-sides',
-						duration: movement.switchSidesDuration,
+						duration: m.switchSidesDuration,
 						label: 'Switch Sides',
 						key: `${i}-switch`,
 						setNumber: i,
@@ -74,7 +79,7 @@
 				result.push({ type: 'set', setNumber: i, side: null, key: `${i}` });
 			}
 
-			if (i < movement.sets) {
+			if (i < m.sets) {
 				result.push({
 					type: 'rest',
 					restType: 'between-sets',
@@ -238,9 +243,9 @@
 							<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
 						</svg>
 					</button>
-					<span class="text-sm font-bold text-accent-primary min-w-[3rem] text-center font-display">
-						{movement.sets} Sets
-					</span>
+				<span class="text-sm font-bold text-accent-primary min-w-[3rem] text-center font-display">
+					{liveMovement.sets} Sets
+				</span>
 					<button
 						onclick={() => onAdjustSets?.(1)}
 						class="min-h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center bg-surface-elevated border border-accent-track text-text-secondary hover:text-text-primary hover:border-accent-primary disabled:opacity-50 transition-colors"
@@ -256,6 +261,7 @@
 			{#each items as item (item.key)}
 				{#if item.type === 'set'}
 					<SetRow
+						id="set-{movement.id}-{item.setNumber}-{item.side || 'none'}"
 						setNumber={item.setNumber!}
 						movementId={movement.id}
 						movementType={movement.type}
@@ -268,9 +274,11 @@
 						isCompleted={session.isSetCompleted(movement.id, item.setNumber!, item.side!)}
 						isSkipped={session.isSetSkipped(movement.id, item.setNumber!, item.side!)}
 						completedValue={session.getSetRecord(movement.id, item.setNumber!, item.side!)?.value ?? null}
+						timePerRep={movement.timePerRep}
 						onComplete={(data) => session.completeSet(movement.id, item.setNumber!, item.side!, data.value, { weight: data.weight, weightUnit: data.weightUnit, rating: data.rating })}
 						onUncomplete={() => session.uncompleteSet(movement.id, item.setNumber!, item.side!)}
 						onSkip={() => session.skipSet(movement.id, item.setNumber!, item.side!)}
+						onRepIncrement={() => onRepIncrement?.()}
 						isPaused={session.timer.isPaused}
 						isInRestPeriod={session.timer.state === 'rest' || session.timer.state === 'switchSides'}
 					/>

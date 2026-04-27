@@ -4,6 +4,7 @@
 	import type { PracticeSession } from '$lib/composables/PracticeSession.svelte';
 
 	let {
+		id = '',
 		setNumber,
 		movementId,
 		movementType = 'reps',
@@ -16,12 +17,15 @@
 		isCompleted = false,
 		isSkipped = false,
 		completedValue = null,
+		timePerRep = null,
 		onComplete,
 		onUncomplete,
 		onSkip,
+		onRepIncrement,
 		isPaused = false,
 		isInRestPeriod = false,
 	}: {
+		id?: string;
 		setNumber: number;
 		movementId: string;
 		movementType: 'timed' | 'reps' | 'weighted' | 'resistance_band';
@@ -34,9 +38,11 @@
 		isCompleted?: boolean;
 		isSkipped?: boolean;
 		completedValue?: number | null;
+		timePerRep?: number | null;
 		onComplete?: (data: { value: number; weight?: number | null; weightUnit?: string | null; rating?: number | null }) => void;
 		onUncomplete?: () => void;
 		onSkip?: () => void;
+		onRepIncrement?: () => void;
 		isPaused?: boolean;
 		isInRestPeriod?: boolean;
 	} = $props();
@@ -91,6 +97,37 @@
 		currentWeight = newWeight;
 	}
 
+	// Auto-increment rep counter for rep-based exercises with timePerRep
+	let autoRepInterval: ReturnType<typeof setInterval> | null = null;
+	$effect(() => {
+		if (isActive && !isCompleted && !isSkipped && !isPaused && !isInRestPeriod && timePerRep && timePerRep > 0 && movementType !== 'timed') {
+			if (!autoRepInterval) {
+				autoRepInterval = setInterval(() => {
+					if (currentValue < targetValue) {
+						currentValue++;
+						onRepIncrement?.();
+					} else {
+						// Reached target — auto-complete
+						if (autoRepInterval) clearInterval(autoRepInterval);
+						autoRepInterval = null;
+						handleComplete();
+					}
+				}, timePerRep * 1000);
+			}
+		} else {
+			if (autoRepInterval) {
+				clearInterval(autoRepInterval);
+				autoRepInterval = null;
+			}
+		}
+		return () => {
+			if (autoRepInterval) {
+				clearInterval(autoRepInterval);
+				autoRepInterval = null;
+			}
+		};
+	});
+
 	function getSetDisplay() {
 		if (isBilateral && side) {
 			return `${setNumber}${side === 'left' ? 'L' : 'R'}`;
@@ -100,6 +137,7 @@
 </script>
 
 <div
+	{id}
 	class="flex flex-col gap-2 p-3 border transition-all sm:flex-row sm:items-center sm:gap-3 {isActive
 		? 'border-accent-primary bg-accent-primary/5'
 		: 'border-accent-track hover:border-accent-primary'}"
@@ -211,8 +249,87 @@
 					</button>
 				</div>
 			{/if}
-		{:else if movementType === 'reps'}
+	{:else if movementType === 'reps'}
+		<div class="flex items-center gap-3 justify-center sm:justify-start">
+			{#if isActive}
+				<button
+					onclick={() => session.togglePause()}
+					class="min-h-11 w-11 sm:h-9 sm:w-9 bg-accent-primary hover:bg-accent-primary-light flex items-center justify-center text-white"
+					aria-label={isPaused ? 'Resume' : 'Pause'}
+				>
+					{#if isPaused}
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+						</svg>
+					{:else}
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+						</svg>
+					{/if}
+				</button>
+			{/if}
+			<button
+				onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
+				disabled={isPaused}
+				class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
+			>
+				-
+			</button>
+			<div class="font-bold w-20 text-center transition-all {isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
+				<span class="text-current">{displayValue}</span>
+				<span class="text-text-muted text-lg mx-1">/</span>
+				<span class="text-text-secondary text-lg">{targetValue}</span>
+				{#if isActive && timePerRep && timePerRep > 0}
+					<span class="text-xs text-success bg-success/10 px-2 py-0.5 ml-1">{timePerRep}s/rep</span>
+				{/if}
+			</div>
+			<button
+				onclick={() => handleValueChange(currentValue + 1)}
+				disabled={isPaused}
+				class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
+			>
+				+
+			</button>
+		</div>
+	{:else if movementType === 'weighted' || movementType === 'resistance_band'}
+		<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
 			<div class="flex items-center gap-3 justify-center sm:justify-start">
+				{#if isActive}
+					<button
+						onclick={() => session.togglePause()}
+						class="min-h-11 w-11 sm:h-9 sm:w-9 bg-accent-primary hover:bg-accent-primary-light flex items-center justify-center text-white"
+						aria-label={isPaused ? 'Resume' : 'Pause'}
+					>
+						{#if isPaused}
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+							</svg>
+						{:else}
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+							</svg>
+						{/if}
+					</button>
+				{/if}
+				<button
+					onclick={() => handleWeightChange(Math.max(0, currentWeight - 5))}
+					disabled={isPaused}
+					class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
+				>
+					-
+				</button>
+				<span class="font-bold w-16 text-center transition-all {isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">{currentWeight}</span>
+				<button
+					onclick={() => handleWeightChange(currentWeight + 5)}
+					disabled={isPaused}
+					class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
+				>
+					+
+				</button>
+				<span class="text-text-secondary text-sm">{weightUnit}</span>
+			</div>
+			<div class="flex items-center gap-3 justify-center sm:justify-start">
+				<span class="text-text-muted mx-1 hidden sm:inline">×</span>
 				<button
 					onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
 					disabled={isPaused}
@@ -233,49 +350,7 @@
 					+
 				</button>
 			</div>
-		{:else if movementType === 'weighted' || movementType === 'resistance_band'}
-			<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
-				<div class="flex items-center gap-3 justify-center sm:justify-start">
-					<button
-						onclick={() => handleWeightChange(Math.max(0, currentWeight - 5))}
-						disabled={isPaused}
-						class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
-					>
-						-
-					</button>
-					<span class="font-bold w-16 text-center transition-all {isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">{currentWeight}</span>
-					<button
-						onclick={() => handleWeightChange(currentWeight + 5)}
-						disabled={isPaused}
-						class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
-					>
-						+
-					</button>
-					<span class="text-text-secondary text-sm">{weightUnit}</span>
-				</div>
-				<div class="flex items-center gap-3 justify-center sm:justify-start">
-					<span class="text-text-muted mx-1 hidden sm:inline">×</span>
-					<button
-						onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
-						disabled={isPaused}
-						class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
-					>
-						-
-					</button>
-					<div class="font-bold w-20 text-center transition-all {isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
-						<span class="text-current">{displayValue}</span>
-						<span class="text-text-muted text-lg mx-1">/</span>
-						<span class="text-text-secondary text-lg">{targetValue}</span>
-					</div>
-					<button
-						onclick={() => handleValueChange(currentValue + 1)}
-						disabled={isPaused}
-						class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
-					>
-						+
-					</button>
-				</div>
-			</div>
+		</div>
 		{/if}
 	</div>
 

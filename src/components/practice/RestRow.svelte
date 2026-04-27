@@ -24,12 +24,14 @@
 
 <div
 	class="flex items-center gap-2 py-2 px-3 border transition-all relative overflow-hidden {isActive
-		? 'border-accent-primary bg-accent-primary/5'
-		: 'border-transparent'}"
+		? 'border-l-2 border-l-accent-primary border-accent-track bg-surface-elevated/60'
+		: isCompleted
+		? 'border-accent-track/30 bg-surface/30 opacity-60'
+		: 'border-accent-track/20 bg-surface/20'}"
 >
 	{#if isActive}
 		<div
-			class="absolute bottom-0 left-0 h-0.5 bg-accent-primary/30 transition-all duration-1000 ease-linear"
+			class="absolute bottom-0 left-0 h-0.5 bg-accent-primary/40 transition-all duration-1000 ease-linear"
 			style="width: {progress}%"
 		></div>
 	{/if}
@@ -38,25 +40,25 @@
 		{#if isActive || isCompleted}
 			<div class="flex-shrink-0">
 				{#if isCompleted}
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3.5 h-3.5 text-success/50">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 text-success">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
 					</svg>
 				{:else}
-					<div class="w-2 h-2 bg-accent-primary animate-pulse"></div>
+					<div class="w-2.5 h-2.5 rounded-full bg-accent-primary animate-pulse"></div>
 				{/if}
 			</div>
 		{/if}
 
-		<span class="text-[10px] font-bold uppercase tracking-widest {isActive ? 'text-accent-primary' : 'text-text-muted'}">
+		<span class="text-xs font-title font-bold uppercase tracking-widest {isActive ? 'text-accent-primary' : 'text-text-muted'}">
 			{label}
 		</span>
 
 		{#if isActive}
-			<span class="text-base font-display text-accent-primary tabular-nums">
+			<span class="text-lg font-display font-bold text-accent-primary tabular-nums">
 				{formatTime(remainingTime || 0)}
 			</span>
 		{:else if !isCompleted}
-			<span class="text-[10px] text-text-muted font-mono">({formatTime(duration)})</span>
+			<span class="text-xs text-text-muted font-mono">({formatTime(duration)})</span>
 		{/if}
 	</div>
 

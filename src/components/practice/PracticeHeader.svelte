@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { theme } from '$lib/theme.svelte';
+	import { Sun, Moon } from 'phosphor-svelte';
+
 	let {
 		routineName = '',
 		totalSets = 0,
@@ -97,8 +100,20 @@
 			</div>
 		</div>
 
-		<!-- Right: Settings -->
-		<div class="flex-shrink-0 w-10 flex justify-end">
+		<!-- Right: Theme toggle + Settings -->
+		<div class="flex-shrink-0 flex items-center gap-1 justify-end">
+			<button
+				onclick={() => theme.toggle()}
+				class="p-2 text-text-secondary hover:text-accent-primary hover:bg-surface-elevated transition-all duration-150"
+				aria-label="Toggle theme"
+				title="Toggle dark/light mode"
+			>
+				{#if $theme === 'dark'}
+					<Sun weight="duotone" size={20} />
+				{:else}
+					<Moon weight="duotone" size={20} />
+				{/if}
+			</button>
 			{#if !isPreview}
 				<button
 					onclick={onSettings}

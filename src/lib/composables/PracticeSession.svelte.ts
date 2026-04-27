@@ -1,4 +1,5 @@
 import { PracticeTimer } from './PracticeTimer.svelte';
+import { createAudioController, type AudioController } from '$lib/utils/audio';
 
 export type Side = 'left' | 'right' | null;
 
@@ -13,6 +14,7 @@ export interface MovementSnapshot {
   switchSidesDuration: number;
   weight?: number | null;
   weightUnit?: string | null;
+  timePerRep?: number | null;
   notes?: string | null;
   order: number;
 }
@@ -61,6 +63,9 @@ export class PracticeSession {
 
   // ── Timer ──
   timer = new PracticeTimer();
+
+  // ── Audio ──
+  audio = $state<AudioController | null>(null);
 
   // ── Async states ──
   isSaving = $state(false);
@@ -142,6 +147,10 @@ export class PracticeSession {
     this.#syncCurrentIndexToNextIncomplete();
   }
 
+  setAudio(audio: AudioController) {
+    this.audio = audio;
+  }
+
   // ── Practice lifecycle ──
   start() {
     if (this.hasStarted) return;
@@ -149,14 +158,17 @@ export class PracticeSession {
     this.timer.startDuration();
     const isFreshPractice = this.completedSets.size === 0 && this.skippedSets.size === 0;
     if (this.settings.autoPlay && isFreshPractice) {
+      this.audio?.play('restStart');
       this.timer.startRest(
         15,
         'get-ready',
         this.movements[0]?.name || '',
         undefined,
         () => {
+          this.audio?.play('restEnd');
           this.#checkAndStartTimer();
         },
+        () => this.audio?.play('countdown'),
       );
     }
   }
@@ -171,6 +183,7 @@ export class PracticeSession {
 
   completeWorkout() {
     this.isCompleted = true;
+    this.audio?.play('practiceComplete');
     this.timer.cleanup();
     return this.#toServerData();
   }
@@ -248,15 +261,18 @@ export class PracticeSession {
       const rightKey = generateSetKey(movementId, setNumber, 'right');
       if (!this.completedSets.has(rightKey) && !this.skippedSets.has(rightKey)) {
         if (movement.switchSidesDuration > 0) {
+          this.audio?.play('switchSides');
           this.timer.startRest(
             movement.switchSidesDuration,
             'switch-sides',
             movement.name,
             undefined,
             () => {
+              this.audio?.play('restEnd');
               this.#syncCurrentIndexToNextIncomplete();
               this.#checkAndStartTimer();
             },
+            () => this.audio?.play('countdown'),
           );
         } else {
           this.#syncCurrentIndexToNextIncomplete();
@@ -272,15 +288,18 @@ export class PracticeSession {
     if (completedForMovement < totalForMovement) {
       // More sets in same movement — rest between sets
       if (this.restBetweenSets > 0) {
+        this.audio?.play('restStart');
         this.timer.startRest(
           this.restBetweenSets,
           'between-sets',
           movement.name,
           undefined,
           () => {
+            this.audio?.play('restEnd');
             this.#syncCurrentIndexToNextIncomplete();
             this.#checkAndStartTimer();
           },
+          () => this.audio?.play('countdown'),
         );
       } else {
         this.#syncCurrentIndexToNextIncomplete();
@@ -294,15 +313,18 @@ export class PracticeSession {
     if (currentIdx < this.movements.length - 1) {
       const nextMovement = this.movements[currentIdx + 1];
       if (this.restBetweenMovements > 0) {
+        this.audio?.play('restStart');
         this.timer.startRest(
           this.restBetweenMovements,
           'between-movements',
           nextMovement.name,
           undefined,
           () => {
+            this.audio?.play('restEnd');
             this.currentMovementIndex = currentIdx + 1;
             this.#checkAndStartTimer();
           },
+          () => this.audio?.play('countdown'),
         );
       } else {
         this.currentMovementIndex = currentIdx + 1;
@@ -357,7 +379,7 @@ export class PracticeSession {
   }
 
   isSetActive(movementId: string, setNumber: number, side: Side): boolean {
-    if (!this.hasStarted || this.isCompleted || this.timer.isPaused) return false;
+    if (!this.hasStarted || this.isCompleted || this.timer.isPaused || this.timer.state === 'rest' || this.timer.state === 'switchSides') return false;
     const next = this.findNextIncompleteSet();
     if (!next) return false;
     return (
@@ -396,12 +418,15 @@ export class PracticeSession {
     if (!movement) return;
 
     if (movement.type === 'timed' && movement.target.value > 0) {
+      this.audio?.play('setStart');
       this.timer.startActiveSet(
         movement.target.value,
         () => {}, // UI reads from timer.activeSetInfo
         () => {
+          this.audio?.play('setComplete');
           this.completeSet(next.movementId, next.setNumber, next.side, movement.target.value);
         },
+        () => this.audio?.play('countdown'),
       );
     }
   }

@@ -34,6 +34,7 @@ export class PracticeTimer {
   #activeSetDuration = 0;
   #activeSetOnTick: ((elapsed: number, remaining: number) => void) | null = null;
   #activeSetOnComplete: (() => void) | null = null;
+  #activeSetOnCountdown: (() => void) | null = null;
   #activeSetCountdownPlayed = false;
 
   // ── Rest internals ──
@@ -41,15 +42,16 @@ export class PracticeTimer {
   #restDuration = 0;
   #restOnTick: ((remaining: number) => void) | null = null;
   #restOnComplete: (() => void) | null = null;
+  #restOnCountdown: (() => void) | null = null;
 
   // ── Pause ──
-  #isPaused = false;
+  isPaused = $state(false);
 
   // ── Duration timer (always runs once practice starts) ──
   startDuration() {
     if (this.#durationInterval) return;
     this.#durationInterval = setInterval(() => {
-      if (!this.#isPaused) {
+      if (!this.isPaused) {
         this.durationSeconds++;
       }
     }, 1000);
@@ -68,6 +70,7 @@ export class PracticeTimer {
     duration: number,
     onTick: (elapsed: number, remaining: number) => void,
     onComplete: () => void,
+    onCountdown?: () => void,
   ) {
     this.stopAll(); // MUTUAL EXCLUSION
 
@@ -75,6 +78,7 @@ export class PracticeTimer {
     this.#activeSetElapsed = 0;
     this.#activeSetOnTick = onTick;
     this.#activeSetOnComplete = onComplete;
+    this.#activeSetOnCountdown = onCountdown ?? null;
     this.#activeSetCountdownPlayed = false;
 
     this.activeSetInfo = {
@@ -90,13 +94,14 @@ export class PracticeTimer {
     onTick(0, duration);
 
     this.#activeInterval = setInterval(() => {
-      if (this.#isPaused) return;
+      if (this.isPaused) return;
 
       this.#activeSetElapsed++;
       const remaining = this.#activeSetDuration - this.#activeSetElapsed;
 
       if (remaining <= 3 && remaining > 0 && !this.#activeSetCountdownPlayed) {
         this.#activeSetCountdownPlayed = true;
+        this.#activeSetOnCountdown?.();
       }
 
       this.activeSetInfo = {
@@ -150,13 +155,14 @@ export class PracticeTimer {
 
     // Restart the interval from 0
     this.#activeInterval = setInterval(() => {
-      if (this.#isPaused) return;
+      if (this.isPaused) return;
 
       this.#activeSetElapsed++;
       const remaining = this.#activeSetDuration - this.#activeSetElapsed;
 
       if (remaining <= 3 && remaining > 0 && !this.#activeSetCountdownPlayed) {
         this.#activeSetCountdownPlayed = true;
+        this.#activeSetOnCountdown?.();
       }
 
       this.activeSetInfo = {
@@ -182,6 +188,7 @@ export class PracticeTimer {
     nextMovementName: string = '',
     onTick?: (remaining: number) => void,
     onComplete?: () => void,
+    onCountdown?: () => void,
   ) {
     this.stopAll(); // MUTUAL EXCLUSION
 
@@ -189,6 +196,7 @@ export class PracticeTimer {
     this.#restRemaining = duration;
     this.#restOnTick = onTick ?? null;
     this.#restOnComplete = onComplete ?? null;
+    this.#restOnCountdown = onCountdown ?? null;
 
     this.restInfo = {
       type,
@@ -200,7 +208,7 @@ export class PracticeTimer {
     this.state = type === 'switch-sides' ? 'switchSides' : 'rest';
 
     this.#restInterval = setInterval(() => {
-      if (this.#isPaused) return;
+      if (this.isPaused) return;
 
       this.#restRemaining--;
 
@@ -212,6 +220,10 @@ export class PracticeTimer {
       };
 
       this.#restOnTick?.(this.#restRemaining);
+
+      if (this.#restRemaining === 3) {
+        this.#restOnCountdown?.();
+      }
 
       if (this.#restRemaining <= 0) {
         this.stopRest();
@@ -238,21 +250,17 @@ export class PracticeTimer {
 
   // ── Pause / resume ──
   pause() {
-    this.#isPaused = true;
+    this.isPaused = true;
     if (this.activeSetInfo) {
       this.activeSetInfo = { ...this.activeSetInfo, isPaused: true };
     }
   }
 
   resume() {
-    this.#isPaused = false;
+    this.isPaused = false;
     if (this.activeSetInfo) {
       this.activeSetInfo = { ...this.activeSetInfo, isPaused: false };
     }
-  }
-
-  get isPaused() {
-    return this.#isPaused;
   }
 
   // ── Emergency stop ALL ──
@@ -267,6 +275,6 @@ export class PracticeTimer {
     this.stopAll();
     this.state = 'idle';
     this.durationSeconds = 0;
-    this.#isPaused = false;
+    this.isPaused = false;
   }
 }
