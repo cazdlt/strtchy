@@ -57,6 +57,8 @@ export class PracticeSession {
   settings = $state<PracticeSettings>({ autoPlay: false, audioEnabled: true, keepAwake: true });
   notes = $state<Map<string, string>>(new Map());
 
+  hasRoutineChanges = $state(false);
+
   // Routine settings snapshotted at practice start
   restBetweenSets = $state(15);
   restBetweenMovements = $state(30);
@@ -454,6 +456,7 @@ export class PracticeSession {
   addMovement(movement: MovementSnapshot) {
     this.movements = [...this.movements, movement];
     this.movements = this.movements.map((m, i) => ({ ...m, order: i }));
+    this.hasRoutineChanges = true;
   }
 
   removeMovement(movementId: string) {
@@ -473,6 +476,7 @@ export class PracticeSession {
     this.completedSets = new Map(this.completedSets);
     this.skippedSets = new Map(this.skippedSets);
     this.#syncCurrentIndexToNextIncomplete();
+    this.hasRoutineChanges = true;
   }
 
   reorderMovement(movementId: string, direction: 'up' | 'down') {
@@ -484,6 +488,7 @@ export class PracticeSession {
     const next = [...this.movements];
     [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
     this.movements = next.map((m, i) => ({ ...m, order: i }));
+    this.hasRoutineChanges = true;
   }
 
   adjustSets(movementId: string, delta: number) {
@@ -494,11 +499,13 @@ export class PracticeSession {
     this.movements = this.movements.map((m, i) =>
       i === idx ? { ...m, sets: newSets } : m,
     );
+    this.hasRoutineChanges = true;
   }
 
   updateNotes(movementId: string, note: string) {
     this.notes.set(movementId, note);
     this.notes = new Map(this.notes);
+    this.hasRoutineChanges = true;
   }
 
   // ── Serialization ──

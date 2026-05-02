@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, setContext } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { deserialize } from '$app/forms';
+	import { nanoid } from 'nanoid';
 	import type { PageData } from './$types';
 	import { PracticeSession } from '$lib/composables/PracticeSession.svelte';
 	import { formatTime } from '$lib/utils/formatting';
@@ -103,6 +103,8 @@
 	let isRemovingMovement = $state(false);
 	let isReordering = $state(false);
 	let isAdjustingSets = $state(false);
+	let showSaveChangesModal = $state(false);
+	let isSavingRoutineChanges = $state(false);
 
 	// ── Auto-save to localStorage ──
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -164,8 +166,7 @@
 	});
 
 	// ── Complete workout ──
-	async function handleCompleteWorkout() {
-		if (!confirm('Complete workout?')) return;
+	async function doCompleteWorkout() {
 		isCompleting = true;
 		const serverData = session.completeWorkout();
 
@@ -185,6 +186,45 @@
 			isCompleting = false;
 			alert('Failed to complete workout. Please try again.');
 		}
+	}
+
+	async function handleCompleteWorkout() {
+		if (session.hasRoutineChanges) {
+			showSaveChangesModal = true;
+			return;
+		}
+		if (!confirm('Complete workout?')) return;
+		await doCompleteWorkout();
+	}
+
+	async function handleSaveAndFinish() {
+		isSavingRoutineChanges = true;
+		try {
+			const formData = new FormData();
+			formData.append('movements', JSON.stringify(session.movements));
+
+			const response = await fetch('?/saveRoutineChanges', {
+				method: 'POST',
+				body: formData,
+			});
+
+			if (!response.ok) {
+				alert('Failed to save routine changes. Please try again.');
+				isSavingRoutineChanges = false;
+				return;
+			}
+		} catch {
+			alert('Failed to save routine changes. Please try again.');
+			isSavingRoutineChanges = false;
+			return;
+		}
+		showSaveChangesModal = false;
+		await doCompleteWorkout();
+	}
+
+	async function handleFinishWithoutSaving() {
+		showSaveChangesModal = false;
+		await doCompleteWorkout();
 	}
 
 	// ── Settings ──
@@ -217,43 +257,55 @@
 	}
 
 	// ── Structural changes with server sync ──
-	async function handleAddMovement(movementId: string) {
+	function handleAddMovement(movementId: string) {
 		isAddingMovement = true;
-		const formData = new FormData();
-		formData.append('movementId', movementId);
 
-		const response = await fetch('?/addMovement', {
-			method: 'POST',
-			body: formData,
+		// Find movement from grouped movements
+		let movement: typeof data.groupedMovements[keyof typeof data.groupedMovements][number] | undefined = undefined;
+		for (const group of Object.values(data.groupedMovements) as Array<typeof data.groupedMovements[keyof typeof data.groupedMovements]>) {
+			movement = group.find((m: typeof group[number]) => m.id === movementId);
+			if (movement) break;
+		}
+
+		if (!movement) {
+			alert('Movement not found');
+			isAddingMovement = false;
+			return;
+		}
+
+		const targetTypeMap = {
+			timed: 'time' as const,
+			reps: 'reps' as const,
+			weighted: 'reps' as const,
+			resistance_band: 'reps' as const,
+		};
+
+		const defaultTarget = movement.metadata?.defaultTarget;
+
+		session.addMovement({
+			id: nanoid(),
+			movementId: movement.id,
+			name: movement.name,
+			type: movement.type as 'timed' | 'reps' | 'weighted' | 'resistance_band',
+			target: {
+				type: targetTypeMap[movement.type as keyof typeof targetTypeMap],
+				value: defaultTarget?.value || 30,
+				unit: defaultTarget?.unit,
+			},
+			sets: 1,
+			isBilateral: movement.isBilateral ?? false,
+			switchSidesDuration: movement.switchSidesDuration ?? 5,
+			weight: null,
+			weightUnit: movement.weightUnit || null,
+			timePerRep: movement.timePerRep,
+			notes: null,
+			order: session.movements.length,
 		});
 
-		if (response.ok) {
-			const result = deserialize(await response.text());
-			if (result.type === 'success' && (result.data as any)?.routineMovement) {
-				const rm = (result.data as any).routineMovement;
-				session.addMovement({
-					id: rm.id,
-					movementId: rm.movementId,
-					name: rm.movement.name,
-					type: rm.movement.type as 'timed' | 'reps' | 'weighted' | 'resistance_band',
-					target: rm.target,
-					sets: rm.sets,
-					isBilateral: rm.isBilateral,
-					switchSidesDuration: rm.switchSidesDuration || 5,
-					weight: rm.weight,
-					weightUnit: rm.weightUnit,
-					timePerRep: rm.movement.timePerRep,
-					notes: rm.notes,
-					order: rm.order,
-				});
-			}
-		} else {
-			alert('Failed to add movement');
-		}
 		isAddingMovement = false;
 	}
 
-	async function handleRemoveMovement(routineMovementId: string) {
+	function handleRemoveMovement(routineMovementId: string) {
 		if (!confirm('Remove this movement from the routine?')) return;
 		isRemovingMovement = true;
 
@@ -263,24 +315,12 @@
 			session.timer.pause();
 		}
 
-		// Update local state first
+		// Update local state only (server sync deferred until finish)
 		session.removeMovement(routineMovementId);
-
-		const formData = new FormData();
-		formData.append('routineMovementId', routineMovementId);
-
-		const response = await fetch('?/removeMovement', {
-			method: 'POST',
-			body: formData,
-		});
-
-		if (!response.ok) {
-			alert('Failed to remove movement');
-		}
 		isRemovingMovement = false;
 	}
 
-	async function handleReorderMovement(routineMovementId: string, direction: 'up' | 'down') {
+	function handleReorderMovement(routineMovementId: string, direction: 'up' | 'down') {
 		isReordering = true;
 
 		// Stop any running timer and pause before structural change
@@ -289,54 +329,21 @@
 			session.timer.pause();
 		}
 
+		// Update local state only (server sync deferred until finish)
 		session.reorderMovement(routineMovementId, direction);
-
-		const formData = new FormData();
-		formData.append('routineMovementId', routineMovementId);
-		formData.append('direction', direction);
-
-		const response = await fetch('?/reorderMovement', {
-			method: 'POST',
-			body: formData,
-		});
-
-		if (!response.ok) {
-			alert('Failed to reorder movement');
-		}
 		isReordering = false;
 	}
 
-	async function handleAdjustSets(routineMovementId: string, direction: 'up' | 'down') {
+	function handleAdjustSets(routineMovementId: string, direction: 'up' | 'down') {
 		isAdjustingSets = true;
+		// Update local state only (server sync deferred until finish)
 		session.adjustSets(routineMovementId, direction === 'up' ? 1 : -1);
-
-		const formData = new FormData();
-		formData.append('routineMovementId', routineMovementId);
-		formData.append('direction', direction);
-
-		const response = await fetch('?/adjustSets', {
-			method: 'POST',
-			body: formData,
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json();
-			alert(errorData.error || 'Failed to adjust sets');
-		}
 		isAdjustingSets = false;
 	}
 
-	async function handleUpdateNotes(routineMovementId: string, notes: string) {
+	function handleUpdateNotes(routineMovementId: string, notes: string) {
+		// Update local state only (server sync deferred until finish)
 		session.updateNotes(routineMovementId, notes);
-
-		const formData = new FormData();
-		formData.append('routineMovementId', routineMovementId);
-		formData.append('notes', notes);
-
-		await fetch('?/updateMovementNotes', {
-			method: 'POST',
-			body: formData,
-		});
 	}
 
 	// ── Cleanup ──
@@ -524,6 +531,40 @@
 		}}
 		onClose={() => (showAddMovementModal = false)}
 	/>
+
+	{#if showSaveChangesModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+			<div class="bg-surface p-6 max-w-md w-full shadow-2xl border border-accent-track" style="box-shadow: var(--shadow-elevated);">
+				<h3 class="font-display text-2xl text-text-primary tracking-wider mb-3">ROUTINE MODIFIED</h3>
+				<p class="text-text-secondary font-body mb-6">
+					You changed this routine's structure during this practice (reordered movements, adjusted sets, or added exercises).
+				</p>
+				<div class="flex flex-col gap-3">
+					<button
+						onclick={handleSaveAndFinish}
+						disabled={isSavingRoutineChanges}
+						class="w-full py-3 px-4 bg-accent-primary text-text-primary font-title uppercase tracking-wider text-sm hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+					>
+						{isSavingRoutineChanges ? 'Saving...' : 'Save & Finish'}
+					</button>
+					<button
+						onclick={handleFinishWithoutSaving}
+						disabled={isSavingRoutineChanges}
+						class="w-full py-3 px-4 bg-surface-elevated text-text-secondary font-title uppercase tracking-wider text-sm hover:text-text-primary transition-colors disabled:opacity-50"
+					>
+						Finish without saving
+					</button>
+					<button
+						onclick={() => (showSaveChangesModal = false)}
+						disabled={isSavingRoutineChanges}
+						class="w-full py-3 px-4 border border-accent-track text-text-muted font-title uppercase tracking-wider text-sm hover:text-text-primary transition-colors disabled:opacity-50"
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>

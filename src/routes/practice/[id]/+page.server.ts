@@ -343,4 +343,51 @@ export const actions = {
 
     return { success: true, newSets };
   },
+
+  saveRoutineChanges: async ({ request, params }: RequestEvent) => {
+    const formData = await request.formData();
+    const movementsJson = formData.get("movements") as string;
+
+    if (!movementsJson) return fail(400, { error: "Missing movements data" });
+
+    const practice = await db.query.practiceLogs.findFirst({
+      where: eq(practiceLogs.id, params.id),
+    });
+    if (!practice) return fail(404, { error: "Practice not found" });
+
+    const movementsData = JSON.parse(movementsJson) as Array<{
+      id: string;
+      movementId: string;
+      target: { type: "time" | "reps"; value: number; unit?: string };
+      sets: number;
+      isBilateral: boolean;
+      switchSidesDuration: number;
+      weight?: number | null;
+      weightUnit?: string | null;
+      notes?: string | null;
+    }>;
+
+    // Delete all existing routine movements and re-insert
+    await db.delete(routineMovements)
+      .where(eq(routineMovements.routineId, practice.routineId));
+
+    for (let i = 0; i < movementsData.length; i++) {
+      const m = movementsData[i];
+      await db.insert(routineMovements).values({
+        id: m.id,
+        routineId: practice.routineId,
+        movementId: m.movementId,
+        order: i,
+        target: m.target,
+        sets: m.sets,
+        isBilateral: m.isBilateral,
+        switchSidesDuration: m.switchSidesDuration,
+        weight: m.weight ?? null,
+        weightUnit: m.weightUnit as "lbs" | "kg" | "bodyweight" | null,
+        notes: m.notes ?? null,
+      });
+    }
+
+    return { success: true };
+  },
 };

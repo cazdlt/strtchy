@@ -160,7 +160,7 @@
 								<p class="text-text-muted text-sm">{practice.startedAt}</p>
 							</div>
 							
-							{#if practice.duration}
+							{#if practice.duration != null}
 								<div class="flex items-center gap-2 shrink-0">
 									<Clock weight="duotone" size={16} class="text-accent-primary" />
 									<span class="font-mono text-sm text-accent-primary">{formatDuration(practice.duration)}</span>
@@ -173,6 +173,11 @@
 							{/if}
 						</a>
 					{/each}
+				</div>
+				<div class="mt-4 text-right">
+					<a href="/practices" class="text-sm text-text-muted hover:text-accent-primary transition-colors font-body uppercase tracking-wider">
+						View full history →
+					</a>
 				</div>
 			{/if}
 		</section>
