@@ -6,39 +6,28 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-usage() {
-    echo "Usage: $0 <env>"
-    echo "  env    Environment: dev or prod"
-    echo ""
-    echo "This will DELETE the existing database and recreate it."
+# Load environment variables from .env
+if [ ! -f ".env" ]; then
+    echo -e "${RED}❌ Error: .env not found${NC}"
     exit 1
-}
-
-if [ -z "$1" ]; then
-    echo -e "${RED}Error: Environment not specified${NC}"
-    usage
 fi
 
-ENV="$1"
+export $(grep -v '^#' ".env" | xargs)
 
-if [ "$ENV" = "dev" ]; then
-    DB_PATH="./data/dev/local.db"
-    echo -e "${YELLOW}Resetting Development Database${NC}"
-elif [ "$ENV" = "prod" ]; then
-    DB_PATH="./data/prod/local.db"
-    echo -e "${YELLOW}Resetting Production Database${NC}"
-else
-    echo -e "${RED}Invalid environment: $ENV${NC}"
-    usage
+if [ -z "$DATABASE_URL" ]; then
+    echo -e "${RED}❌ Error: DATABASE_URL not set in .env${NC}"
+    exit 1
 fi
 
-if [ -f "$DB_PATH" ]; then
-    echo -e "${YELLOW}→ Deleting existing database at $DB_PATH${NC}"
-    rm -f "$DB_PATH"
+echo -e "${YELLOW}Resetting database at ${DATABASE_URL}${NC}"
+
+if [ -f "$DATABASE_URL" ]; then
+    echo -e "${YELLOW}→ Deleting existing database${NC}"
+    rm -f "$DATABASE_URL"
     echo -e "${GREEN}✅ Database deleted${NC}"
 else
-    echo -e "${YELLOW}→ No existing database found at $DB_PATH${NC}"
+    echo -e "${YELLOW}→ No existing database found${NC}"
 fi
 
 echo -e "${GREEN}→ Running fresh setup...${NC}"
-exec scripts/db/setup.sh "$ENV"
+exec scripts/db/setup.sh

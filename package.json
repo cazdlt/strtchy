@@ -11,17 +11,10 @@
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "db:setup": "./scripts/db/setup.sh dev",
-    "db:setup:prod": "./scripts/db/setup.sh prod",
-    "db:reset": "./scripts/db/reset.sh dev",
-    "db:reset:prod": "./scripts/db/reset.sh prod",
-    "db:backup": "./scripts/db/backup.sh dev",
-    "db:backup:prod": "./scripts/db/backup.sh prod",
-    "db:migrate": "DATABASE_URL=./data/dev/local.db npx tsx scripts/db/migrate.ts",
-    "db:generate": "DATABASE_URL=./data/dev/local.db npx tsx scripts/db/generate-migration.ts",
-    "db:generate:prod": "DATABASE_URL=./data/prod/local.db npx tsx scripts/db/generate-migration.ts",
-    "db:push": "DATABASE_URL=./data/dev/local.db npx drizzle-kit push",
-    "db:push:prod": "DATABASE_URL=./data/prod/local.db npx drizzle-kit push"
+    "db:setup": "./scripts/db/setup.sh",
+    "db:reset": "./scripts/db/reset.sh",
+    "db:backup": "./scripts/db/backup.sh",
+    "db:push": "npx drizzle-kit push"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.5.4",

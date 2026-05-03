@@ -66,12 +66,10 @@ npm run build        # Production build
 npm run check        # Type checking with svelte-check
 
 # Database Operations
-npm run db:setup     # Setup dev database (migrations + seed)
-npm run db:reset     # Reset dev database (delete and reinitialize)
-npm run db:backup    # Backup dev database to SQL file
-npm run db:push      # Push schema changes to dev DB
-npm run db:generate  # Generate migration from dev DB
-npm run db:migrate   # Run migrations
+npm run db:setup     # Push schema + seed data (uses DATABASE_URL from .env)
+npm run db:reset     # Delete database and run fresh setup
+npm run db:backup    # Export database to SQL file
+npm run db:push      # Push schema changes without wiping data
 ```
 
 ## Known Issues
@@ -137,55 +135,29 @@ Key reactive states in `/src/routes/practice/[id]/+page.svelte`:
 
 ## Database Setup
 
-- Local dev database: `./data/dev/local.db` (SQLite)
-- Local prod database: `./data/prod/local.db` (SQLite)
-- Seed data: 27 movements, 3 built-in routines
+- Local dev database: `./data/dev/local.db` (SQLite, via `DATABASE_URL` in `.env`)
+- Prod database path is set in `docker-compose.yml` (`/app/data/prod/local.db`)
+- Seed data: 37 movements, 6 built-in routines
 
-### Database Scripts (scripts/db/)
+### Database Scripts
 
-| Script            | Purpose                               |
-| ----------------- | ------------------------------------- |
-| `setup.sh [env]`  | Run migrations + seed for dev or prod |
-| `reset.sh [env]`  | Delete database and run fresh setup   |
-| `backup.sh [env]` | Export database to SQL file           |
+All scripts read `DATABASE_URL` from `.env`:
 
-### Migration Workflow
+| npm script           | Purpose                                      |
+| -------------------- | -------------------------------------------- |
+| `npm run db:setup`   | Push schema + seed data (idempotent)         |
+| `npm run db:reset`   | Delete DB and run fresh setup                |
+| `npm run db:backup`  | Export DB to `./backups/local_<timestamp>.sql` |
+| `npm run db:push`    | Sync schema without wiping data              |
 
-**Important Note**: `drizzle-kit generate` fails with `TypeError: Cannot read properties of undefined (reading 'length')`. Use the working workflow below.
+### Schema Changes Workflow
 
-**Working Workflow** (for schema changes):
-
-1. **Development**: Make schema changes in `src/lib/db/schema.ts`
-2. **Sync to dev DB**: Run `npm run db:push` to sync schema changes to dev database
-3. **Generate migration**: Run `npm run db:generate` to create migration file
-4. **Review migration**: Check the generated migration file in `drizzle/migrations/`
-5. **Deploy**: Run migrations on production with `npm run db:migrate`
-
-**When to use db:push vs db:generate**:
-
-- `db:push`: Use during development to quickly sync schema changes to dev database without creating migration files
-- `db:generate`: Use when ready to create a formal migration for production deployment
-
-**Manual Migration Creation** (alternative approach):
-
-1. Make schema changes in `src/lib/db/schema.ts`
+1. Edit `src/lib/db/schema.ts`
 2. Run `npm run db:push` to sync to dev database
-3. Run `drizzle-kit introspect` to update `drizzle/schema.ts`
-4. Run `npm run db:generate` to create migration file in `drizzle/migrations/`
-5. Verify migration file is created in `drizzle/migrations/<timestamp>_<random>.sql`
+3. Test the app
+4. If you need to start fresh: `npm run db:reset`
 
-### Quick Reference
-
-| npm script               | Shell script                  | Purpose                          |
-| ------------------------ | ----------------------------- | -------------------------------- |
-| `npm run db:setup`       | `./scripts/db/setup.sh dev`   | Setup dev DB (migrations + seed) |
-| `npm run db:setup:prod`  | `./scripts/db/setup.sh prod`  | Setup prod DB                    |
-| `npm run db:reset`       | `./scripts/db/reset.sh dev`   | Reset dev DB                     |
-| `npm run db:reset:prod`  | `./scripts/db/reset.sh prod`  | Reset prod DB                    |
-| `npm run db:backup`      | `./scripts/db/backup.sh dev`  | Backup dev DB to SQL             |
-| `npm run db:backup:prod` | `./scripts/db/backup.sh prod` | Backup prod DB                   |
-| -                        | `./scripts/db/migrate.ts`     | Run migrations only              |
-| -                        | `./scripts/db/seed.ts`        | Seed data only                   |
+**Note**: Formal migrations are not needed yet (no prod deployment). The `drizzle/migrations/` directory is kept empty for future use. When you need migrations, add `npm run db:migrate` back to `package.json`.
 
 ## PWA
 

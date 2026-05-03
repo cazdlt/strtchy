@@ -1,48 +1,44 @@
 {
   "movements": [
     {
-      "name": "Liberación Plantar con Pelota",
-      "description": "De pie, coloca la pelota debajo de la planta del pie. Aplica presión rodando desde el talón hasta los dedos, buscando puntos de tensión.",
+      "name": "Plantar Fascia Release",
+      "description": "De pie, rueda una pelota bajo la planta del pie desde el talón hasta los metatarsos. Mantén presión en puntos de tensión y flexiona los dedos.",
       "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": ["Pelota pequeña"],
+      "equipment": ["Pelota de masaje"],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 10
+      "switchSidesDuration": 5
     },
     {
-      "name": "Estiramiento de Pantorrilla en Bloque",
-      "description": "Coloca la mitad delantero del pie sobre el bloque y el talón en el suelo. Fase A: Mantén la pierna totalmente recta (gemelo). Fase B: Flexiona ligeramente la rodilla (sóleo).",
+      "name": "Calf Stretch",
+      "description": "Apoya la mitad delantera del pie en un bloque y el talón en el suelo. Mantén la pierna recta para el gemelo y flexiona ligeramente la rodilla para el sóleo.",
       "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": ["Bloque de yoga"],
+      "equipment": ["Bloque"],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 10
+      "switchSidesDuration": 5
     },
     {
-      "name": "Estiramiento de Isquiotibiales de Pie",
-      "description": "De pie, pies al ancho de hombros. Inclina el torso hacia adelante desde la cadera (no doblando la cintura), manteniendo la espalda lo más recta posible.",
+      "name": "Forward Fold",
+      "description": "De pie, inclínate hacia adelante desde la cadera con una microflexión en las rodillas. Deja colgar la cabeza y relaja la zona lumbar.",
       "type": "timed",
-      "illustrationKey": "generic",
       "equipment": [],
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
     },
-
     {
-      "name": "Elevación de Arco con Banda",
-      "description": "De pie, coloca una banda elástica cerrada alrededor de ambos tobillos. Separa los pies para tensar la banda. Lucha contra ella empujando los bordes externos de los pies contra el suelo y elevando el arco plantar. Mantén los dedos en el suelo.",
+      "name": "Arch Raises",
+      "description": "De pie con una banda alrededor de los tobillos. Empuja los bordes externos de los pies contra el suelo elevando el arco plantar sin levantar los dedos.",
       "type": "reps",
-      "illustrationKey": "generic",
       "equipment": ["Banda elástica"],
       "defaultTarget": { "type": "reps", "value": 10 },
-      "timePerRep": 5
+      "timePerRep": 5,
+      "isBilateral": false
     },
     {
-      "name": "Puente de Glúteo a Una Pierna",
-      "description": "Acostado boca arriba, una pierna flexionada apoyada en el suelo, la otra estirada al aire. Eleva la cadera empujando con el talón apoyada.",
+      "name": "Single-Leg Glute Bridge",
+      "description": "Boca arriba, una pierna flexionada apoyada y la otra estirada al aire. Eleva la cadera empujando con el talón apoyado y contrae el glúteo sin arquear la lumbar.",
       "type": "reps",
-      "illustrationKey": "generic",
       "equipment": [],
       "defaultTarget": { "type": "reps", "value": 10 },
       "timePerRep": 4,
@@ -50,44 +46,42 @@
       "switchSidesDuration": 5
     },
     {
-      "name": "Equilibrio a una pierna (Reloj)",
-      "description": "Sobre una pierna (descalzo). Mueve la pierna libre adelante, al lado y atrás sin tocar el suelo ni rotar el tronco.",
+      "name": "Single-Leg Balance",
+      "description": "Descalzo sobre una pierna, mueve la pierna libre adelante, al lado y atrás sin tocar el suelo. El pie de apoyo debe estabilizar activamente.",
       "type": "timed",
-      "illustrationKey": "generic",
       "equipment": [],
       "defaultTarget": { "type": "time", "value": 45, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 10
+      "switchSidesDuration": 5
     },
     {
-      "name": "Pancake Stretch (Sentado en V)",
-      "description": "Sentado con piernas abiertas al máximo y rodillas estiradas. Inclina el torso hacia adelante desde la pelvis.",
+      "name": "Seated Straddle",
+      "description": "Sentado con las piernas separadas. Inclina el torso hacia adelante desde la pelvis manteniendo la espalda recta.",
       "type": "timed",
-      "illustrationKey": "generic",
       "equipment": [],
-      "defaultTarget": { "type": "time", "value": 120, "unit": "s" }
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
     },
     {
-      "name": "Cobra",
-      "description": "Boca abajo, extiende brazos levantando el pecho. Mantén pelvis pegada al suelo y glúteos relajados.",
+      "name": "Cobra Extension",
+      "description": "Boca abajo, extiende los brazos levantando el pecho. Mantén la pelvis en el suelo, glúteos relajados y hombros abajo.",
       "type": "timed",
-      "illustrationKey": "cobra-stretch",
       "equipment": [],
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" },
+      "isBilateral": false
     },
     {
-      "name": "Dead Hang (Colgado pasivo)",
-      "description": "Cuélgate de una barra relajando hombros y columna, dejando que el peso traccione las vértebras.",
+      "name": "Passive Hang",
+      "description": "Cuélgate de una barra relajando completamente los hombros y el abdomen para descomprimir la columna.",
       "type": "timed",
-      "illustrationKey": "generic",
       "equipment": ["Barra"],
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" },
+      "isBilateral": false
     },
     {
-      "name": "Caminata Lateral con Banda (Monster Walks)",
-      "description": "Banda gruesa en tobillos o sobre rodillas. Posición de media sentadilla, da pasos laterales manteniendo tensión y rodillas alineadas.",
+      "name": "Monster Walks",
+      "description": "En posición de media sentadilla con una banda en los tobillos o rodillas. Da pasos laterales controlando que las rodillas no colapsen hacia adentro.",
       "type": "reps",
-      "illustrationKey": "generic",
       "equipment": ["Banda elástica"],
       "defaultTarget": { "type": "reps", "value": 15 },
       "timePerRep": 4,
@@ -95,278 +89,296 @@
       "switchSidesDuration": 5
     },
     {
-      "name": "Liberación de Cuádriceps con Rodillo",
-      "description": "Boca abajo, coloca el rodillo bajo los muslos. Rueda desde la cadera hasta justo encima de la rodilla. Si encuentras un punto doloroso, detente y flexiona/estira la rodilla un par de veces.",
+      "name": "Quad Release",
+      "description": "Boca abajo con un rodillo bajo los muslos. Rueda lentamente desde la cadera hasta la rodilla. Detente en puntos de tensión y flexiona la rodilla suavemente.",
       "type": "timed",
-      "illustrationKey": "generic",
       "equipment": ["Rodillo de espuma"],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
       "switchSidesDuration": 5
     },
     {
-      "name": "Couch Stretch",
-      "description": "Coloca una rodilla lo más pegada posible a la esquina entre la pared y el suelo. La espinilla debe estar vertical contra la pared. La otra pierna adelante en posición de estocada. Intenta erguir el torso lentamente hasta pegar la espalda a la pared.",
+      "name": "Kneeling Wall Stretch",
+      "description": "Rodilla en el suelo y espinilla trasera contra la pared. Adelanta la otra pierna en estocada. Contrae el glúteo trasero para empujar la cadera hacia adelante.",
       "type": "timed",
-      "illustrationKey": "couchStretch",
-      "equipment": [],
+      "equipment": ["Pared"],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 15
+      "switchSidesDuration": 10
     },
     {
       "name": "90/90 Hip Switch",
-      "description": "Sentado en el suelo, una pierna delante flexionada a 90º y la otra detrás flexionada a 90º. Sin usar las manos (si es posible), rota las caderas para llevar las rodillas al otro lado, invirtiendo la posición de las piernas.",
+      "description": "Sentado con ambas piernas flexionadas a 90 grados. Rota las caderas de un lado a otro manteniendo el torso lo más erguido posible.",
       "type": "timed",
-      "illustrationKey": "ninetyNinetyHipSwitch",
       "equipment": [],
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
     },
     {
       "name": "Butterfly Stretch",
-      "description": "Sentado, junta las plantas de los pies y deja caer las rodillas hacia los lados. Sujeta los pies y mantén la espalda recta.",
+      "description": "Sentado con las plantas de los pies juntas. Sujeta los pies, mantén la espalda recta e inclina el torso hacia adelante desde la cadera.",
       "type": "timed",
-      "illustrationKey": "butterflyStretch",
       "equipment": [],
-      "defaultTarget": { "type": "time", "value": 90, "unit": "s" }
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
     },
     {
-      "name": "Pigeon Pose",
-      "description": "Desde una posición de plancha o cuadrupedia, lleva la rodilla derecha hacia la muñeca derecha y el pie derecho hacia la muñeca izquierda. Desliza la pierna izquierda hacia atrás. Baja el torso hacia el suelo si la flexibilidad lo permite.",
+      "name": "Pigeon Stretch",
+      "description": "Lleva una rodilla hacia la muñeca del mismo lado y cruza el pie hacia la muñeca opuesta. Extiende la pierna trasera y baja el torso al suelo.",
       "type": "timed",
-      "illustrationKey": "pigeonPose",
       "equipment": [],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 10
+      "switchSidesDuration": 5
     },
     {
-      "name": "Lunge con Rotación Torácica",
-      "description": "Posición de estocada profunda (pierna derecha adelante). Apoya la mano izquierda en el suelo junto al pie derecho. Gira el torso y eleva el brazo derecho hacia el techo, siguiendo la mano con la mirada.",
+      "name": "Lunge with Rotation",
+      "description": "En estocada profunda, apoya la mano contraria al pie delantero en el suelo. Gira el torso y eleva el brazo libre apuntando al techo.",
       "type": "reps",
-      "illustrationKey": "generic",
       "equipment": [],
       "defaultTarget": { "type": "reps", "value": 8 },
+      "timePerRep": 7,
       "isBilateral": true,
-      "switchSidesDuration": 10,
-      "timePerRep": 7
+      "switchSidesDuration": 8
     },
     {
       "name": "Dead Bug",
-      "description": "Boca arriba, brazos y piernas a 90º. Extiende brazo y pierna contraria sin arquear la lumbar. Mantén la posición de los extremos.",
+      "description": "Boca arriba con brazos y piernas a 90 grados. Presiona la zona lumbar contra el suelo mientras extiendes un brazo y la pierna contraria lentamente.",
       "type": "reps",
-      "illustrationKey": "generic",
       "equipment": [],
       "defaultTarget": { "type": "reps", "value": 10 },
-      "timePerRep": 5
+      "timePerRep": 5,
+      "isBilateral": false
     },
     {
-      "name": "Plancha Lateral",
-      "description": "Apoyo en antebrazo y pies, cuerpo en línea recta. Contrae el abdomen y mantén los hombros alineados con los codos.",
+      "name": "Side Plank",
+      "description": "Apoyo sobre un antebrazo y los bordes de los pies. Contrae el abdomen y empuja el suelo con el codo para no hundir el hombro.",
       "type": "timed",
-      "illustrationKey": "generic",
       "equipment": [],
       "defaultTarget": { "type": "time", "value": 30, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 10
+      "switchSidesDuration": 5
     },
     {
-      "name": "Child's Pose Bilateral",
-      "description": "Arrodillado, siéntate sobre los talones y estira los brazos hacia adelante por el suelo. Baja el pecho hacia el piso, enfocándote en estirar la zona de las axilas y dorsales.",
+      "name": "Side Child's Pose",
+      "description": "Arrodillado sobre los talones. Desliza ambas manos hacia adelante y luego camínalas hacia un lado hasta sentir el estiramiento en el dorsal opuesto. Mantén el pecho bajo.",
       "type": "timed",
-      "illustrationKey": "childsPose",
       "equipment": [],
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
-    },
-    {
-      "name": "Extensiones Torácicas con Rodillo",
-      "description": "Coloca el rodillo en la espalda media/alta (omóplatos). Manos detrás de la nuca. Toma aire y arquea la espalda hacia atrás sobre el rodillo, exhala al regresar. No muevas la espalda baja.",
-      "type": "timed",
-      "illustrationKey": "thoracicExtension",
-      "equipment": ["Rodillo de espuma"],
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
-    },
-    {
-      "name": "Liberación de Trapecio con Pelota",
-      "description": "De pie o contra una pared, coloca la pelota en el trapecio superior (la zona carnosa entre cuello y hombro). Presiona y mueve el brazo ligeramente o simplemente sostén la presión.",
-      "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": ["Pelota pequeña"],
-      "defaultTarget": { "type": "time", "value": 90, "unit": "s" },
-      "isBilateral": true,
-      "switchSidesDuration": 10
-    },
-    {
-      "name": "Estiramiento Pectoral Menor en Marco",
-      "description": "Apoya el antebrazo en el marco de una puerta, con el codo ligeramente por encima de la altura del hombro. Da un paso adelante y gira el torso levemente hacia el lado opuesto.",
-      "type": "timed",
-      "illustrationKey": "doorwayPecStretch",
-      "equipment": ["Marco de puerta"],
       "defaultTarget": { "type": "time", "value": 45, "unit": "s" },
       "isBilateral": true,
-      "switchSidesDuration": 10
+      "switchSidesDuration": 5
     },
     {
-      "name": "Extensiones de Hombro con Banda",
-      "description": "Sostén una banda por detrás de la espalda con las palmas hacia atrás. Separa las manos tensando la banda y eleva los brazos lejos del cuerpo sin inclinar el torso hacia adelante.",
+      "name": "Thoracic Roller Extensions",
+      "description": "Coloca un rodillo en la espalda media. Con las manos tras la nuca, arquea la parte superior de la espalda sobre el rodillo sin mover la zona lumbar.",
       "type": "reps",
-      "illustrationKey": "facePulls",
-      "equipment": ["Banda elástica"],
-      "defaultTarget": { "type": "reps", "value": 15 },
-      "timePerRep": 3
+      "equipment": ["Rodillo de espuma"],
+      "defaultTarget": { "type": "reps", "value": 10 },
+      "timePerRep": 5,
+      "isBilateral": false
     },
     {
-      "name": "Wall Slides con Banda",
-      "description": "Coloca una banda pequeña alrededor de los antebrazos (cerca de los codos). Párate frente a una pared con los antebrazos apoyados en ella. Desliza los brazos hacia arriba mientras presionas hacia afuera (contra la banda) y hacia la pared.",
-      "type": "reps",
-      "illustrationKey": "scapularWallSlides",
-      "equipment": ["Banda elástica", "Pared"],
-      "defaultTarget": { "type": "reps", "value": 12 },
-      "timePerRep": 5
-    },
-    {
-      "name": "Y-Raises con Mancuernas",
-      "description": "De pie, inclina el torso hacia adelante (45-90º) con la espalda recta. Levanta los brazos en forma de 'Y' con los pulgares apuntando al techo. Pausa un segundo arriba.",
-      "type": "reps",
-      "illustrationKey": "generic",
-      "equipment": ["Mancuernas ligeras"],
-      "defaultTarget": { "type": "reps", "value": 12 },
-      "timePerRep": 4,
-      "weightUnit": "lbs"
-    },
-    {
-      "name": "Plancha Frontal",
-      "description": "Apoyo en antebrazos y puntas de pie. Contrae glúteos y abdomen. Empuja el suelo con los codos para separar los omóplatos (protracción).",
+      "name": "Trap Release",
+      "description": "Presiona una pelota entre la pared y tu trapecio superior. Aplica peso corporal y mueve el brazo arriba y abajo para masajear el músculo.",
       "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": [],
-      "defaultTarget": { "type": "time", "value": 45, "unit": "s" }
-    },
-    {
-      "name": "Face Pulls",
-      "description": "Con una banda anclada a altura media/alta, jala hacia la cara separando las manos y rotando los hombros hacia atrás (pose de doble bíceps).",
-      "type": "reps",
-      "illustrationKey": "facePulls",
-      "equipment": ["Banda elástica"],
-      "defaultTarget": { "type": "reps", "value": 15 },
-      "timePerRep": 3
-    },
-    {
-      "name": "Hollow Hold",
-      "description": "Boca arriba, levanta hombros y piernas (rodillas estiradas o flexionadas según nivel), arqueando la espalda baja (lumbar presionando el suelo). Mantén la posición activando abdomen. Parece una canoa invertida.",
-      "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": [],
-      "defaultTarget": { "type": "time", "value": 30, "unit": "s" }
-    },
-    {
-      "name": "Inversión de Tobillo con Banda",
-      "description": "Sentado, ata una banda elástica a una pata de mesa y alrededor del tobillo. El pie rota hacia adentro (inversión) contra la resistencia, fortaleciendo tibiales para prevenir periostitis. Movimiento lento y controlado.",
-      "type": "reps",
-      "illustrationKey": "generic",
-      "equipment": ["Banda elástica"],
-      "defaultTarget": { "type": "reps", "value": 15 },
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "timePerRep": 4
-    },
-    {
-      "name": "Perro Boca Abajo (Downward Dog)",
-      "description": "Desde posición de cuadrupedia, levanta caderas hacia arriba y atrás formando una V invertida. Piernas estiradas o semi-flexionadas, talones buscando el suelo. Estira toda la cadena posterior.",
-      "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": [],
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
-    },
-    {
-      "name": "Estiramiento de Isquiotibial Acostado con Banda",
-      "description": "Boca arriba, coloca banda elástica alrededor del pie y eleva la pierna hacia el techo. Mantén la otra pierna estirada en el suelo. Tira suavemente de la banda para acercar la pierna al torso sin flexionar rodilla.",
-      "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": ["Banda elástica"],
-      "defaultTarget": { "type": "time", "value": 90, "unit": "s" },
-      "isBilateral": true,
-      "switchSidesDuration": 15
-    },
-    {
-      "name": "Gato-Vaca (Cat-Cow)",
-      "description": "En cuadrupedia, alterna entre arquear la espalda hacia abajo (Vaca - omóplatos juntos, mira al frente) y redondear hacia arriba (Gato - omóplatos separados, barbilla al pecho). Movimiento fluido coordinado con la respiración.",
-      "type": "reps",
-      "illustrationKey": "generic",
-      "equipment": [],
-      "defaultTarget": { "type": "reps", "value": 12 },
-      "timePerRep": 4
-    },
-    {
-      "name": "Torsión Espinal Acostado",
-      "description": "Boca arriba, lleva rodillas flexionadas hacia un lado mientras miras al lado opuesto. Brazos abiertos en cruz. Mantén ambos omóplatos en el suelo. Respira profundo para relajar la espalda baja.",
-      "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": [],
+      "equipment": ["Pelota de masaje", "Pared"],
       "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
       "isBilateral": true,
       "switchSidesDuration": 10
     },
     {
-      "name": "Rodillas al Pecho",
-      "description": "Boca arriba, lleva ambas rodillas flexionadas hacia el pecho y abrázalas con los brazos. Balancéate suavemente de lado a lado para masajear la zona lumbar.",
+      "name": "Wall Pec Stretch",
+      "description": "Apoya el antebrazo en la pared a 90 grados. Da un paso adelante y gira levemente el torso en dirección opuesta al brazo.",
       "type": "timed",
-      "illustrationKey": "generic",
-      "equipment": [],
-      "defaultTarget": { "type": "time", "value": 60, "unit": "s" }
+      "equipment": ["Pared"],
+      "defaultTarget": { "type": "time", "value": 45, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 8
     },
     {
-      "name": "Balanceos de Muñeca en Cuadrupedia",
-      "description": "En posición de cuadrupedia (4 patas), manos bajo hombros con dedos apuntando hacia adelante. Desplaza suavemente el peso hacia adelante hasta sentir estiramiento en muñecas, luego regresa. Incrementa progresivamente la amplitud.",
+      "name": "Band Pull-Aparts",
+      "description": "Sujeta una banda a la altura del pecho. Mantén los brazos estirados y separa las manos hasta que la banda toque tu cuerpo, juntando los omóplatos.",
       "type": "reps",
-      "illustrationKey": "generic",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 15 },
+      "timePerRep": 3,
+      "isBilateral": false
+    },
+    {
+      "name": "Scapular Wall Slides",
+      "description": "Con una banda en los antebrazos, apóyalos contra la pared. Desliza los brazos hacia arriba manteniendo la tensión hacia afuera.",
+      "type": "reps",
+      "equipment": ["Banda elástica", "Pared"],
+      "defaultTarget": { "type": "reps", "value": 12 },
+      "timePerRep": 5,
+      "isBilateral": false
+    },
+    {
+      "name": "Y-Raises",
+      "description": "Con el torso inclinado hacia adelante y espalda recta, eleva mancuernas ligeras formando una Y con los brazos. Inicia el movimiento desde las escápulas.",
+      "type": "reps",
+      "equipment": ["Mancuernas"],
+      "defaultTarget": { "type": "reps", "value": 12 },
+      "timePerRep": 4,
+      "weightUnit": "lbs",
+      "isBilateral": false
+    },
+    {
+      "name": "Front Plank",
+      "description": "Apoyo en antebrazos y puntas de los pies. Contrae abdomen y glúteos mientras empujas el suelo para separar los omóplatos.",
+      "type": "timed",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
+    },
+    {
+      "name": "Face Pulls",
+      "description": "Jala una banda hacia tu rostro separando las manos al final del movimiento, rotando los hombros hacia atrás. Controla el regreso.",
+      "type": "reps",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 15 },
+      "timePerRep": 3,
+      "isBilateral": false
+    },
+    {
+      "name": "Hollow Hold",
+      "description": "Boca arriba, pega la zona lumbar al suelo. Eleva hombros y piernas unos centímetros y mantén la tensión sin arquear la espalda baja.",
+      "type": "timed",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" },
+      "isBilateral": false
+    },
+    {
+      "name": "Ankle Inversion",
+      "description": "Con una banda anclada lateralmente al pie, rota el tobillo hacia adentro contra la resistencia de forma lenta y controlada.",
+      "type": "reps",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "reps", "value": 15 },
+      "timePerRep": 4,
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Downward Dog",
+      "description": "Desde cuadrupedia, eleva la cadera formando una V invertida. Empuja el suelo con las manos y alarga la columna, flexionando las rodillas si es necesario.",
+      "type": "timed",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
+    },
+    {
+      "name": "Supine Hamstring Stretch",
+      "description": "Boca arriba, coloca una banda en el pie y eleva la pierna recta. Tira suavemente para acercar la pierna al torso sin levantar la cadera.",
+      "type": "timed",
+      "equipment": ["Banda elástica"],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Cat-Cow",
+      "description": "En cuadrupedia, alterna entre arquear la espalda hacia abajo al inhalar y redondearla hacia arriba empujando el suelo al exhalar.",
+      "type": "reps",
+      "equipment": [],
+      "defaultTarget": { "type": "reps", "value": 10 },
+      "timePerRep": 5,
+      "isBilateral": false
+    },
+    {
+      "name": "Lying Spinal Twist",
+      "description": "Boca arriba, cruza una rodilla sobre tu cuerpo hacia el suelo mientras mantienes el brazo opuesto extendido y anclado al piso.",
+      "type": "timed",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
+    },
+    {
+      "name": "Knees to Chest",
+      "description": "Boca arriba, abraza tus rodillas contra el pecho. Realiza movimientos suaves para masajear la zona lumbar contra el suelo.",
+      "type": "timed",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
+    },
+    {
+      "name": "Quadruped Wrist Rocks",
+      "description": "En cuadrupedia con las manos bajo los hombros, balancea tu peso ligeramente hacia adelante hasta sentir el estiramiento en las muñecas y regresa.",
+      "type": "reps",
       "equipment": [],
       "defaultTarget": { "type": "reps", "value": 12 },
-      "timePerRep": 5
+      "timePerRep": 5,
+      "isBilateral": false
+    },
+    {
+      "name": "Deep Squat Hold",
+      "description": "Baja a una sentadilla profunda manteniendo los talones apoyados. Usa los codos para empujar suavemente las rodillas hacia afuera y mantén el pecho erguido.",
+      "type": "timed",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 60, "unit": "s" },
+      "isBilateral": false
+    },
+    {
+      "name": "Thread the Needle",
+      "description": "Desde cuadrupedia, desliza un brazo por debajo del torso hasta que el hombro y la cabeza toquen el suelo. Siente la torsión en la espalda media.",
+      "type": "timed",
+      "equipment": [],
+      "defaultTarget": { "type": "time", "value": 30, "unit": "s" },
+      "isBilateral": true,
+      "switchSidesDuration": 5
     }
   ],
   "routines": [
     {
+      "name": "15-Minute Full Body",
+      "description": "Rutina eficiente de cuerpo completo utilizando movimientos compuestos de movilidad. Ideal para mantenimiento diario.",
+      "restBetweenMovements": 10,
+      "restBetweenSets": 15,
+      "autoAdvance": true,
+      "audioEnabled": true,
+      "keepAwake": true
+    },
+    {
       "name": "Cimientos y Cadena Posterior",
-      "description": "Foco: Pies, tobillos, isquiotibiales y espalda baja. Equipo: Pelota pequeña, Bloque de yoga, Banda elástica.",
+      "description": "Foco principal en pies, tobillos, isquiotibiales y fascia toracolumbar para mejorar las mecánicas de impacto.",
       "restBetweenMovements": 15,
-      "restBetweenSets": 30,
+      "restBetweenSets": 20,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true
     },
     {
       "name": "Desbloqueo de Cadera",
-      "description": "Foco: Flexores, cuádriceps, aductores y core. Equipo: Rodillo de espuma (Foam Roller).",
+      "description": "Trabajo de flexores, cuádriceps y movilidad rotacional. Ideal para contrarrestar posturas sedentes prolongadas.",
       "restBetweenMovements": 15,
-      "restBetweenSets": 30,
+      "restBetweenSets": 20,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true
     },
     {
       "name": "Hombros Blindados",
-      "description": "Foco: Hombros, escápula, dorsales y tórax. Equipo: Rodillo, Pelota, Banda elástica, Mancuernas ligeras.",
+      "description": "Enfocado en la salud escapular, apertura torácica y estabilización del manguito rotador.",
       "restBetweenMovements": 15,
-      "restBetweenSets": 45,
+      "restBetweenSets": 20,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true
     },
     {
       "name": "Piernas Frescas",
-      "description": "Recuperación post-fondo (carrera o ciclismo). Foco: Descarga de piernas, flexores de cadera, isquiotibiales y fascial. Ideal tras 10-30min de caminata de enfriamiento activo. Equipo: Pelota, Rodillo, Bloque, Banda.",
-      "restBetweenMovements": 20,
-      "restBetweenSets": 30,
+      "description": "Rutina de recuperación enfocada en la descarga excéntrica y la cadena fascial, ideal tras entrenamientos de fondo.",
+      "restBetweenMovements": 15,
+      "restBetweenSets": 15,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": true
     },
     {
       "name": "Estiramiento Nocturno",
-      "description": "Rutina suave y relajante sin trabajo de fuerza. Foco: Espalda baja, caderas, espalda media. Perfecta para finalizar el día de forma tranquila. Equipo: Solo una banda opcional.",
+      "description": "Activación parasimpática mediante movimientos fluidos para liberar tensión residual en zona lumbar y caderas.",
       "restBetweenMovements": 10,
-      "restBetweenSets": 20,
+      "restBetweenSets": 10,
       "autoAdvance": true,
       "audioEnabled": true,
       "keepAwake": false
@@ -374,153 +386,185 @@
   ],
   "routineMovements": [
     {
-      "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Liberación Plantar con Pelota",
+      "routineName": "15-Minute Full Body",
+      "movementName": "Plantar Fascia Release",
       "order": 1,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10,
-      "notes": "1 minuto por pie"
+      "sets": 1
     },
     {
-      "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Estiramiento de Pantorrilla en Bloque",
+      "routineName": "15-Minute Full Body",
+      "movementName": "Calf Stretch",
       "order": 2,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10,
-      "notes": "30s pierna recta, 30s flexionada"
+      "sets": 1
+    },
+    {
+      "routineName": "15-Minute Full Body",
+      "movementName": "Deep Squat Hold",
+      "order": 3,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "15-Minute Full Body",
+      "movementName": "Downward Dog",
+      "order": 4,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "15-Minute Full Body",
+      "movementName": "Lunge with Rotation",
+      "order": 5,
+      "target": { "type": "reps", "value": 8 },
+      "sets": 1
+    },
+    {
+      "routineName": "15-Minute Full Body",
+      "movementName": "Pigeon Stretch",
+      "order": 6,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "15-Minute Full Body",
+      "movementName": "Band Pull-Aparts",
+      "order": 7,
+      "target": { "type": "reps", "value": 15 },
+      "sets": 1
+    },
+    {
+      "routineName": "15-Minute Full Body",
+      "movementName": "Dead Bug",
+      "order": 8,
+      "target": { "type": "reps", "value": 10 },
+      "sets": 1
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Equilibrio a una pierna (Reloj)",
+      "movementName": "Plantar Fascia Release",
+      "order": 1,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Calf Stretch",
+      "order": 2,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Single-Leg Balance",
       "order": 3,
       "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10
+      "sets": 1
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Elevación de Arco con Banda",
+      "movementName": "Arch Raises",
       "order": 4,
       "target": { "type": "reps", "value": 10 },
-      "sets": 3,
-      "restBetweenSets": 30,
-      "notes": "3 retenciones de 3 segundos"
+      "sets": 2,
+      "restBetweenSets": 15
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Estiramiento de Isquiotibiales de Pie",
+      "movementName": "Forward Fold",
       "order": 5,
       "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Pancake Stretch (Sentado en V)",
+      "movementName": "Seated Straddle",
       "order": 6,
-      "target": { "type": "time", "value": 120, "unit": "s" },
-      "sets": 1
-    },
-    {
-      "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Cobra",
-      "order": 7,
       "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 2,
+      "restBetweenSets": 15
+    },
+    {
+      "routineName": "Cimientos y Cadena Posterior",
+      "movementName": "Cobra Extension",
+      "order": 7,
+      "target": { "type": "time", "value": 45, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Dead Hang (Colgado pasivo)",
+      "movementName": "Passive Hang",
       "order": 8,
       "target": { "type": "time", "value": 45, "unit": "s" },
       "sets": 2,
-      "restBetweenSets": 60
+      "restBetweenSets": 20
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Puente de Glúteo a Una Pierna",
+      "movementName": "Single-Leg Glute Bridge",
       "order": 9,
       "target": { "type": "reps", "value": 10 },
       "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "restBetweenSets": 30,
-      "notes": "Pausa de 2s arriba"
+      "restBetweenSets": 15
     },
     {
       "routineName": "Cimientos y Cadena Posterior",
-      "movementName": "Inversión de Tobillo con Banda",
+      "movementName": "Ankle Inversion",
       "order": 10,
       "target": { "type": "reps", "value": 15 },
       "sets": 2,
-      "isBilateral": true,
-      "switchSidesDuration": 5,
-      "restBetweenSets": 20,
-      "notes": "Fortalecimiento para prevenir periostitis"
+      "restBetweenSets": 15
     },
     {
       "routineName": "Desbloqueo de Cadera",
-      "movementName": "Caminata Lateral con Banda (Monster Walks)",
+      "movementName": "Monster Walks",
       "order": 1,
       "target": { "type": "reps", "value": 15 },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 5
+      "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
-      "movementName": "Liberación de Cuádriceps con Rodillo",
+      "movementName": "Quad Release",
       "order": 2,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 5
+      "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
-      "movementName": "Couch Stretch",
+      "movementName": "Kneeling Wall Stretch",
       "order": 3,
-      "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 15
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "restBetweenSets": 15
     },
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "90/90 Hip Switch",
       "order": 4,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "notes": "Movimiento continuo, cambiando de lado"
+      "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
       "movementName": "Butterfly Stretch",
       "order": 5,
-      "target": { "type": "time", "value": 90, "unit": "s" },
+      "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
-      "movementName": "Pigeon Pose",
+      "movementName": "Pigeon Stretch",
       "order": 6,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10
+      "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
-      "movementName": "Lunge con Rotación Torácica",
+      "movementName": "Lunge with Rotation",
       "order": 7,
       "target": { "type": "reps", "value": 8 },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10
+      "sets": 1
     },
     {
       "routineName": "Desbloqueo de Cadera",
@@ -528,80 +572,77 @@
       "order": 8,
       "target": { "type": "time", "value": 30, "unit": "s" },
       "sets": 3,
-      "restBetweenSets": 45
+      "restBetweenSets": 20
     },
     {
       "routineName": "Desbloqueo de Cadera",
-      "movementName": "Plancha Lateral",
+      "movementName": "Side Plank",
       "order": 9,
       "target": { "type": "time", "value": 30, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10
+      "sets": 1
     },
     {
       "routineName": "Hombros Blindados",
-      "movementName": "Child's Pose Bilateral",
+      "movementName": "Side Child's Pose",
       "order": 1,
       "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Hombros Blindados",
-      "movementName": "Extensiones Torácicas con Rodillo",
+      "movementName": "Thoracic Roller Extensions",
       "order": 2,
       "target": { "type": "reps", "value": 10 },
+      "sets": 2,
+      "restBetweenSets": 15
+    },
+    {
+      "routineName": "Hombros Blindados",
+      "movementName": "Trap Release",
+      "order": 3,
+      "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Hombros Blindados",
-      "movementName": "Liberación de Trapecio con Pelota",
-      "order": 3,
-      "target": { "type": "time", "value": 90, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10
-    },
-    {
-      "routineName": "Hombros Blindados",
-      "movementName": "Estiramiento Pectoral Menor en Marco",
+      "movementName": "Wall Pec Stretch",
       "order": 4,
       "target": { "type": "time", "value": 45, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10
-    },
-    {
-      "routineName": "Hombros Blindados",
-      "movementName": "Extensiones de Hombro con Banda",
-      "order": 5,
-      "target": { "type": "reps", "value": 15 },
       "sets": 1
     },
     {
       "routineName": "Hombros Blindados",
-      "movementName": "Wall Slides con Banda",
+      "movementName": "Band Pull-Aparts",
+      "order": 5,
+      "target": { "type": "reps", "value": 15 },
+      "sets": 2,
+      "restBetweenSets": 15
+    },
+    {
+      "routineName": "Hombros Blindados",
+      "movementName": "Scapular Wall Slides",
       "order": 6,
       "target": { "type": "reps", "value": 12 },
       "sets": 3,
-      "restBetweenSets": 45
+      "restBetweenSets": 20
     },
     {
       "routineName": "Hombros Blindados",
-      "movementName": "Y-Raises con Mancuernas",
+      "movementName": "Y-Raises",
       "order": 7,
       "target": { "type": "reps", "value": 12 },
       "sets": 3,
-      "restBetweenSets": 45,
+      "restBetweenSets": 20,
       "weight": 5,
       "weightUnit": "lbs"
     },
     {
       "routineName": "Hombros Blindados",
-      "movementName": "Plancha Frontal",
+      "movementName": "Front Plank",
       "order": 8,
-      "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 2,
+      "restBetweenSets": 20
     },
     {
       "routineName": "Hombros Blindados",
@@ -609,138 +650,114 @@
       "order": 9,
       "target": { "type": "reps", "value": 15 },
       "sets": 2,
-      "restBetweenSets": 30,
-      "notes": "Opcional"
+      "restBetweenSets": 15
     },
     {
       "routineName": "Hombros Blindados",
-      "movementName": "Balanceos de Muñeca en Cuadrupedia",
+      "movementName": "Quadruped Wrist Rocks",
       "order": 10,
       "target": { "type": "reps", "value": 12 },
       "sets": 2,
-      "restBetweenSets": 20,
-      "notes": "Movimiento suave, progresivo. Para trabajo de movilidad en extensión"
+      "restBetweenSets": 15
     },
     {
       "routineName": "Piernas Frescas",
-      "movementName": "Liberación Plantar con Pelota",
+      "movementName": "Plantar Fascia Release",
       "order": 1,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10,
-      "notes": "1 minuto por pie"
+      "sets": 1
     },
     {
       "routineName": "Piernas Frescas",
-      "movementName": "Liberación de Cuádriceps con Rodillo",
+      "movementName": "Quad Release",
       "order": 2,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 5
+      "sets": 1
     },
     {
       "routineName": "Piernas Frescas",
-      "movementName": "Estiramiento de Pantorrilla en Bloque",
+      "movementName": "Calf Stretch",
       "order": 3,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10,
-      "notes": "30s pierna recta, 30s flexionada"
+      "sets": 1
     },
     {
       "routineName": "Piernas Frescas",
-      "movementName": "Couch Stretch",
+      "movementName": "Kneeling Wall Stretch",
       "order": 4,
-      "target": { "type": "time", "value": 75, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 15,
-      "notes": "Focus en flexores de cadera (castigados en ciclismo)"
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
     },
     {
       "routineName": "Piernas Frescas",
-      "movementName": "Pigeon Pose",
+      "movementName": "Pigeon Stretch",
       "order": 5,
-      "target": { "type": "time", "value": 75, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 15
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
     },
     {
       "routineName": "Piernas Frescas",
-      "movementName": "Perro Boca Abajo (Downward Dog)",
+      "movementName": "Downward Dog",
       "order": 6,
       "target": { "type": "time", "value": 60, "unit": "s" },
-      "sets": 1,
-      "notes": "Pedalear pies suavemente para profundizar el estiramiento"
+      "sets": 1
     },
     {
       "routineName": "Piernas Frescas",
-      "movementName": "Estiramiento de Isquiotibial Acostado con Banda",
+      "movementName": "Supine Hamstring Stretch",
       "order": 7,
-      "target": { "type": "time", "value": 90, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 15
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 2,
+      "restBetweenSets": 15
     },
     {
       "routineName": "Piernas Frescas",
       "movementName": "90/90 Hip Switch",
       "order": 8,
       "target": { "type": "time", "value": 75, "unit": "s" },
-      "sets": 1,
-      "notes": "Movimiento continuo y fluido"
+      "sets": 1
     },
     {
       "routineName": "Estiramiento Nocturno",
-      "movementName": "Child's Pose Bilateral",
+      "movementName": "Side Child's Pose",
       "order": 1,
       "target": { "type": "time", "value": 75, "unit": "s" },
-      "sets": 1,
-      "notes": "Respiración profunda, enfocado en la espalda media"
+      "sets": 1
     },
     {
       "routineName": "Estiramiento Nocturno",
-      "movementName": "Gato-Vaca (Cat-Cow)",
+      "movementName": "Cat-Cow",
       "order": 2,
       "target": { "type": "reps", "value": 12 },
-      "sets": 1,
-      "notes": "Coordinar con respiración: arquear al inhalar, redondear al exhalar"
+      "sets": 1
     },
     {
       "routineName": "Estiramiento Nocturno",
-      "movementName": "Torsión Espinal Acostado",
+      "movementName": "Lying Spinal Twist",
       "order": 3,
-      "target": { "type": "time", "value": 75, "unit": "s" },
-      "sets": 1,
-      "isBilateral": true,
-      "switchSidesDuration": 10
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1
     },
     {
       "routineName": "Estiramiento Nocturno",
-      "movementName": "Rodillas al Pecho",
+      "movementName": "Knees to Chest",
       "order": 4,
-      "target": { "type": "time", "value": 75, "unit": "s" },
+      "target": { "type": "time", "value": 60, "unit": "s" },
       "sets": 1
     },
     {
       "routineName": "Estiramiento Nocturno",
       "movementName": "Butterfly Stretch",
       "order": 5,
-      "target": { "type": "time", "value": 120, "unit": "s" },
-      "sets": 1,
-      "notes": "Versión relajada, no forzar las rodillas"
+      "target": { "type": "time", "value": 90, "unit": "s" },
+      "sets": 1
     },
     {
       "routineName": "Estiramiento Nocturno",
-      "movementName": "Pancake Stretch (Sentado en V)",
+      "movementName": "Seated Straddle",
       "order": 6,
-      "target": { "type": "time", "value": 150, "unit": "s" },
-      "sets": 1,
-      "notes": "Versión chill: rodillas pueden estar levemente flexionadas si es necesario"
+      "target": { "type": "time", "value": 90, "unit": "s" },
+      "sets": 1
     }
   ]
 }

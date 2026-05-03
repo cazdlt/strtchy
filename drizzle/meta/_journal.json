@@ -1,13 +1,5 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1768081672411,
-      "tag": "0000_jittery_anita_blake",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }
