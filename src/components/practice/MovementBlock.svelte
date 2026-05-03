@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { Info } from 'phosphor-svelte';
 	import SetRow from './SetRow.svelte';
 	import RestRow from './RestRow.svelte';
 	import type { PracticeSession, MovementSnapshot } from '$lib/composables/PracticeSession.svelte';
@@ -15,6 +16,7 @@
 		onAdjustSets?: (delta: number) => void;
 		onNotesChange?: (notes: string) => void;
 		onRepIncrement?: () => void;
+		onShowDetails?: () => void;
 	}
 
 	let {
@@ -28,6 +30,7 @@
 		onAdjustSets,
 		onNotesChange,
 		onRepIncrement,
+		onShowDetails,
 	}: Props = $props();
 
 	const session = getContext<PracticeSession>('practice');
@@ -190,6 +193,16 @@
 			</div>
 		</button>
 		<div class="flex items-center gap-1 flex-shrink-0">
+			{#if onShowDetails}
+				<button
+					onclick={() => onShowDetails()}
+					class="w-8 h-8 flex items-center justify-center text-text-muted hover:text-accent-primary hover:bg-surface-elevated transition-colors"
+					aria-label="Show movement details"
+					title="Show movement details"
+				>
+					<Info weight="duotone" size={18} />
+				</button>
+			{/if}
 			<button
 				onclick={() => onRemove?.()}
 				class="hidden sm:flex w-8 h-8 items-center justify-center text-text-secondary hover:bg-error/20 hover:text-error transition-colors"

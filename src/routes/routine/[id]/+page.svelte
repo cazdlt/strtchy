@@ -4,24 +4,36 @@
 	import { enhance } from '$app/forms';
 	import PageHeader from '../../../components/ui/PageHeader.svelte';
 	import { goto } from '$app/navigation';
-	import { 
-		ArrowLeft, 
-		PencilSimple, 
-		Play, 
-		Clock, 
-		Stack, 
-		ArrowsLeftRight, 
-		Barbell, 
+	import {
+		ArrowLeft,
+		PencilSimple,
+		Play,
+		Clock,
+		Stack,
+		ArrowsLeftRight,
+		Barbell,
 		Timer,
 		PersonSimple,
 		SpeakerHigh,
 		Sun,
 		Lightning,
 		CaretRight,
-		Trash
+		Trash,
+		Info,
 	} from 'phosphor-svelte';
+	import MovementDetailModal from '../../../components/practice/MovementDetailModal.svelte';
 
 	let { data }: { data: PageData } = $props();
+
+	let selectedMovement = $state<any>(null);
+
+	function showMovementDetail(movement: any) {
+		selectedMovement = movement;
+	}
+
+	function closeMovementDetail() {
+		selectedMovement = null;
+	}
 
 	const totalSets = $derived(
 		data.routine.movements.reduce((sum: number, rm: any) => {
@@ -244,9 +256,19 @@
 								<div class="flex-1 min-w-0">
 									<div class="flex items-start justify-between gap-3 mb-3">
 										<div>
-											<h3 class="font-title text-xl text-text-primary group-hover:text-accent-primary transition-colors leading-tight mb-1">
-												{rm.movement.name}
-											</h3>
+											<div class="flex items-center gap-2">
+												<h3 class="font-title text-xl text-text-primary group-hover:text-accent-primary transition-colors leading-tight">
+													{rm.movement.name}
+												</h3>
+												<button
+													onclick={() => showMovementDetail(rm.movement)}
+													class="p-1 text-text-muted hover:text-accent-primary transition-colors shrink-0"
+													aria-label="Show movement details"
+													title="Show movement details"
+												>
+														<Info weight="duotone" size={16} />
+													</button>
+											</div>
 									<div class="flex items-center gap-2 text-text-muted text-sm">
 										{#if rm.movement.type === 'timed'}
 											<Timer weight="duotone" size={14} class="text-accent-primary" />
@@ -365,6 +387,12 @@
 			</p>
 		</div>
 	</footer>
+
+	<MovementDetailModal
+		movement={selectedMovement}
+		isOpen={selectedMovement !== null}
+		onClose={closeMovementDetail}
+	/>
 </div>
 
 <style>

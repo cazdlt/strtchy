@@ -18,6 +18,7 @@
 	import PracticePauseBanner from '../../../components/practice/PracticePauseBanner.svelte';
 	import StartPracticeOverlay from '../../../components/practice/StartPracticeOverlay.svelte';
 	import AddMovementModal from '../../../components/practice/AddMovementModal.svelte';
+	import MovementDetailModal from '../../../components/practice/MovementDetailModal.svelte';
 
 	let { data } = $props<{ data: PageData }>();
 
@@ -105,6 +106,22 @@
 	let isAdjustingSets = $state(false);
 	let showSaveChangesModal = $state(false);
 	let isSavingRoutineChanges = $state(false);
+
+	// Movement detail modal state
+	let selectedMovementId = $state<string | null>(null);
+	const movementDetailsMap = $derived(
+		new Map<string, any>(initialData.allRoutineMovements.map((rm: any) => [rm.movementId, rm.movement]))
+	);
+	const selectedMovement = $derived(
+		selectedMovementId ? movementDetailsMap.get(selectedMovementId) ?? null : null
+	);
+
+	function showMovementDetail(movementId: string) {
+		selectedMovementId = movementId;
+	}
+	function closeMovementDetail() {
+		selectedMovementId = null;
+	}
 
 	// ── Auto-save to localStorage ──
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -461,6 +478,7 @@
 					onAdjustSets={(delta) => handleAdjustSets(rm.id, delta === 1 ? 'up' : 'down')}
 					onNotesChange={(notes) => handleUpdateNotes(rm.id, notes)}
 					onRepIncrement={() => audio.play('rep')}
+					onShowDetails={() => showMovementDetail(rm.movementId)}
 					isFirst={index === 0}
 					isLast={index === session.movements.length - 1}
 				/>
@@ -530,6 +548,12 @@
 			showAddMovementModal = false;
 		}}
 		onClose={() => (showAddMovementModal = false)}
+	/>
+
+	<MovementDetailModal
+		movement={selectedMovement}
+		isOpen={selectedMovement !== null}
+		onClose={closeMovementDetail}
 	/>
 
 	{#if showSaveChangesModal}
