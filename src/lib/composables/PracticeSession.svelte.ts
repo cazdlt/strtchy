@@ -59,6 +59,9 @@ export class PracticeSession {
 
   hasRoutineChanges = $state(false);
 
+  // Per-set target overrides (session-only, not synced to server)
+  targetOverrides = $state<Map<string, number>>(new Map());
+
   // Routine settings snapshotted at practice start
   restBetweenSets = $state(15);
   restBetweenMovements = $state(30);
@@ -403,6 +406,29 @@ export class PracticeSession {
     return this.completedSets.get(generateSetKey(movementId, setNumber, side));
   }
 
+  // ── Target overrides ──
+  getTargetOverride(movementId: string, setNumber: number, side: Side): number | undefined {
+    return this.targetOverrides.get(generateSetKey(movementId, setNumber, side));
+  }
+
+  setTargetOverride(movementId: string, setNumber: number, side: Side, value: number) {
+    this.targetOverrides.set(generateSetKey(movementId, setNumber, side), value);
+    this.targetOverrides = new Map(this.targetOverrides);
+  }
+
+  clearTargetOverride(movementId: string, setNumber: number, side: Side) {
+    this.targetOverrides.delete(generateSetKey(movementId, setNumber, side));
+    this.targetOverrides = new Map(this.targetOverrides);
+  }
+
+  updateCompletedValue(movementId: string, setNumber: number, side: Side, value: number) {
+    const key = generateSetKey(movementId, setNumber, side);
+    const existing = this.completedSets.get(key);
+    if (!existing) return;
+    this.completedSets.set(key, { ...existing, value });
+    this.completedSets = new Map(this.completedSets);
+  }
+
   // ── Timer integration ──
   #checkAndStartTimer() {
     if (!this.settings.autoPlay || !this.hasStarted || this.isCompleted || this.timer.isPaused) {
@@ -519,6 +545,7 @@ export class PracticeSession {
       completedSets: Array.from(this.completedSets.entries()),
       skippedSets: Array.from(this.skippedSets.entries()),
       setRatings: Array.from(this.setRatings.entries()),
+      targetOverrides: Array.from(this.targetOverrides.entries()),
       currentMovementIndex: this.currentMovementIndex,
       settings: this.settings,
       notes: Array.from(this.notes.entries()),
@@ -543,6 +570,7 @@ export class PracticeSession {
     this.currentMovementIndex = d.currentMovementIndex ?? 0;
     this.settings = d.settings ?? this.settings;
     this.notes = new Map(d.notes ?? []);
+    this.targetOverrides = new Map(d.targetOverrides ?? []);
     // Restore duration
     this.timer.durationSeconds = d.timerDuration ?? 0;
     if (this.hasStarted && !this.isCompleted) {

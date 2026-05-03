@@ -68,7 +68,18 @@
 	let activeSetTimerValue = $derived(showTimer ? (activeSetTimerInfo?.elapsed ?? 0) : 0);
 	let activeSetTimerPaused = $derived(showTimer ? (activeSetTimerInfo?.isPaused ?? false) : false);
 
-	const displayValue = $derived((isCompleted || isSkipped) && completedValue !== null ? completedValue : currentValue);
+	const effectiveTarget = $derived(session?.getTargetOverride?.(movementId, setNumber, side) ?? targetValue);
+	const isTargetOverridden = $derived(session?.getTargetOverride?.(movementId, setNumber, side) !== undefined);
+
+	const displayValue = $derived(
+		isCompleted || isSkipped
+			? (completedValue ?? 0)
+			: isActive
+				? currentValue
+				: effectiveTarget
+	);
+
+	const goalTarget = $derived(isActive || isCompleted || isSkipped ? effectiveTarget : targetValue);
 
 	function handleComplete() {
 		if (isPaused) return;
@@ -79,7 +90,7 @@
 		}
 
 		const value = movementType === 'timed'
-			? (showTimer ? activeSetTimerValue : targetValue)
+			? (showTimer ? activeSetTimerValue : currentValue)
 			: currentValue;
 
 		onComplete?.({
@@ -90,8 +101,30 @@
 		});
 	}
 
-	function handleValueChange(newValue: number) {
-		currentValue = newValue;
+	function handleIncrement(delta: number) {
+		if (isCompleted || isSkipped) {
+			const base = completedValue ?? 0;
+			const newValue = Math.max(0, base + delta);
+			session?.updateCompletedValue?.(movementId, setNumber, side, newValue);
+			return;
+		}
+
+		if (isActive) {
+			const newValue = Math.max(0, currentValue + delta);
+			currentValue = newValue;
+			if (newValue >= effectiveTarget) {
+				if (autoRepInterval) {
+					clearInterval(autoRepInterval);
+					autoRepInterval = null;
+				}
+				handleComplete();
+			}
+			return;
+		}
+
+		// Inactive — adjust target override
+		const newValue = Math.max(0, effectiveTarget + delta);
+		session?.setTargetOverride?.(movementId, setNumber, side, newValue);
 	}
 
 	function handleWeightChange(newWeight: number) {
@@ -106,7 +139,7 @@
 		if (isActive && !isCompleted && !isSkipped && !isPaused && !isInRestPeriod && timePerRep && timePerRep > 0 && movementType !== 'timed') {
 			if (!autoRepInterval) {
 				autoRepInterval = setInterval(() => {
-					if (currentValue < targetValue) {
+					if (currentValue < effectiveTarget) {
 						currentValue++;
 						onRepIncrement?.();
 					} else {
@@ -174,8 +207,8 @@
 			<button
 				onclick={handleComplete}
 				disabled={isPaused}
-				class="h-11 w-11 flex items-center justify-center font-display text-lg tracking-widest uppercase transition-colors {isCompleted
-					? 'bg-success/20 text-success border border-success/30 hover:bg-success/30'
+				class="group h-11 w-11 flex items-center justify-center font-display text-lg tracking-widest uppercase transition-colors {isCompleted
+					? 'bg-success/20 text-success border border-success/30 hover:bg-error/20 hover:text-error hover:border-error/30'
 					: isSkipped
 					? 'bg-surface-elevated text-text-muted border border-accent-track'
 					: isActive
@@ -183,9 +216,16 @@
 					: 'bg-surface-elevated border border-accent-track hover:border-accent-primary text-text-secondary'} disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{#if isCompleted}
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-					</svg>
+					<span class="group-hover:hidden">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+						</svg>
+					</span>
+					<span class="hidden group-hover:inline">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+						</svg>
+					</span>
 				{:else if isSkipped}
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 opacity-70">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
@@ -235,13 +275,13 @@
 					<div class="font-bold w-24 text-center transition-all">
 						<span class="text-3xl {activeSetTimerPaused ? 'text-warning' : 'text-text-primary'}">{formatTime(activeSetTimerValue)}</span>
 						<span class="text-text-muted text-lg mx-1">/</span>
-						<span class="text-text-secondary text-lg">{formatTime(targetValue)}</span>
+						<span class="text-text-secondary text-lg {isTargetOverridden ? 'text-accent-primary' : ''}">{formatTime(effectiveTarget)}</span>
 					</div>
 				</div>
 			{:else}
 				<div class="flex items-center gap-3 justify-center sm:justify-start">
 					<button
-						onclick={() => handleValueChange(Math.max(0, currentValue - 5))}
+						onclick={() => handleIncrement(-5)}
 						disabled={isPaused}
 						class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 					>
@@ -250,10 +290,10 @@
 					<div class="font-bold w-24 text-center transition-all {isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
 						<span class="text-current">{formatTime(displayValue)}</span>
 						<span class="text-text-muted text-lg mx-1">/</span>
-						<span class="text-text-secondary text-lg">{formatTime(targetValue)}</span>
+						<span class="text-text-secondary text-lg {isTargetOverridden ? 'text-accent-primary' : ''}">{formatTime(goalTarget)}</span>
 					</div>
 					<button
-						onclick={() => handleValueChange(currentValue + 5)}
+						onclick={() => handleIncrement(5)}
 						disabled={isPaused}
 						class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 					>
@@ -293,7 +333,7 @@
 				{/if}
 			{/if}
 			<button
-				onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
+				onclick={() => handleIncrement(-1)}
 				disabled={isPaused}
 				class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 			>
@@ -302,13 +342,13 @@
 			<div class="font-bold w-20 text-center transition-all {isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
 				<span class="text-current">{displayValue}</span>
 				<span class="text-text-muted text-lg mx-1">/</span>
-				<span class="text-text-secondary text-lg">{targetValue}</span>
+				<span class="text-text-secondary text-lg {isTargetOverridden ? 'text-accent-primary font-bold' : ''}">{goalTarget}</span>
 				{#if isActive && timePerRep && timePerRep > 0}
 					<span class="text-xs text-success bg-success/10 px-2 py-0.5 ml-1">{timePerRep}s/rep</span>
 				{/if}
 			</div>
 			<button
-				onclick={() => handleValueChange(currentValue + 1)}
+				onclick={() => handleIncrement(1)}
 				disabled={isPaused}
 				class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 			>
@@ -367,7 +407,7 @@
 			<div class="flex items-center gap-3 justify-center sm:justify-start">
 				<span class="text-text-muted mx-1 hidden sm:inline">×</span>
 				<button
-					onclick={() => handleValueChange(Math.max(0, currentValue - 1))}
+					onclick={() => handleIncrement(-1)}
 					disabled={isPaused}
 					class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 				>
@@ -376,10 +416,10 @@
 				<div class="font-bold w-20 text-center transition-all {isActive ? 'text-3xl text-accent-primary' : 'text-2xl text-text-primary'}">
 					<span class="text-current">{displayValue}</span>
 					<span class="text-text-muted text-lg mx-1">/</span>
-					<span class="text-text-secondary text-lg">{targetValue}</span>
+					<span class="text-text-secondary text-lg {isTargetOverridden ? 'text-accent-primary font-bold' : ''}">{goalTarget}</span>
 				</div>
 				<button
-					onclick={() => handleValueChange(currentValue + 1)}
+					onclick={() => handleIncrement(1)}
 					disabled={isPaused}
 					class="min-h-11 w-11 sm:h-9 sm:w-9 bg-surface-elevated hover:bg-accent-track disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-elevated flex items-center justify-center text-text-primary"
 				>
@@ -404,8 +444,8 @@
 		<button
 			onclick={handleComplete}
 			disabled={isPaused}
-			class="px-4 h-11 flex items-center justify-center font-display text-lg tracking-widest uppercase transition-colors {isCompleted
-				? 'bg-success/20 text-success border border-success/30 hover:bg-success/30'
+			class="group px-4 h-11 flex items-center justify-center font-display text-lg tracking-widest uppercase transition-colors {isCompleted
+				? 'bg-success/20 text-success border border-success/30 hover:bg-error/20 hover:text-error hover:border-error/30'
 				: isSkipped
 				? 'bg-surface-elevated text-text-muted border border-accent-track'
 				: isActive
@@ -413,10 +453,18 @@
 				: 'bg-surface-elevated border border-accent-track hover:border-accent-primary text-text-secondary'} disabled:opacity-50 disabled:cursor-not-allowed"
 		>
 			{#if isCompleted}
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 mr-1.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-				</svg>
-				Done
+				<span class="group-hover:hidden flex items-center">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 mr-1.5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+					</svg>
+					Done
+				</span>
+				<span class="hidden group-hover:flex items-center">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+					</svg>
+					Undo
+				</span>
 			{:else if isSkipped}
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5 opacity-70">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
