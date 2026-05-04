@@ -76,7 +76,7 @@
 			? (completedValue ?? 0)
 			: isActive
 				? currentValue
-				: effectiveTarget
+				: 0
 	);
 
 	const goalTarget = $derived(isActive || isCompleted || isSkipped ? effectiveTarget : targetValue);
@@ -210,7 +210,7 @@
 				class="group h-11 w-11 flex items-center justify-center font-display text-lg tracking-widest uppercase transition-colors {isCompleted
 					? 'bg-success/20 text-success border border-success/30 hover:bg-error/20 hover:text-error hover:border-error/30'
 					: isSkipped
-					? 'bg-surface-elevated text-text-muted border border-accent-track'
+					? 'bg-surface-elevated text-text-muted border border-accent-track hover:bg-error/20 hover:text-error hover:border-error/30'
 					: isActive
 					? 'bg-accent-primary hover:bg-accent-primary-light text-white'
 					: 'bg-surface-elevated border border-accent-track hover:border-accent-primary text-text-secondary'} disabled:opacity-50 disabled:cursor-not-allowed"
@@ -226,11 +226,18 @@
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
 						</svg>
 					</span>
-				{:else if isSkipped}
+			{:else if isSkipped}
+				<span class="group-hover:hidden">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 opacity-70">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
 					</svg>
-				{:else if isActive}
+				</span>
+				<span class="hidden group-hover:inline">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+					</svg>
+				</span>
+			{:else if isActive}
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
 					</svg>
@@ -466,10 +473,18 @@
 					Undo
 				</span>
 			{:else if isSkipped}
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5 opacity-70">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-				</svg>
-				Skipped
+				<span class="group-hover:hidden flex items-center">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5 opacity-70">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+					</svg>
+					Skipped
+				</span>
+				<span class="hidden group-hover:flex items-center">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+					</svg>
+					Undo
+				</span>
 			{:else if isActive}
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1.5">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />

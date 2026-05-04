@@ -326,7 +326,7 @@ export class PracticeSession {
           undefined,
           () => {
             this.audio?.play('restEnd');
-            this.currentMovementIndex = currentIdx + 1;
+            this.#syncCurrentIndexToNextIncomplete();
             this.#checkAndStartTimer();
           },
           () => this.audio?.play('countdown'),
