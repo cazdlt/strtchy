@@ -154,6 +154,15 @@
 		}
 	});
 
+	// ── Wake Lock ──
+	$effect(() => {
+		if (session.settings.keepAwake && session.hasStarted && !session.isCompleted) {
+			session.requestWakeLock();
+		} else {
+			session.releaseWakeLock();
+		}
+	});
+
 	// ── Scroll on rest start ──
 	let prevRestInfo = $state<typeof session.timer.restInfo>(null);
 	$effect(() => {
@@ -365,7 +374,7 @@
 
 	// ── Cleanup ──
 	onDestroy(() => {
-		session.timer.cleanup();
+		session.destroy();
 		if (saveTimeout) clearTimeout(saveTimeout);
 	});
 
@@ -410,7 +419,7 @@
 		isPreview={false}
 		onExit={() => {
 			if (confirm('Exit practice? Your progress so far is saved.')) {
-				session.timer.cleanup();
+				session.destroy();
 				goto(isReadOnly ? `/routine/${data.practice.routineId}` : '/');
 			}
 		}}

@@ -1,5 +1,6 @@
 import { PracticeTimer } from './PracticeTimer.svelte';
 import { createAudioController, type AudioController } from '$lib/utils/audio';
+import { createWakeLockManager, type WakeLockManager } from '$lib/utils/wakeLock';
 
 export type Side = 'left' | 'right' | null;
 
@@ -72,6 +73,9 @@ export class PracticeSession {
   // ── Audio ──
   audio = $state<AudioController | null>(null);
 
+  // ── Wake Lock ──
+  #wakeLockManager = $state<WakeLockManager | null>(null);
+
   // ── Async states ──
   isSaving = $state(false);
   saveError = $state<string | null>(null);
@@ -115,6 +119,7 @@ export class PracticeSession {
     this.currentMovementIndex = 0;
     this.hasStarted = false;
     this.isCompleted = false;
+    this.#initWakeLock();
   }
 
   hydrateFromServer(rows: Array<{
@@ -156,6 +161,28 @@ export class PracticeSession {
     this.audio = audio;
   }
 
+  // ── Wake Lock lifecycle ──
+  #initWakeLock() {
+    if (this.#wakeLockManager) {
+      this.#wakeLockManager.cleanup();
+    }
+    this.#wakeLockManager = createWakeLockManager(this.settings.keepAwake);
+  }
+
+  requestWakeLock() {
+    this.#wakeLockManager?.request();
+  }
+
+  releaseWakeLock() {
+    this.#wakeLockManager?.release();
+  }
+
+  destroy() {
+    this.#wakeLockManager?.cleanup();
+    this.#wakeLockManager = null;
+    this.timer.cleanup();
+  }
+
   // ── Practice lifecycle ──
   start() {
     if (this.hasStarted) return;
@@ -189,6 +216,7 @@ export class PracticeSession {
   completeWorkout() {
     this.isCompleted = true;
     this.audio?.play('practiceComplete');
+    this.releaseWakeLock();
     this.timer.cleanup();
     return this.#toServerData();
   }
@@ -576,6 +604,7 @@ export class PracticeSession {
     if (this.hasStarted && !this.isCompleted) {
       this.timer.startDuration();
     }
+    this.#initWakeLock();
   }
 
   saveToStorage() {
