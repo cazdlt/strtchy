@@ -45,8 +45,7 @@ docker compose up -d
 echo ""
 
 echo -e "${BLUE}→ Running database migrations...${NC}"
-# Run migrations only (no seed for existing database)
-docker compose exec -T -e DATABASE_URL=./data/prod/local.db strtchy npx tsx scripts/db/migrate.ts prod
+docker compose exec -T -e DATABASE_URL=/app/data/prod/local.db strtchy npx tsx scripts/db/run-migrations.ts
 echo ""
 
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

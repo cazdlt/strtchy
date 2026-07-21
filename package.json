@@ -14,7 +14,9 @@
     "db:setup": "./scripts/db/setup.sh",
     "db:reset": "./scripts/db/reset.sh",
     "db:backup": "./scripts/db/backup.sh",
-    "db:push": "npx drizzle-kit push"
+    "db:push": "npx drizzle-kit push",
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx tsx scripts/db/run-migrations.ts"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.5.4",

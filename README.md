@@ -29,27 +29,38 @@ A stretching and recovery routine tracker inspired by Hevy. Create custom moveme
 ### Development
 
 ```bash
-./scripts/dev.sh
+# 1. Install dependencies
+npm install
+
+# 2. Copy .env and set DATABASE_URL
+cp .env.example .env
+
+# 3. Initialize database (run migrations + seed data)
+npm run db:setup
+
+# 4. Start dev server
+npm run dev
 ```
 
-This script will:
-
-- Check/create `.env` file
-- Initialize development database if needed (migrations + seeding)
-- Start the development server
-
-### Production
+### Production (Docker)
 
 ```bash
-./scripts/prod.sh
+# 1. Set up .env.production
+cp .env.example .env.production
+# Edit .env.production with production values
+
+# 2. Deploy
+./scripts/docker/start.sh
 ```
 
-This script will:
+### Production (Node.js)
 
-- Check/create `.env.production` file
-- Initialize production database if needed (migrations + seeding)
-- Build the application
-- Start the production preview server
+```bash
+npm run build              # Build the application
+DATABASE_URL=./data/prod/local.db npm run db:migrate  # Apply migrations
+DATABASE_URL=./data/prod/local.db npm run db:setup   # Seed if fresh
+npm run preview            # Start production preview server
+```
 
 ## Database Structure
 
@@ -60,28 +71,43 @@ The app uses separate databases for different environments:
 
 Both databases are automatically initialized with seed data on first run (27 movements, 3 built-in routines).
 
-## Manual Database Operations
+## Database Operations
 
-If you need to manually work with databases:
+All commands read `DATABASE_URL` from `.env`:
+
+| Command | Description |
+|---------|-------------|
+| `npm run db:setup` | Reset + push schema + seed data (use for fresh dev DBs) |
+| `npm run db:reset` | Delete database and re-run setup |
+| `npm run db:backup` | Export database to `./backups/<timestamp>.sql` |
+| `npm run db:migrate` | **Run pending migrations** (safe, idempotent, tracks state) |
+| `npm run db:generate` | Generate a new migration from current schema diff |
+| `npm run db:push` | ⚠️ Directly push schema (dev only, **not for prod**) |
+
+### Migration System (Production Safe)
+
+The project uses Drizzle migrations with a custom runner that handles edge cases:
+
+- **Migrations live in**: `drizzle/*.sql`
+- **Journal tracked in**: `drizzle/meta/_journal.json`
+- **Applied state stored in DB table**: `__drizzle_migrations`
+
+**Typical schema change workflow:**
 
 ```bash
-# Database Setup
-npm run db:setup          # Setup dev database (migrations + seed)
-npm run db:setup:prod     # Setup prod database
+# 1. Edit src/lib/db/schema.ts
+# 2. Generate migration from schema diff
+npm run db:generate       # Creates drizzle/000X_*.sql + snapshot + journal entry
 
-# Database Reset
-npm run db:reset          # Reset dev database (delete and reinitialize)
-npm run db:reset:prod     # Reset prod database
+# 3. Test locally
+npm run db:migrate        # Applies pending migrations safely
 
-# Database Backup
-npm run db:backup         # Backup dev database to SQL file
-npm run db:backup:prod    # Backup prod database
-
-# Schema Management (Development Workflow)
-npm run db:push           # Push schema changes to dev DB
-npm run db:generate       # Generate migration from dev DB
-npm run db:migrate        # Run migrations
+# 4. Deploy to production
+#    Run npm run db:migrate on the production environment
 ```
+
+**Why not `db:push` for production?**
+`db:push` syncs schema directly and drops/recreates tables. It does **not** migrate data. Use `db:migrate` on production, which runs SQL migrations that can transform existing data (like the `practice_data` column rename + data backfill in `0001_update_practice_data.sql`).
 
 ## Usage
 

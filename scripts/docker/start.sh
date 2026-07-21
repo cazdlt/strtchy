@@ -36,9 +36,12 @@ echo -e "${BLUE}→ Starting containers...${NC}"
 docker compose up -d
 
 echo ""
-echo -e "${BLUE}→ Setting up database (migrations + seed)...${NC}"
-# Run database setup inside the container
-docker compose exec -T strtchy sh -c "mkdir -p data/prod && DATABASE_URL=./data/prod/local.db npx drizzle-kit push --force && DATABASE_URL=./data/prod/local.db npx tsx scripts/db/seed.ts"
+echo -e "${BLUE}→ Running database migrations...${NC}"
+docker compose exec -T -e DATABASE_URL=/app/data/prod/local.db strtchy npx tsx scripts/db/run-migrations.ts
+
+echo ""
+echo -e "${BLUE}→ Seeding database...${NC}"
+docker compose exec -T -e DATABASE_URL=/app/data/prod/local.db strtchy npx tsx scripts/db/seed.ts
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

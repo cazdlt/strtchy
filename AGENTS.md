@@ -69,7 +69,27 @@ npm run check        # Type checking with svelte-check
 npm run db:setup     # Push schema + seed data (uses DATABASE_URL from .env)
 npm run db:reset     # Delete database and run fresh setup
 npm run db:backup    # Export database to SQL file
-npm run db:push      # Push schema changes without wiping data
+npm run db:migrate   # Run pending migrations (safe, idempotent, tracks state)
+npm run db:generate  # Generate migration from schema diff
+npm run db:push      # Push schema changes without wiping data (dev only!)
+```
+
+### Scripts Directory Layout
+
+```
+scripts/
+  dev.sh              # Sources .env, runs npm run dev (thin wrapper)
+  db/
+    setup.sh          # Fresh dev setup: drizzle-kit push + seed
+    reset.sh          # Delete DB + re-run setup
+    backup.sh         # Export DB to ./backups/<timestamp>.sql
+    seed.ts           # Seed data (37 movements, 6 built-in routines)
+    run-migrations.ts # Canonical migration runner (production-safe)
+  docker/
+    start.sh          # Fresh Docker deploy (build + migrate + seed)
+    upgrade.sh        # Docker upgrade (pull + rebuild + migrate)
+  test/
+    api.sh            # API endpoint tests (requires running server + API key)
 ```
 
 ## Known Issues
@@ -143,21 +163,45 @@ Key reactive states in `/src/routes/practice/[id]/+page.svelte`:
 
 All scripts read `DATABASE_URL` from `.env`:
 
-| npm script           | Purpose                                      |
-| -------------------- | -------------------------------------------- |
-| `npm run db:setup`   | Push schema + seed data (idempotent)         |
-| `npm run db:reset`   | Delete DB and run fresh setup                |
-| `npm run db:backup`  | Export DB to `./backups/local_<timestamp>.sql` |
-| `npm run db:push`    | Sync schema without wiping data              |
+| npm script           | Purpose                                               |
+| -------------------- | ----------------------------------------------------- |
+| `npm run db:setup`   | Push schema + seed data (idempotent, uses `drizzle-kit push`) |
+| `npm run db:reset`   | Delete DB and run fresh setup                         |
+| `npm run db:backup`  | Export DB to `./backups/local_<timestamp>.sql`         |
+| `npm run db:migrate` | Run pending migrations (safe, idempotent, tracks state in `__drizzle_migrations` table) |
+| `npm run db:generate`| Generate migration from schema diff (creates SQL + snapshot + journal entry) |
+| `npm run db:push`    | ⚠️ Sync schema without wiping data (dev only, not for prod) |
+
+### Migration System
+
+Migrations are stored in `drizzle/*.sql` with metadata in `drizzle/meta/`:
+
+- `drizzle/0000_nervous_slipstream.sql` — Baseline schema (creates all tables)
+- `drizzle/0001_update_practice_data.sql` — Data migration example (column rename + data backfill)
+- `drizzle/meta/_journal.json` — Lists migrations and their order
+- `drizzle/meta/000X_snapshot.json` — Schema state after each migration
+
+**Custom runner**: `scripts/db/run-migrations.ts` handles edge cases:
+- **Fresh DB**: Applies baseline, skips data migrations for tables that don't exist yet
+- **Production upgrade**: Skips baseline if tables exist, applies data migrations
+- **Already migrated**: Skips if hash exists in `__drizzle_migrations` table
 
 ### Schema Changes Workflow
 
+**For development (quick iteration):**
 1. Edit `src/lib/db/schema.ts`
 2. Run `npm run db:push` to sync to dev database
 3. Test the app
 4. If you need to start fresh: `npm run db:reset`
 
-**Note**: Formal migrations are not needed yet (no prod deployment). The `drizzle/migrations/` directory is kept empty for future use. When you need migrations, add `npm run db:migrate` back to `package.json`.
+**For production (tracked migrations):**
+1. Edit `src/lib/db/schema.ts`
+2. Run `npm run db:generate` to create a new migration file
+3. Test the migration locally: `npm run db:migrate`
+4. Commit the new `drizzle/000X_*.sql`, `drizzle/meta/` files
+5. Deploy and run `npm run db:migrate` on production
+
+**Important**: `db:push` is for development only. It can drop columns and recreate tables, which destroys data. Always use `db:migrate` on production.
 
 ## PWA
 
