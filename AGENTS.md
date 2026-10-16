@@ -32,6 +32,12 @@ Strtchy is a SvelteKit app for tracking stretching and recovery routines. It's b
 - Session management in `src/hooks.server.ts`
 - Password hashing uses `@oslojs/crypto/sha2` (sha256)
 
+### Remote API & API Key
+
+- The `FLORESTA_API_KEY` in `.env` is the API key (value `strtchy_...`) to hit the **remote API**: `https://strtchy.zamoradelatorre.com` or `floresta.local` (the same instance). Sent as `Authorization: Bearer <key>`.
+- Verified working: GET/POST/DELETE against `/api/routines` and `/api/movements` on that remote instance.
+- Note: no code reads the `FLORESTA_API_KEY` env var name; the key value itself is what's used.
+
 ### Svelte 5 Runes
 
 - Use `$state()` for reactive state
