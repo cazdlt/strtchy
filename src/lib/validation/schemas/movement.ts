@@ -21,7 +21,12 @@ export const movementSchema = z.object({
   timePerRep: z.coerce.number().int().min(1).optional().nullable(),
   isBilateral: z.boolean().default(false),
   switchSidesDuration: z.coerce.number().int().min(0).default(5),
-  equipment: z.string().transform(equipmentParser).optional(),
+  equipment: z
+    .union([
+      z.string().transform(equipmentParser),
+      z.array(z.string().transform((s) => s.trim()).pipe(z.string().min(1))),
+    ])
+    .optional(),
   illustration: imageFileSchema.optional().nullable(),
 });
 

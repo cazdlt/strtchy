@@ -53,7 +53,7 @@ export async function createRoutine(
 export async function updateRoutine(
   routineId: string,
   data: RoutineUpdateInput,
-  movementsData: RoutineMovementConfig[],
+  movementsData: RoutineMovementConfig[] | undefined,
   userId: string | undefined,
 ) {
   const existing = await db.query.routines.findFirst({
@@ -90,22 +90,24 @@ export async function updateRoutine(
     })
     .where(eq(routines.id, routineId));
 
-  // Delete and re-insert movements
-  console.log(
-    `[updateRoutine] Deleting old movements for routine ${routineId}`,
-  );
-  await db
-    .delete(routineMovements)
-    .where(eq(routineMovements.routineId, routineId));
+  // Delete and re-insert movements only if movementsData was provided
+  if (movementsData !== undefined) {
+    console.log(
+      `[updateRoutine] Deleting old movements for routine ${routineId}`,
+    );
+    await db
+      .delete(routineMovements)
+      .where(eq(routineMovements.routineId, routineId));
 
-  console.log(
-    `[updateRoutine] Inserting ${movementsData.length} new movements for routine ${routineId}`,
-  );
-  await insertRoutineMovements(
-    routineId,
-    data.name ?? existing.name,
-    movementsData,
-  );
+    console.log(
+      `[updateRoutine] Inserting ${movementsData.length} new movements for routine ${routineId}`,
+    );
+    await insertRoutineMovements(
+      routineId,
+      data.name ?? existing.name,
+      movementsData,
+    );
+  }
   console.log(`[updateRoutine] Successfully updated routine ${routineId}`);
 
   return routineId;

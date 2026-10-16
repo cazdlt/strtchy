@@ -6,10 +6,9 @@ import { validateBearerToken, requireAuth } from "$lib/api/auth";
 import { formatZodError, formatApiError } from "$lib/api/errors";
 import {
   routineUpdateSchema,
-  routineMovementConfigSchema,
+  movementsDataInputSchema,
 } from "$lib/validation/schemas/routine";
 import { updateRoutine, deleteRoutine } from "$lib/db/helpers/routines";
-import { z } from "zod";
 import type { RequestEvent } from "./$types";
 
 // GET /api/routines/[id] - Get single routine with movements (public)
@@ -54,9 +53,10 @@ export async function PATCH(event: RequestEvent) {
 
     // Validate movements if provided
     let movementsData;
-    if (body.movementsData) {
-      const movementsSchema = z.array(routineMovementConfigSchema);
-      const movementsParsed = movementsSchema.safeParse(body.movementsData);
+    if (body.movementsData !== undefined) {
+      const movementsParsed = movementsDataInputSchema.safeParse(
+        body.movementsData,
+      );
       if (!movementsParsed.success) {
         return json(formatZodError(movementsParsed.error), { status: 400 });
       }
@@ -66,7 +66,7 @@ export async function PATCH(event: RequestEvent) {
     await updateRoutine(
       event.params.id,
       routineParsed.data,
-      movementsData || [],
+      movementsData,
       user?.id,
     );
 

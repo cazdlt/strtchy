@@ -1,0 +1,128 @@
+{
+  "name": "Cuerpo Completo",
+  "description": "Foco: Cuerpo completo — pies, caderas, columna y hombros. Solo estiramiento, movilidad y masaje, sin trabajo de fuerza. ~20 min. Equipo: Pelota, Bloque, Rodillo, Marco de puerta.",
+  "restBetweenMovements": 15,
+  "restBetweenSets": 20,
+  "autoAdvance": true,
+  "audioEnabled": true,
+  "keepAwake": true,
+  "movementsData": [
+    {
+      "movementId": "mv_gato-vaca-cat-cow",
+      "order": 0,
+      "target": { "type": "reps", "value": 10 },
+      "sets": 1,
+      "isBilateral": false,
+      "switchSidesDuration": 5,
+      "notes": "Coordinar con respiración: arquear al inhalar, redondear al exhalar"
+    },
+    {
+      "movementId": "mv_90-90-hip-switch",
+      "order": 1,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": false,
+      "switchSidesDuration": 5,
+      "notes": "Movimiento continuo, cambiando de lado"
+    },
+    {
+      "movementId": "mv_liberacion-plantar-con-pelota",
+      "order": 2,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 10,
+      "notes": "45 segundos por pie"
+    },
+    {
+      "movementId": "mv_estiramiento-de-pantorrilla-en-bloque",
+      "order": 3,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 10,
+      "notes": "30s pierna recta, 15s flexionada"
+    },
+    {
+      "movementId": "mv_estiramiento-de-isquiotibiales-de-pie",
+      "order": 4,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": false,
+      "switchSidesDuration": 5,
+      "notes": null
+    },
+    {
+      "movementId": "mv_perro-boca-abajo-downward-dog",
+      "order": 5,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": false,
+      "switchSidesDuration": 5,
+      "notes": "Pedalear pies suavemente para profundizar el estiramiento"
+    },
+    {
+      "movementId": "mv_couch-stretch",
+      "order": 6,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 15,
+      "notes": null
+    },
+    {
+      "movementId": "mv_pigeon-pose",
+      "order": 7,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 10,
+      "notes": null
+    },
+    {
+      "movementId": "mv_extensiones-toracicas-con-rodillo",
+      "order": 8,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": false,
+      "switchSidesDuration": 5,
+      "notes": null
+    },
+    {
+      "movementId": "mv_liberacion-de-trapecio-con-pelota",
+      "order": 9,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 10,
+      "notes": null
+    },
+    {
+      "movementId": "mv_estiramiento-pectoral-menor-en-marco",
+      "order": 10,
+      "target": { "type": "time", "value": 30, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 10,
+      "notes": null
+    },
+    {
+      "movementId": "mv_torsion-espinal-acostado",
+      "order": 11,
+      "target": { "type": "time", "value": 45, "unit": "s" },
+      "sets": 1,
+      "isBilateral": true,
+      "switchSidesDuration": 10,
+      "notes": null
+    },
+    {
+      "movementId": "mv_child-s-pose-bilateral",
+      "order": 12,
+      "target": { "type": "time", "value": 60, "unit": "s" },
+      "sets": 1,
+      "isBilateral": false,
+      "switchSidesDuration": 5,
+      "notes": "Respiración profunda, para cerrar la rutina"
+    }
+  ]
+}
