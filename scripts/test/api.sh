@@ -225,6 +225,46 @@ EOF
         test_endpoint "PATCH update routine" "PATCH" "/api/routines/$ROUTINE_ID" "200" "{\"name\":\"Updated Routine $(date +%s)\"}" "$API_KEY"
         test_endpoint "DELETE routine" "DELETE" "/api/routines/$ROUTINE_ID" "200" "" "$API_KEY"
     fi
+
+    # Create routine using native JSON array for movementsData (no escaped string!)
+    NATIVE_ROUTINE_NAME="Native JSON Routine $(date +%s)"
+    NATIVE_ROUTINE_DATA=$(cat <<EOF
+{"name":"$NATIVE_ROUTINE_NAME","description":"Native JSON array routine","movementsData":[{"movementId":"$EXISTING_MOVEMENT_ID","target":{"type":"time","value":45},"sets":2}]}
+EOF
+)
+    test_endpoint "POST create routine (native JSON array)" "POST" "/api/routines" "201" "$NATIVE_ROUTINE_DATA" "$API_KEY"
+    response=$(make_request "GET" "/api/routines" "" "")
+    routines_json=$(echo "$response" | sed '$d')
+    NATIVE_ROUTINE_ID=$(echo "$routines_json" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+    echo ""
+    echo "=== Testing Practice Endpoints ==="
+    test_endpoint "GET all practices" "GET" "/api/practices" "200"
+    test_endpoint "GET practice stats" "GET" "/api/practices/stats?days=30" "200"
+
+    if [ -n "$NATIVE_ROUTINE_ID" ]; then
+        test_endpoint "POST log practice" "POST" "/api/practices" "201" "{\"routineId\":\"$NATIVE_ROUTINE_ID\",\"notes\":\"Post-workout stretch\",\"rating\":5}" "$API_KEY"
+        response=$(make_request "GET" "/api/practices?limit=1" "" "")
+        practices_json=$(echo "$response" | sed '$d')
+        PRACTICE_ID=$(echo "$practices_json" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+        if [ -n "$PRACTICE_ID" ]; then
+            test_endpoint "GET single practice" "GET" "/api/practices/$PRACTICE_ID" "200"
+            test_endpoint "PATCH update practice" "PATCH" "/api/practices/$PRACTICE_ID" "200" "{\"notes\":\"Updated practice notes\",\"duration\":300}" "$API_KEY"
+            test_endpoint "DELETE practice" "DELETE" "/api/practices/$PRACTICE_ID" "200" "" "$API_KEY"
+        fi
+
+        test_endpoint "DELETE native routine" "DELETE" "/api/routines/$NATIVE_ROUTINE_ID" "200" "" "$API_KEY"
+    fi
+
+    echo ""
+    echo "=== Testing MCP Endpoint (/api/mcp) ==="
+    test_endpoint "GET /api/mcp info" "GET" "/api/mcp" "200" "" "$API_KEY"
+    test_endpoint "POST /api/mcp initialize" "POST" "/api/mcp" "200" '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test-client","version":"1.0.0"}}}' "$API_KEY"
+    test_endpoint "POST /api/mcp notifications/initialized" "POST" "/api/mcp" "202" '{"jsonrpc":"2.0","method":"notifications/initialized"}' "$API_KEY"
+    test_endpoint "POST /api/mcp tools/list" "POST" "/api/mcp" "200" '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' "$API_KEY"
+    test_endpoint "POST /api/mcp tools/call (list_movements)" "POST" "/api/mcp" "200" '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"list_movements","arguments":{"type":"timed"}}}' "$API_KEY"
+    test_endpoint "POST /api/mcp tools/call (get_practice_stats)" "POST" "/api/mcp" "200" '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_practice_stats","arguments":{"days":30}}}' "$API_KEY"
     
     # Delete test movement last (after routine is deleted to avoid FK constraint)
     if [ -n "$MOVEMENT_ID" ]; then
