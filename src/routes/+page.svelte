@@ -3,6 +3,10 @@
 	import type { PageData } from './$types';
 	import PageHeader from '../components/ui/PageHeader.svelte';
 	import { ListChecks, Plus, Clock, PersonSimple, Barbell, ArrowRight, Play } from 'phosphor-svelte';
+	import { routineCover, movementArt } from '$lib/art';
+
+	// Empty-state illustration: a cast member resting in a calm seated stretch.
+	const restingArt = movementArt({ name: 'Butterfly Stretch' });
 
 	let { data }: { data: PageData } = $props();
 	
@@ -95,6 +99,17 @@
 						class="group relative bg-surface p-5 hover:-translate-y-0.5 transition-all duration-200 border-t-4 border-t-accent-primary"
 						style="box-shadow: var(--shadow-elevated);"
 					>
+						{#if routineCover(routine)}
+							<div class="-mx-5 -mt-5 mb-4 overflow-hidden bg-inset">
+								<img
+									src={routineCover(routine)}
+									alt=""
+									loading="lazy"
+									class="w-full aspect-[2/1] object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+									style="object-position: 50% 70%;"
+								/>
+							</div>
+						{/if}
 						<!-- Blue glow on hover -->
 						<div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style="box-shadow: inset 0 0 30px rgba(91, 141, 184, 0.1);"></div>
 						
@@ -137,6 +152,9 @@
 			
 			{#if data.recentPractices.length === 0}
 				<div class="bg-surface p-8 text-center" style="box-shadow: var(--shadow-elevated);">
+					{#if restingArt}
+						<img src={restingArt.icon} alt="" class="w-32 h-32 mx-auto mb-4 object-contain opacity-90" />
+					{/if}
 					<p class="text-text-secondary">No sessions yet. Pick a routine to start.</p>
 				</div>
 			{:else}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Strtchy · 3D stretch figures spike</title>
+		<style>
+			:root {
+				--bg: #151515;
+				--surface: #1f1f1f;
+				--text: #faf8f5;
+				--muted: #a09b92;
+				--blue: #5b8db8;
+				--coral: #e07a5f;
+			}
+			body.light {
+				--bg: #f5f1ea;
+				--surface: #ffffff;
+				--text: #1a1814;
+				--muted: #7a756b;
+				--blue: #2d5a85;
+				--coral: #c55a40;
+			}
+			* { box-sizing: border-box; }
+			body {
+				margin: 0;
+				min-height: 100vh;
+				background: var(--bg);
+				color: var(--text);
+				font-family: 'Inter', system-ui, sans-serif;
+				display: grid;
+				grid-template-rows: auto 1fr auto;
+			}
+			header, footer { padding: 16px 20px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+			h1 { font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 16px 0 0; }
+			button {
+				border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+				background: var(--surface);
+				color: var(--text);
+				border-radius: 999px;
+				padding: 8px 14px;
+				font: inherit;
+				font-size: 13px;
+				cursor: pointer;
+			}
+			button[aria-pressed='true'] { background: var(--blue); border-color: var(--blue); color: #faf8f5; }
+			#stage { width: 100%; height: 100%; min-height: 60vh; display: block; touch-action: none; }
+			.stripe { height: 4px; background: linear-gradient(90deg, var(--coral) 0 50%, var(--blue) 50% 100%); }
+			#time { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; }
+		</style>
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "./node_modules/three/build/three.module.js",
+					"three/addons/": "./node_modules/three/examples/jsm/"
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<header>
+			<h1>Strtchy · Figures</h1>
+			<span id="movements"></span>
+		</header>
+		<canvas id="stage"></canvas>
+		<footer>
+			<div class="stripe" style="width: 48px"></div>
+			<button id="play" aria-pressed="true">Playing</button>
+			<button id="mirror" aria-pressed="false">Other side</button>
+			<button id="theme">Light theme</button>
+			<span id="time"></span>
+		</footer>
+		<script type="module" src="./src/main.js"></script>
+	</body>
+</html>

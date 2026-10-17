@@ -1,0 +1,6 @@
+node_modules/
+out/frames/
+out/*/frames/
+out/_*.png
+out/skel.png
+out/angles*.png

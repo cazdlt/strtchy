@@ -3,6 +3,8 @@
 	import { Info } from 'phosphor-svelte';
 	import SetRow from './SetRow.svelte';
 	import RestRow from './RestRow.svelte';
+	import MovementArt from '../ui/MovementArt.svelte';
+	import { movementArt } from '$lib/art';
 	import type { PracticeSession, MovementSnapshot } from '$lib/composables/PracticeSession.svelte';
 
 	interface Props {
@@ -36,6 +38,14 @@
 	const session = getContext<PracticeSession>('practice');
 
 	const liveMovement = $derived(session.movements.find((m) => m.id === movement.id) ?? movement);
+
+	// 3D preview: a still in the header, the looping animation while active.
+	// The right side of a bilateral movement plays mirrored.
+	const art = $derived(movementArt(movement));
+	const rightSide = $derived.by(() => {
+		const next = session.findNextIncompleteSet();
+		return isActive && next?.movementId === movement.id && next.side === 'right';
+	});
 
 	let collapsed = $state(false);
 	let currentNotes = $state('');
@@ -181,6 +191,9 @@
 			class="flex-1 min-w-0 text-left hover:bg-surface-elevated transition-colors p-2 -m-2"
 		>
 			<div class="flex items-center gap-2 flex-wrap">
+				{#if art}
+					<MovementArt {movement} class="w-10 h-10 bg-inset shrink-0" />
+				{/if}
 				<h3 class="font-title font-bold text-text-primary">{movement.name}</h3>
 				<span class="inline-flex items-center px-2 py-0.5 text-xs font-body uppercase tracking-wider bg-surface-elevated text-text-secondary border border-accent-track">
 					{movement.type}
@@ -227,6 +240,16 @@
 
 	{#if !collapsed}
 		<div class="border-t border-accent-track p-2 space-y-2">
+			{#if art && isActive}
+				<div class="relative bg-base mx-2 mb-2">
+					<MovementArt {movement} animated mirrored={rightSide} class="w-full max-h-64 aspect-square mx-auto" />
+					{#if movement.isBilateral}
+						<span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-surface/90 text-text-secondary border border-accent-track">
+							{rightSide ? 'Right side' : 'Left side'}
+						</span>
+					{/if}
+				</div>
+			{/if}
 			<!-- Notes Section -->
 			<div class="px-2 pb-2 mb-2 border-b border-accent-track">
 				<div class="mb-2 flex items-center gap-2">

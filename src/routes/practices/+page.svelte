@@ -2,6 +2,9 @@
 	import { Clock, CaretLeft, CaretRight, CheckCircle, Circle } from 'phosphor-svelte';
 	import { formatDuration } from '$lib/utils/formatting';
 	import PageHeader from '../../components/ui/PageHeader.svelte';
+	import { movementArt } from '$lib/art';
+
+	const restingArt = movementArt({ name: 'Butterfly Stretch' });
 
 	let { data } = $props<{ data: import('./$types').PageData }>();
 
@@ -20,6 +23,9 @@
 
 	{#if practices.length === 0}
 		<div class="bg-surface p-8 text-center" style="box-shadow: var(--shadow-elevated);">
+			{#if restingArt}
+				<img src={restingArt.icon} alt="" class="w-32 h-32 mx-auto mb-4 object-contain opacity-90" />
+			{/if}
 			<p class="text-text-secondary">No sessions yet. Pick a routine to start.</p>
 		</div>
 	{:else}

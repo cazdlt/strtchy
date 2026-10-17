@@ -37,3 +37,8 @@ vite.config.ts.timestamp-*
 
 # Databases
 **.db
+
+# 3D raw assets & spike outputs
+thrixel_assets/
+spikes/3d-figures/out/
+spikes/3d-figures/models/

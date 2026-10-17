@@ -7,6 +7,8 @@
 		Timer,
 		X,
 	} from 'phosphor-svelte';
+	import MovementArt from '../ui/MovementArt.svelte';
+	import { movementArt } from '$lib/art';
 
 	interface Movement {
 		id: string;
@@ -78,8 +80,13 @@
 
 			<!-- Content -->
 			<div class="p-6 space-y-6 overflow-y-auto">
+				<!-- Animated 3D preview (built-in movements) -->
+				{#if movementArt(movement)}
+					<div class="bg-base border-2 border-accent-track">
+						<MovementArt {movement} animated class="w-full max-h-72 aspect-square mx-auto" />
+					</div>
 				<!-- Illustration -->
-				{#if movement.illustrationPath}
+				{:else if movement.illustrationPath}
 					<div
 						class="relative bg-surface-elevated border-2 border-accent-track p-6 flex items-center justify-center"
 					>

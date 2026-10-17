@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ArrowRight, PencilSimple, Trash, Clock, ListChecks } from 'phosphor-svelte';
+	import { routineCover } from '$lib/art';
 
 	interface Routine {
 		id: string;
@@ -23,12 +24,25 @@
 		showActions?: boolean;
 		onDelete?: (id: string) => void;
 	} = $props();
+
+	const cover = $derived(routineCover(routine));
 </script>
 
 <div
 	class="group bg-surface border-t-4 border-t-accent-primary hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
 	style="box-shadow: var(--shadow-elevated);"
 >
+	{#if cover}
+		<a href="/routine/{routine.id}" class="block overflow-hidden bg-inset" tabindex="-1" aria-hidden="true">
+			<img
+				src={cover}
+				alt=""
+				loading="lazy"
+				class="w-full aspect-[2/1] object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+				style="object-position: 50% 70%;"
+			/>
+		</a>
+	{/if}
 	<div class="p-5">
 		<div class="flex items-start justify-between gap-3 mb-3">
 			<h3 class="font-display font-bold text-lg flex-1 min-w-0">

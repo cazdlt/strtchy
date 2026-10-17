@@ -11,6 +11,7 @@ import {
   generateRoutineMovementId,
 } from "../utils/id";
 import seedData from "./data.json";
+import artManifest from "../art/manifest.json";
 
 const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || "dev-secret-change-in-production",
@@ -111,8 +112,11 @@ export async function seedDatabase() {
         name: m.name,
         description: m.description,
         type: m.type as "timed" | "reps" | "weighted" | "resistance_band",
+        // 3D render (spikes/3d-figures/export-app.mjs), else a legacy SVG.
         illustrationPath:
-          svgMap[m.illustrationKey as keyof typeof svgMap] || null,
+          (artManifest.movements as Record<string, { icon: string }>)[m.name]
+            ?.icon ??
+          (svgMap[m.illustrationKey as keyof typeof svgMap] || null),
         isCustom: false,
         weightUnit: m.weightUnit as "lbs" | "kg" | "bodyweight" | undefined,
         isBilateral: m.isBilateral ?? false,

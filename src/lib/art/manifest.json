@@ -1,0 +1,280 @@
+{
+	"movements": {
+		"Forward Fold": {
+			"icon": "/assets/movements/3d/forward-fold.webp",
+			"dark": "/assets/movements/3d/forward-fold-dark.mp4",
+			"light": "/assets/movements/3d/forward-fold-light.mp4",
+			"cast": "mei-a",
+			"bilateral": false
+		},
+		"Cat-Cow": {
+			"icon": "/assets/movements/3d/cat-cow.webp",
+			"dark": "/assets/movements/3d/cat-cow-dark.mp4",
+			"light": "/assets/movements/3d/cat-cow-light.mp4",
+			"cast": "c1a",
+			"bilateral": false
+		},
+		"Pigeon Stretch": {
+			"icon": "/assets/movements/3d/pigeon-stretch.webp",
+			"dark": "/assets/movements/3d/pigeon-stretch-dark.mp4",
+			"light": "/assets/movements/3d/pigeon-stretch-light.mp4",
+			"cast": "ruth",
+			"bilateral": true
+		},
+		"Band Pull-Aparts": {
+			"icon": "/assets/movements/3d/band-pull-aparts.webp",
+			"dark": "/assets/movements/3d/band-pull-aparts-dark.mp4",
+			"light": "/assets/movements/3d/band-pull-aparts-light.mp4",
+			"cast": "mei-a",
+			"bilateral": false
+		},
+		"Hollow Hold": {
+			"icon": "/assets/movements/3d/hollow-hold.webp",
+			"dark": "/assets/movements/3d/hollow-hold-dark.mp4",
+			"light": "/assets/movements/3d/hollow-hold-light.mp4",
+			"cast": "mei-a",
+			"bilateral": false
+		},
+		"Quadruped Wrist Rocks": {
+			"icon": "/assets/movements/3d/quadruped-wrist-rocks.webp",
+			"dark": "/assets/movements/3d/quadruped-wrist-rocks-dark.mp4",
+			"light": "/assets/movements/3d/quadruped-wrist-rocks-light.mp4",
+			"cast": "mei-a",
+			"bilateral": false
+		},
+		"Face Pulls": {
+			"icon": "/assets/movements/3d/face-pulls.webp",
+			"dark": "/assets/movements/3d/face-pulls-dark.mp4",
+			"light": "/assets/movements/3d/face-pulls-light.mp4",
+			"cast": "c1a",
+			"bilateral": false
+		},
+		"Supine Hamstring Stretch": {
+			"icon": "/assets/movements/3d/supine-hamstring-stretch.webp",
+			"dark": "/assets/movements/3d/supine-hamstring-stretch-dark.mp4",
+			"light": "/assets/movements/3d/supine-hamstring-stretch-light.mp4",
+			"cast": "c1a",
+			"bilateral": true
+		},
+		"Thread the Needle": {
+			"icon": "/assets/movements/3d/thread-the-needle.webp",
+			"dark": "/assets/movements/3d/thread-the-needle-dark.mp4",
+			"light": "/assets/movements/3d/thread-the-needle-light.mp4",
+			"cast": "c1a",
+			"bilateral": true
+		},
+		"Kneeling Wall Stretch": {
+			"icon": "/assets/movements/3d/kneeling-wall-stretch.webp",
+			"dark": "/assets/movements/3d/kneeling-wall-stretch-dark.mp4",
+			"light": "/assets/movements/3d/kneeling-wall-stretch-light.mp4",
+			"cast": "ruth",
+			"bilateral": true
+		},
+		"Lying Spinal Twist": {
+			"icon": "/assets/movements/3d/lying-spinal-twist.webp",
+			"dark": "/assets/movements/3d/lying-spinal-twist-dark.mp4",
+			"light": "/assets/movements/3d/lying-spinal-twist-light.mp4",
+			"cast": "ruth",
+			"bilateral": true
+		},
+		"Seated Straddle": {
+			"icon": "/assets/movements/3d/seated-straddle.webp",
+			"dark": "/assets/movements/3d/seated-straddle-dark.mp4",
+			"light": "/assets/movements/3d/seated-straddle-light.mp4",
+			"cast": "ruth",
+			"bilateral": false
+		},
+		"Plantar Fascia Release": {
+			"icon": "/assets/movements/3d/plantar-fascia-release.webp",
+			"dark": "/assets/movements/3d/plantar-fascia-release-dark.mp4",
+			"light": "/assets/movements/3d/plantar-fascia-release-light.mp4",
+			"cast": "diego",
+			"bilateral": true
+		},
+		"Trap Release": {
+			"icon": "/assets/movements/3d/trap-release.webp",
+			"dark": "/assets/movements/3d/trap-release-dark.mp4",
+			"light": "/assets/movements/3d/trap-release-light.mp4",
+			"cast": "diego",
+			"bilateral": true
+		},
+		"Knees to Chest": {
+			"icon": "/assets/movements/3d/knees-to-chest.webp",
+			"dark": "/assets/movements/3d/knees-to-chest-dark.mp4",
+			"light": "/assets/movements/3d/knees-to-chest-light.mp4",
+			"cast": "diego",
+			"bilateral": false
+		},
+		"90/90 Hip Switch": {
+			"icon": "/assets/movements/3d/90-90-hip-switch.webp",
+			"dark": "/assets/movements/3d/90-90-hip-switch-dark.mp4",
+			"light": "/assets/movements/3d/90-90-hip-switch-light.mp4",
+			"cast": "diego",
+			"bilateral": false
+		},
+		"Calf Stretch": {
+			"icon": "/assets/movements/3d/calf-stretch.webp",
+			"dark": "/assets/movements/3d/calf-stretch-dark.mp4",
+			"light": "/assets/movements/3d/calf-stretch-light.mp4",
+			"cast": "amara",
+			"bilateral": true
+		},
+		"Wall Pec Stretch": {
+			"icon": "/assets/movements/3d/wall-pec-stretch.webp",
+			"dark": "/assets/movements/3d/wall-pec-stretch-dark.mp4",
+			"light": "/assets/movements/3d/wall-pec-stretch-light.mp4",
+			"cast": "amara",
+			"bilateral": true
+		},
+		"Thoracic Roller Extensions": {
+			"icon": "/assets/movements/3d/thoracic-roller-extensions.webp",
+			"dark": "/assets/movements/3d/thoracic-roller-extensions-dark.mp4",
+			"light": "/assets/movements/3d/thoracic-roller-extensions-light.mp4",
+			"cast": "amara",
+			"bilateral": false
+		},
+		"Butterfly Stretch": {
+			"icon": "/assets/movements/3d/butterfly-stretch.webp",
+			"dark": "/assets/movements/3d/butterfly-stretch-dark.mp4",
+			"light": "/assets/movements/3d/butterfly-stretch-light.mp4",
+			"cast": "amara",
+			"bilateral": false
+		},
+		"Arch Raises": {
+			"icon": "/assets/movements/3d/arch-raises.webp",
+			"dark": "/assets/movements/3d/arch-raises-dark.mp4",
+			"light": "/assets/movements/3d/arch-raises-light.mp4",
+			"cast": "karim",
+			"bilateral": false
+		},
+		"Scapular Wall Slides": {
+			"icon": "/assets/movements/3d/scapular-wall-slides.webp",
+			"dark": "/assets/movements/3d/scapular-wall-slides-dark.mp4",
+			"light": "/assets/movements/3d/scapular-wall-slides-light.mp4",
+			"cast": "karim",
+			"bilateral": false
+		},
+		"Cobra Extension": {
+			"icon": "/assets/movements/3d/cobra-extension.webp",
+			"dark": "/assets/movements/3d/cobra-extension-dark.mp4",
+			"light": "/assets/movements/3d/cobra-extension-light.mp4",
+			"cast": "karim",
+			"bilateral": false
+		},
+		"Side Child's Pose": {
+			"icon": "/assets/movements/3d/side-child-s-pose.webp",
+			"dark": "/assets/movements/3d/side-child-s-pose-dark.mp4",
+			"light": "/assets/movements/3d/side-child-s-pose-light.mp4",
+			"cast": "karim",
+			"bilateral": true
+		},
+		"Single-Leg Balance": {
+			"icon": "/assets/movements/3d/single-leg-balance.webp",
+			"dark": "/assets/movements/3d/single-leg-balance-dark.mp4",
+			"light": "/assets/movements/3d/single-leg-balance-light.mp4",
+			"cast": "lucia",
+			"bilateral": true
+		},
+		"Y-Raises": {
+			"icon": "/assets/movements/3d/y-raises.webp",
+			"dark": "/assets/movements/3d/y-raises-dark.mp4",
+			"light": "/assets/movements/3d/y-raises-light.mp4",
+			"cast": "lucia",
+			"bilateral": false
+		},
+		"Quad Release": {
+			"icon": "/assets/movements/3d/quad-release.webp",
+			"dark": "/assets/movements/3d/quad-release-dark.mp4",
+			"light": "/assets/movements/3d/quad-release-light.mp4",
+			"cast": "lucia",
+			"bilateral": true
+		},
+		"Lunge with Rotation": {
+			"icon": "/assets/movements/3d/lunge-with-rotation.webp",
+			"dark": "/assets/movements/3d/lunge-with-rotation-dark.mp4",
+			"light": "/assets/movements/3d/lunge-with-rotation-light.mp4",
+			"cast": "lucia",
+			"bilateral": true
+		},
+		"Monster Walks": {
+			"icon": "/assets/movements/3d/monster-walks.webp",
+			"dark": "/assets/movements/3d/monster-walks-dark.mp4",
+			"light": "/assets/movements/3d/monster-walks-light.mp4",
+			"cast": "sione",
+			"bilateral": true
+		},
+		"Ankle Inversion": {
+			"icon": "/assets/movements/3d/ankle-inversion.webp",
+			"dark": "/assets/movements/3d/ankle-inversion-dark.mp4",
+			"light": "/assets/movements/3d/ankle-inversion-light.mp4",
+			"cast": "sione",
+			"bilateral": true
+		},
+		"Front Plank": {
+			"icon": "/assets/movements/3d/front-plank.webp",
+			"dark": "/assets/movements/3d/front-plank-dark.mp4",
+			"light": "/assets/movements/3d/front-plank-light.mp4",
+			"cast": "sione",
+			"bilateral": false
+		},
+		"Deep Squat Hold": {
+			"icon": "/assets/movements/3d/deep-squat-hold.webp",
+			"dark": "/assets/movements/3d/deep-squat-hold-dark.mp4",
+			"light": "/assets/movements/3d/deep-squat-hold-light.mp4",
+			"cast": "priya",
+			"bilateral": false
+		},
+		"Single-Leg Glute Bridge": {
+			"icon": "/assets/movements/3d/single-leg-glute-bridge.webp",
+			"dark": "/assets/movements/3d/single-leg-glute-bridge-dark.mp4",
+			"light": "/assets/movements/3d/single-leg-glute-bridge-light.mp4",
+			"cast": "priya",
+			"bilateral": true
+		},
+		"Side Plank": {
+			"icon": "/assets/movements/3d/side-plank.webp",
+			"dark": "/assets/movements/3d/side-plank-dark.mp4",
+			"light": "/assets/movements/3d/side-plank-light.mp4",
+			"cast": "priya",
+			"bilateral": true
+		},
+		"Passive Hang": {
+			"icon": "/assets/movements/3d/passive-hang.webp",
+			"dark": "/assets/movements/3d/passive-hang-dark.mp4",
+			"light": "/assets/movements/3d/passive-hang-light.mp4",
+			"cast": "kenji",
+			"bilateral": false
+		},
+		"Dead Bug": {
+			"icon": "/assets/movements/3d/dead-bug.webp",
+			"dark": "/assets/movements/3d/dead-bug-dark.mp4",
+			"light": "/assets/movements/3d/dead-bug-light.mp4",
+			"cast": "kenji",
+			"bilateral": false
+		},
+		"Downward Dog": {
+			"icon": "/assets/movements/3d/downward-dog.webp",
+			"dark": "/assets/movements/3d/downward-dog-dark.mp4",
+			"light": "/assets/movements/3d/downward-dog-light.mp4",
+			"cast": "kenji",
+			"bilateral": false
+		}
+	},
+	"routines": {
+		"15-Minute Full Body": "/assets/routines/15-minute-full-body.jpg",
+		"Cimientos y Cadena Posterior": "/assets/routines/cimientos-y-cadena-posterior.jpg",
+		"Desbloqueo de Cadera": "/assets/routines/desbloqueo-de-cadera.jpg",
+		"Hombros Blindados": "/assets/routines/hombros-blindados.jpg",
+		"Piernas Frescas": "/assets/routines/piernas-frescas.jpg",
+		"Estiramiento Nocturno": "/assets/routines/estiramiento-nocturno.jpg"
+	},
+	"plates": [
+		"/assets/routines/plate-yoga.jpg",
+		"/assets/routines/plate-home.jpg",
+		"/assets/routines/plate-gym.jpg",
+		"/assets/routines/plate-park.jpg",
+		"/assets/routines/plate-wild.jpg",
+		"/assets/routines/plate-country.jpg",
+		"/assets/routines/plate-beach.jpg"
+	]
+}

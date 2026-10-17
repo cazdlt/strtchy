@@ -20,7 +20,17 @@
 	<title>Sign In — Strtchy</title>
 </svelte:head>
 
-<div class="min-h-screen bg-base">
+<div class="min-h-screen bg-base relative overflow-hidden">
+	<!-- Hero: a cast member stretching in a calm setting, faded into the page. -->
+	<img
+		src="/assets/hero/login.jpg"
+		alt=""
+		class="absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none select-none"
+		style="object-position: 75% 80%;"
+	/>
+	<div class="absolute inset-0 bg-linear-to-r from-base via-base/80 to-base/10 pointer-events-none"></div>
+	<div class="absolute inset-x-0 top-0 h-32 bg-linear-to-b from-base to-transparent pointer-events-none"></div>
+	<div class="relative">
 	<PageHeader user={null} showNav={false} />
 
 	<main class="flex-1 flex items-center justify-center px-6 py-12">
@@ -155,4 +165,5 @@
 			</div>
 		</div>
 	</main>
+	</div>
 </div>

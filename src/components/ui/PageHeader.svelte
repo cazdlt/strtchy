@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { theme } from '$lib/theme.svelte';
+	import favicon from '$lib/assets/favicon.svg';
 	import { ArrowLeft, Sun, Moon, List, User } from 'phosphor-svelte';
 
 	let {
@@ -35,8 +36,9 @@
 						<span class="hidden sm:inline font-display uppercase tracking-wider text-sm">{backText}</span>
 					</a>
 				{:else}
-					<a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-150">
-						<span class="font-display text-2xl tracking-wider text-text-primary">STRTCHY</span>
+					<a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity duration-150">
+						<img src={favicon} alt="" class="w-8 h-8 shrink-0 select-none" />
+						<span class="font-display text-2xl tracking-wider text-text-primary leading-none">STRTCHY</span>
 					</a>
 				{/if}
 

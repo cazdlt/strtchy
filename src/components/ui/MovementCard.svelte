@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { PencilSimple, Trash, PersonSimple, ArrowRight } from 'phosphor-svelte';
+	import { PencilSimple, Trash, ArrowRight } from 'phosphor-svelte';
+	import MovementArt from './MovementArt.svelte';
 
 	interface Movement {
 		id: string;
@@ -54,20 +55,10 @@
 
 		<!-- Metadata row -->
 		<div class="flex items-center gap-3 mb-3">
-			<!-- Small icon -->
-			{#if movement.illustrationPath}
-				<div class="w-8 h-8 flex items-center justify-center bg-inet shrink-0">
-					<img
-						src={movement.illustrationPath}
-						alt=""
-						class="w-6 h-6 object-contain opacity-80"
-					/>
-				</div>
-			{:else}
-				<div class="w-8 h-8 flex items-center justify-center bg-inset text-text-muted shrink-0">
-					<PersonSimple weight="duotone" size={20} />
-				</div>
-			{/if}
+			<!-- Movement art (3D still for built-ins, uploaded illustration otherwise) -->
+			<div class="w-16 h-16 bg-inset shrink-0 overflow-hidden">
+				<MovementArt {movement} class="w-full h-full" />
+			</div>
 
 			<span class="px-2 py-0.5 bg-inset text-xs text-text-muted font-mono uppercase tracking-wider">
 				{movement.type}

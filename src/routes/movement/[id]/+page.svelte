@@ -3,8 +3,13 @@
 	import PageHeader from '../../../components/ui/PageHeader.svelte';
 	import { goto } from '$app/navigation';
 	import { PersonSimple, ArrowsLeftRight, Timer, Barbell, ArrowLeft, PencilSimple, Stack } from 'phosphor-svelte';
+	import MovementArt from '../../../components/ui/MovementArt.svelte';
+	import { movementArt } from '$lib/art';
 
 	let { data }: { data: PageData } = $props();
+
+	const art = $derived(movementArt(data.movement));
+	let otherSide = $state(false);
 
 	function handleBack() {
 		if (window.history.length > 1) {
@@ -62,8 +67,24 @@
 		<div class="grid lg:grid-cols-2 gap-8">
 			<!-- Left Column: Visual & Description -->
 			<div class="space-y-6">
+				<!-- Animated 3D preview (built-in movements) -->
+				{#if art}
+					<div class="relative bg-base border-t-4 border-t-accent-primary" style="box-shadow: var(--shadow-elevated);">
+						<MovementArt movement={data.movement} animated mirrored={otherSide} class="w-full aspect-square" />
+						{#if data.movement.isBilateral}
+							<button
+								type="button"
+								onclick={() => (otherSide = !otherSide)}
+								class="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 bg-surface/90 border border-accent-track text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-accent-primary hover:border-accent-primary transition-colors"
+								aria-pressed={otherSide}
+							>
+								<ArrowsLeftRight weight="bold" size={14} />
+								{otherSide ? 'Right side' : 'Left side'}
+							</button>
+						{/if}
+					</div>
 				<!-- Illustration -->
-				{#if data.movement.illustrationPath}
+				{:else if data.movement.illustrationPath}
 					<div class="relative bg-surface border-t-4 border-t-accent-primary p-8 flex items-center justify-center" style="box-shadow: var(--shadow-elevated);">
 						<!-- Corner accents -->
 						<div class="absolute top-0 left-0 w-3 h-3 bg-accent-primary"></div>
