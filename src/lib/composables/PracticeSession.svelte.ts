@@ -590,6 +590,7 @@ export class PracticeSession {
       routineId: this.routineId,
       hasStarted: this.hasStarted,
       isCompleted: this.isCompleted,
+      hasRoutineChanges: this.hasRoutineChanges,
       movements: this.movements,
       completedSets: Array.from(this.completedSets.entries()),
       skippedSets: Array.from(this.skippedSets.entries()),
@@ -610,6 +611,7 @@ export class PracticeSession {
     this.routineId = d.routineId ?? '';
     this.hasStarted = d.hasStarted ?? false;
     this.isCompleted = d.isCompleted ?? false;
+    this.hasRoutineChanges = d.hasRoutineChanges ?? false;
     this.movements = d.movements ?? [];
     this.restBetweenSets = d.restBetweenSets ?? 15;
     this.restBetweenMovements = d.restBetweenMovements ?? 30;

@@ -49,11 +49,15 @@
 	const session = new PracticeSession();
 	setContext('practice', session);
 
+	const initialMovements = initialData.transientMovements?.length
+		? initialData.transientMovements
+		: buildSnapshots();
+
 	// Load routine data
 	session.loadFromRoutine(
 		initialData.practice.id,
 		initialData.practice.routineId,
-		buildSnapshots(),
+		initialMovements,
 		{
 			restBetweenSets: initialData.practice.routine.restBetweenSets,
 			restBetweenMovements: initialData.practice.routine.restBetweenMovements,
@@ -65,6 +69,10 @@
 			keepAwake: initialData.practice.routine.keepAwake ?? initialData.userPrefs?.keepAwake ?? true,
 		}
 	);
+
+	if (initialData.transientMovements?.length) {
+		session.hasRoutineChanges = true;
+	}
 
 	// Audio controller
 	const audio = createAudioController(session.settings.audioEnabled, session.settings.voiceEnabled);

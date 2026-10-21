@@ -80,9 +80,21 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     }
   }
 
+  // Transient movements if modified before starting
+  let transientMovements = null;
+  if (practice.notes && !isReadOnly) {
+    try {
+      const parsed = JSON.parse(practice.notes);
+      if (Array.isArray(parsed?.transientMovements)) {
+        transientMovements = parsed.transientMovements;
+      }
+    } catch {}
+  }
+
   return {
     practice,
     allRoutineMovements,
+    transientMovements,
     existingPracticeData,
     userPrefs,
     isReadOnly,
