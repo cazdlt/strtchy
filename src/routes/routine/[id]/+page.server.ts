@@ -4,6 +4,7 @@ import {
   routineMovements,
   practiceLogs,
   practiceData,
+  movements,
 } from "$lib/db/schema";
 import { eq, desc, and, isNull } from "drizzle-orm";
 import type { PageData, ActionsFailure, RequestEvent } from "./$types";
@@ -112,26 +113,61 @@ export async function load({
     }
   }
 
+  // All movements for add modal
+  const allMovements = await db.select().from(movements).orderBy(movements.name);
+
+  // Group by type for add modal
+  const groupedMovements: Record<string, typeof allMovements> = {
+    Timed: [],
+    Repetitions: [],
+    Weighted: [],
+    "Resistance Band": [],
+  };
+  for (const movement of allMovements) {
+    if (movement.type === "timed") groupedMovements.Timed.push(movement);
+    else if (movement.type === "reps") groupedMovements.Repetitions.push(movement);
+    else if (movement.type === "weighted") groupedMovements.Weighted.push(movement);
+    else if (movement.type === "resistance_band") groupedMovements["Resistance Band"].push(movement);
+  }
+
   return {
     routine,
     user: locals.user,
     estimatedDuration,
     equipment: Array.from(allEquipment).sort(),
     previousStatsMap,
+    allMovements,
+    groupedMovements,
   };
 }
 
 export const actions = {
   startPractice: async ({ request, params, locals }: RequestEvent) => {
+    const formData = await request.formData();
+    const customMovementsStr = formData.get("customMovements") as string | null;
+
     // Create a new practice log
     const practiceLogId = nanoid();
     const now = new Date();
+
+    let notes: string | null = null;
+    if (customMovementsStr) {
+      try {
+        const parsed = JSON.parse(customMovementsStr);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          notes = JSON.stringify({ transientMovements: parsed });
+        }
+      } catch (e) {
+        console.error("Failed to parse customMovements in startPractice:", e);
+      }
+    }
 
     await db.insert(practiceLogs).values({
       id: practiceLogId,
       routineId: params.id,
       userId: locals.user?.id,
       startedAt: now,
+      notes,
     });
 
     redirect(302, `/practice/${practiceLogId}`);

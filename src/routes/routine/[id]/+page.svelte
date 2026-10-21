@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { formatDuration } from '$lib/utils/formatting';
+	import { formatDuration, calculateRoutineDuration } from '$lib/utils/formatting';
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import PageHeader from '../../../components/ui/PageHeader.svelte';
 	import { goto } from '$app/navigation';
+	import { nanoid } from 'nanoid';
 	import {
 		ArrowLeft,
 		PencilSimple,
@@ -18,14 +19,164 @@
 		Sun,
 		Lightning,
 		CaretRight,
+		CaretUp,
+		CaretDown,
 		Trash,
 		Info,
+		SlidersHorizontal,
+		Plus,
+		Minus,
+		ArrowCounterClockwise,
+		Check,
 	} from 'phosphor-svelte';
 	import MovementDetailModal from '../../../components/practice/MovementDetailModal.svelte';
+	import AddMovementModal from '../../../components/practice/AddMovementModal.svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	let selectedMovement = $state<any>(null);
+	let isCustomizing = $state(false);
+	let showAddModal = $state(false);
+
+	interface CustomMovementItem {
+		id: string;
+		movementId: string;
+		order: number;
+		sets: number;
+		target: { type: 'time' | 'reps'; value: number; unit?: string };
+		isBilateral: boolean;
+		switchSidesDuration: number;
+		weight: number | null;
+		weightUnit: string | null;
+		notes: string | null;
+		movement: any;
+	}
+
+	function cloneInitialMovements(): CustomMovementItem[] {
+		return data.routine.movements.map((rm: any, index: number) => ({
+			id: rm.id,
+			movementId: rm.movementId,
+			order: index,
+			sets: rm.sets,
+			target: { ...rm.target },
+			isBilateral: rm.isBilateral,
+			switchSidesDuration: rm.switchSidesDuration ?? 5,
+			weight: rm.weight ?? null,
+			weightUnit: rm.weightUnit ?? 'kg',
+			notes: rm.notes ?? null,
+			movement: rm.movement,
+		}));
+	}
+
+	let currentMovements = $state<CustomMovementItem[]>(cloneInitialMovements());
+
+	// Derived flag if user has made structural or target changes
+	const hasChanges = $derived.by(() => {
+		if (currentMovements.length !== data.routine.movements.length) return true;
+		for (let i = 0; i < currentMovements.length; i++) {
+			const cur = currentMovements[i];
+			const orig = data.routine.movements[i];
+			if (cur.movementId !== orig.movementId) return true;
+			if (cur.sets !== orig.sets) return true;
+			if (cur.target?.value !== orig.target?.value) return true;
+			if (cur.target?.type !== orig.target?.type) return true;
+			if (cur.weight !== orig.weight) return true;
+		}
+		return false;
+	});
+
+	function resetToOriginal() {
+		currentMovements = cloneInitialMovements();
+	}
+
+	function moveUp(index: number) {
+		if (index <= 0) return;
+		const next = [...currentMovements];
+		[next[index - 1], next[index]] = [next[index], next[index - 1]];
+		currentMovements = next.map((m, i) => ({ ...m, order: i }));
+	}
+
+	function moveDown(index: number) {
+		if (index >= currentMovements.length - 1) return;
+		const next = [...currentMovements];
+		[next[index + 1], next[index]] = [next[index], next[index + 1]];
+		currentMovements = next.map((m, i) => ({ ...m, order: i }));
+	}
+
+	function adjustSets(index: number, delta: number) {
+		const next = [...currentMovements];
+		const updated = Math.max(1, next[index].sets + delta);
+		next[index] = { ...next[index], sets: updated };
+		currentMovements = next;
+	}
+
+	function adjustTarget(index: number, delta: number) {
+		const next = [...currentMovements];
+		const item = next[index];
+		const step = item.target.type === 'time' ? 5 : 1;
+		const currentVal = item.target.value || 0;
+		const updated = Math.max(step, currentVal + delta * step);
+		next[index] = {
+			...item,
+			target: {
+				...item.target,
+				value: updated,
+			},
+		};
+		currentMovements = next;
+	}
+
+	function removeMovement(index: number) {
+		if (currentMovements.length <= 1) {
+			alert('Routine must have at least one exercise.');
+			return;
+		}
+		currentMovements = currentMovements
+			.filter((_, i) => i !== index)
+			.map((m, i) => ({ ...m, order: i }));
+	}
+
+	function handleAddMovement(movementId: string) {
+		const movement = data.allMovements?.find((m: any) => m.id === movementId);
+		if (!movement) return;
+		const newRm: CustomMovementItem = {
+			id: nanoid(),
+			movementId: movement.id,
+			order: currentMovements.length,
+			sets: 3,
+			target: {
+				type: movement.type === 'timed' ? 'time' : 'reps',
+				value: movement.type === 'timed' ? 30 : 10,
+				unit: movement.type === 'timed' ? 's' : 'reps',
+			},
+			isBilateral: movement.isBilateral ?? false,
+			switchSidesDuration: 5,
+			weight: null,
+			weightUnit: 'kg',
+			notes: null,
+			movement,
+		};
+		currentMovements = [...currentMovements, newRm];
+		showAddModal = false;
+	}
+
+	function getSerializedSnapshots() {
+		return currentMovements.map((rm, idx) => ({
+			id: rm.id,
+			movementId: rm.movementId,
+			name: rm.movement.name,
+			type: rm.movement.type,
+			target: rm.target,
+			sets: rm.sets,
+			isBilateral: rm.isBilateral,
+			switchSidesDuration: rm.switchSidesDuration || 5,
+			weight: rm.weight,
+			weightUnit: rm.weightUnit,
+			timePerRep: rm.movement.timePerRep,
+			notes: rm.notes,
+			order: idx,
+		}));
+	}
 
 	function showMovementDetail(movement: any) {
 		selectedMovement = movement;
@@ -36,12 +187,26 @@
 	}
 
 	const totalSets = $derived(
-		data.routine.movements.reduce((sum: number, rm: any) => {
+		currentMovements.reduce((sum: number, rm: any) => {
 			return sum + (rm.isBilateral ? rm.sets * 2 : rm.sets);
 		}, 0)
 	);
 
-	const totalMovements = $derived(data.routine.movements.length);
+	const totalMovements = $derived(currentMovements.length);
+
+	const dynamicDuration = $derived(
+		calculateRoutineDuration(
+			currentMovements.map((rm) => ({
+				target: rm.target,
+				sets: rm.sets,
+				isBilateral: rm.isBilateral,
+				switchSidesDuration: rm.switchSidesDuration,
+				timePerRep: rm.movement.timePerRep,
+			})),
+			data.routine.restBetweenMovements,
+			data.routine.restBetweenSets
+		)
+	);
 
 	function handleBack() {
 		if (window.history.length > 1) {
@@ -157,13 +322,13 @@
 				</div>
 				<div class="flex items-baseline gap-1">
 					<span class="font-display text-3xl text-accent-primary">
-						{#if data.estimatedDuration}
-							{data.estimatedDuration >= 60 ? Math.round(data.estimatedDuration / 60) : data.estimatedDuration}
+						{#if dynamicDuration}
+							{dynamicDuration >= 60 ? Math.round(dynamicDuration / 60) : dynamicDuration}
 						{:else}
 							--
 						{/if}
 					</span>
-					<span class="font-mono text-sm text-text-muted">{data.estimatedDuration && data.estimatedDuration >= 60 ? 'min' : 's'}</span>
+					<span class="font-mono text-sm text-text-muted">{dynamicDuration && dynamicDuration >= 60 ? 'min' : 's'}</span>
 				</div>
 			</div>
 
@@ -233,23 +398,90 @@
 
 		<!-- Timeline Section -->
 		<section class="mb-8">
-			<div class="flex items-baseline gap-4 mb-6">
-				<h2 class="font-display text-3xl text-text-primary tracking-wider">TIMELINE</h2>
-				<div class="flex-1 h-px bg-accent-track"></div>
-				<span class="font-mono text-sm text-text-muted">{totalMovements} movements</span>
+			<div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 mb-6">
+				<div class="flex items-baseline gap-4">
+					<h2 class="font-display text-3xl text-text-primary tracking-wider">TIMELINE</h2>
+					<span class="font-mono text-sm text-text-muted">{totalMovements} movements</span>
+				</div>
+				<div class="flex items-center gap-2">
+					{#if !isCustomizing}
+						<button
+							onclick={() => (isCustomizing = true)}
+							class="inline-flex items-center gap-2 px-3 py-1.5 bg-surface hover:bg-surface-elevated text-text-primary transition-colors border border-accent-track hover:border-accent-primary font-body text-xs uppercase tracking-wider"
+						>
+							<SlidersHorizontal weight="bold" size={14} class="text-accent-primary" />
+							<span>Customize for Today</span>
+						</button>
+					{:else}
+						{#if hasChanges}
+							<button
+								onclick={resetToOriginal}
+								class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-elevated text-text-muted hover:text-text-primary transition-colors border border-accent-track font-body text-xs uppercase tracking-wider"
+								title="Reset routine back to default"
+							>
+								<ArrowCounterClockwise weight="bold" size={14} />
+								<span>Reset</span>
+							</button>
+						{/if}
+						<button
+							onclick={() => (isCustomizing = false)}
+							class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-primary text-white hover:bg-accent-primary-light transition-colors font-body text-xs uppercase tracking-wider"
+						>
+							<Check weight="bold" size={14} />
+							<span>Done</span>
+						</button>
+					{/if}
+				</div>
 			</div>
 
+			{#if hasChanges}
+				<div class="mb-6 p-4 bg-accent-secondary/10 border-l-4 border-accent-secondary flex items-center justify-between gap-3 text-xs font-mono">
+					<div class="flex items-center gap-2 text-accent-secondary">
+						<SlidersHorizontal weight="bold" size={14} />
+						<span>Customized for this session only (you can save or discard changes when finished).</span>
+					</div>
+					{#if !isCustomizing}
+						<button onclick={resetToOriginal} class="text-text-muted hover:text-text-primary underline uppercase tracking-wider">
+							Reset
+						</button>
+					{/if}
+				</div>
+			{/if}
+
 			<div class="space-y-4">
-				{#each data.routine.movements as rm, index (rm.id)}
+				{#each currentMovements as rm, index (rm.id)}
+					{@const TypeIcon = getTypeIcon(rm.movement.type)}
 					<div class="group relative bg-surface border-t-4 border-t-accent-primary hover:-translate-y-0.5 transition-all duration-200" style="box-shadow: var(--shadow-elevated);">
 						<!-- Blue glow on hover -->
 						<div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style="box-shadow: inset 0 0 30px rgba(91, 141, 184, 0.1);"></div>
 						
 						<div class="p-5">
 							<div class="flex items-start gap-4">
-								<!-- Index Badge -->
-								<div class="w-12 h-12 bg-surface-elevated flex items-center justify-center shrink-0">
-									<span class="font-mono text-lg text-accent-primary">{String(index + 1).padStart(2, '0')}</span>
+								<!-- Index Badge & Reordering -->
+								<div class="flex flex-col items-center gap-1 shrink-0">
+									{#if isCustomizing}
+										<button
+											onclick={() => moveUp(index)}
+											disabled={index === 0}
+											class="w-6 h-5 flex items-center justify-center bg-surface-elevated hover:bg-surface text-text-muted hover:text-accent-primary disabled:opacity-20 disabled:pointer-events-none transition-colors border border-accent-track"
+											aria-label="Move up"
+										>
+											<CaretUp weight="bold" size={12} />
+										</button>
+									{/if}
+									<div class="w-12 h-12 bg-surface-elevated flex items-center justify-center shrink-0">
+										<span class="font-mono text-lg text-accent-primary">{String(index + 1).padStart(2, '0')}</span>
+									</div>
+									{#if isCustomizing}
+										<button
+											onclick={() => moveDown(index)}
+											disabled={index === currentMovements.length - 1}
+											class="w-6 h-5 flex items-center justify-center bg-surface-elevated hover:bg-surface text-text-muted hover:text-accent-primary disabled:opacity-20 disabled:pointer-events-none transition-colors border border-accent-track"
+											aria-label="Move down"
+										>
+											<CaretDown weight="bold" size={12} />
+										</button>
+									{/if}
 								</div>
 
 								<!-- Content -->
@@ -266,45 +498,91 @@
 													aria-label="Show movement details"
 													title="Show movement details"
 												>
-														<Info weight="duotone" size={16} />
-													</button>
+													<Info weight="duotone" size={16} />
+												</button>
 											</div>
-									<div class="flex items-center gap-2 text-text-muted text-sm">
-										{#if rm.movement.type === 'timed'}
-											<Timer weight="duotone" size={14} class="text-accent-primary" />
-										{:else if rm.movement.type === 'reps'}
-											<Stack weight="duotone" size={14} class="text-accent-primary" />
-										{:else if rm.movement.type === 'weighted'}
-											<Barbell weight="duotone" size={14} class="text-accent-primary" />
-										{:else}
-											<PersonSimple weight="duotone" size={14} class="text-accent-primary" />
-										{/if}
-										<span class="font-body capitalize">{getTypeLabel(rm.movement.type)}</span>
-									</div>
+											<div class="flex items-center gap-2 text-text-muted text-sm">
+												<TypeIcon weight="duotone" size={14} class="text-accent-primary" />
+												<span class="font-body capitalize">{getTypeLabel(rm.movement.type)}</span>
+											</div>
 										</div>
 
-										<!-- Tags -->
-										<div class="flex items-center gap-1.5 shrink-0">
+										<!-- Tags & Actions -->
+										<div class="flex items-center gap-2 shrink-0">
 											{#if rm.isBilateral}
 												<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-secondary/10 text-accent-secondary text-xs font-mono">
 													<ArrowsLeftRight weight="bold" size={10} />
 													L/R
 												</span>
 											{/if}
-											<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-elevated text-text-muted text-xs font-mono">
-												<Stack weight="bold" size={10} />
-												{rm.sets} sets
-											</span>
+
+											{#if isCustomizing}
+												<!-- Sets Stepper -->
+												<div class="flex items-center bg-surface-elevated border border-accent-track">
+													<button
+														onclick={() => adjustSets(index, -1)}
+														class="w-7 h-7 flex items-center justify-center text-text-muted hover:text-accent-primary transition-colors"
+														aria-label="Decrease sets"
+													>
+														<Minus weight="bold" size={11} />
+													</button>
+													<span class="px-2 text-xs font-mono text-text-primary min-w-[3.5rem] text-center">
+														{rm.sets} {rm.sets === 1 ? 'set' : 'sets'}
+													</span>
+													<button
+														onclick={() => adjustSets(index, 1)}
+														class="w-7 h-7 flex items-center justify-center text-text-muted hover:text-accent-primary transition-colors"
+														aria-label="Increase sets"
+													>
+														<Plus weight="bold" size={11} />
+													</button>
+												</div>
+
+												<!-- Remove Movement Button -->
+												<button
+													onclick={() => removeMovement(index)}
+													class="p-1.5 text-text-muted hover:text-accent-warm hover:bg-surface-elevated transition-colors"
+													aria-label="Remove exercise from session"
+													title="Remove exercise from session"
+												>
+													<Trash weight="bold" size={16} />
+												</button>
+											{:else}
+												<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-elevated text-text-muted text-xs font-mono">
+													<Stack weight="bold" size={10} />
+													{rm.sets} sets
+												</span>
+											{/if}
 										</div>
 									</div>
 
 									<!-- Target Info -->
 									{#if formatTarget(rm)}
 										<div class="flex items-center gap-4 mb-3">
-											<div class="flex items-baseline gap-1">
-												<span class="font-display text-2xl text-accent-primary">{rm.target.value}</span>
-												<span class="font-mono text-xs text-text-muted">{rm.target.unit || ''}</span>
-												<span class="font-body text-xs text-text-muted uppercase tracking-wider ml-1">target</span>
+											<div class="flex items-center gap-2">
+												<div class="flex items-baseline gap-1">
+													<span class="font-display text-2xl text-accent-primary">{rm.target.value}</span>
+													<span class="font-mono text-xs text-text-muted">{rm.target.unit || ''}</span>
+													<span class="font-body text-xs text-text-muted uppercase tracking-wider ml-1">target</span>
+												</div>
+												{#if isCustomizing}
+													<div class="flex items-center bg-surface-elevated border border-accent-track ml-2">
+														<button
+															onclick={() => adjustTarget(index, -1)}
+															class="w-6 h-6 flex items-center justify-center text-text-muted hover:text-accent-primary transition-colors"
+															aria-label="Decrease target"
+														>
+															<Minus weight="bold" size={10} />
+														</button>
+														<button
+															onclick={() => adjustTarget(index, 1)}
+															class="w-6 h-6 flex items-center justify-center text-text-muted hover:text-accent-primary transition-colors"
+															aria-label="Increase target"
+														>
+															<Plus weight="bold" size={10} />
+														</button>
+													</div>
+												{/if}
 											</div>
 											{#if formatWeight(rm)}
 												<div class="w-px h-6 bg-accent-track"></div>
@@ -335,6 +613,16 @@
 						</div>
 					</div>
 				{/each}
+
+				{#if isCustomizing}
+					<button
+						onclick={() => (showAddModal = true)}
+						class="w-full py-4 border-2 border-dashed border-accent-track hover:border-accent-primary hover:bg-surface transition-all flex items-center justify-center gap-2 text-text-secondary hover:text-accent-primary font-title uppercase tracking-wider text-sm mt-4"
+					>
+						<Plus weight="bold" size={16} />
+						<span>Add Exercise to Today's Session</span>
+					</button>
+				{/if}
 			</div>
 		</section>
 
@@ -366,13 +654,20 @@
 	<div class="fixed bottom-0 left-0 right-0 p-6 bg-base/95 border-t-2 border-accent-track backdrop-blur-sm z-30">
 		<div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
 			<form method="POST" action="?/startPractice" use:enhance>
+				{#if hasChanges}
+					<input type="hidden" name="customMovements" value={JSON.stringify(getSerializedSnapshots())} />
+				{/if}
 				<button
 					type="submit"
 					class="group w-full bg-accent-primary text-white hover:bg-accent-primary-light transition-all duration-150 h-16 font-display text-xl tracking-widest flex items-center justify-center gap-3"
 					style="box-shadow: var(--shadow-floating);"
 				>
 					<Play weight="fill" size={24} class="group-hover:scale-110 transition-transform" />
-					START PRACTICE
+					{#if hasChanges}
+						START CUSTOM PRACTICE
+					{:else}
+						START PRACTICE
+					{/if}
 					<CaretRight weight="bold" size={20} />
 				</button>
 			</form>
@@ -392,6 +687,15 @@
 		movement={selectedMovement}
 		isOpen={selectedMovement !== null}
 		onClose={closeMovementDetail}
+	/>
+
+	<AddMovementModal
+		isOpen={showAddModal}
+		isLoading={false}
+		isPaused={false}
+		groupedMovements={(data.groupedMovements as any) || { Timed: [], Repetitions: [], Weighted: [], "Resistance Band": [] }}
+		onAdd={(movementId) => handleAddMovement(movementId)}
+		onClose={() => (showAddModal = false)}
 	/>
 </div>
 
