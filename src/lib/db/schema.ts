@@ -17,6 +17,7 @@ export const user = sqliteTable("user", {
   preferences: text("preferences", { mode: "json" }).$type<{
     autoAdvance?: boolean;
     audioEnabled?: boolean;
+    voiceEnabled?: boolean;
     keepAwake?: boolean;
   }>(),
   // API Key fields

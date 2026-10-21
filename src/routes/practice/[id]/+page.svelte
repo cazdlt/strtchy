@@ -61,16 +61,18 @@
 		{
 			autoPlay: initialData.practice.routine.autoAdvance ?? initialData.userPrefs?.autoAdvance ?? false,
 			audioEnabled: initialData.practice.routine.audioEnabled ?? initialData.userPrefs?.audioEnabled ?? true,
+			voiceEnabled: initialData.userPrefs?.voiceEnabled ?? true,
 			keepAwake: initialData.practice.routine.keepAwake ?? initialData.userPrefs?.keepAwake ?? true,
 		}
 	);
 
 	// Audio controller
-	const audio = createAudioController(session.settings.audioEnabled);
+	const audio = createAudioController(session.settings.audioEnabled, session.settings.voiceEnabled);
 	session.setAudio(audio);
 
 	$effect(() => {
 		audio.setEnabled(session.settings.audioEnabled);
+		audio.setVoiceEnabled(session.settings.voiceEnabled);
 	});
 
 	// Hydrate from existing server data or localStorage
@@ -254,13 +256,14 @@
 	}
 
 	// ── Settings ──
-	async function saveSettings(newSettings: { autoPlay: boolean; audioEnabled: boolean; keepAwake: boolean }) {
+	async function saveSettings(newSettings: { autoPlay: boolean; audioEnabled: boolean; voiceEnabled: boolean; keepAwake: boolean }) {
 		isSavingSettings = true;
 		settingsError = null;
 
 		const formData = new FormData();
 		formData.append('autoPlay', String(newSettings.autoPlay));
 		formData.append('audioEnabled', String(newSettings.audioEnabled));
+		formData.append('voiceEnabled', String(newSettings.voiceEnabled));
 		formData.append('keepAwake', String(newSettings.keepAwake));
 		formData.append('practiceId', data.practice.id);
 

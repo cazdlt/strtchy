@@ -11,6 +11,7 @@
 		settings: {
 			autoPlay: boolean;
 			audioEnabled: boolean;
+			voiceEnabled?: boolean;
 			keepAwake: boolean;
 		};
 		onSave: (settings: any) => void;
@@ -23,6 +24,7 @@
 	let localSettings = $state({
 		autoPlay: settings.autoPlay,
 		audioEnabled: settings.audioEnabled,
+		voiceEnabled: settings.voiceEnabled ?? true,
 		keepAwake: settings.keepAwake
 	});
 
@@ -30,6 +32,7 @@
 		localSettings = {
 			autoPlay: settings.autoPlay,
 			audioEnabled: settings.audioEnabled,
+			voiceEnabled: settings.voiceEnabled ?? true,
 			keepAwake: settings.keepAwake
 		};
 	});
@@ -85,6 +88,26 @@
 						>
 							<div
 								class="w-5 h-5 bg-white absolute top-1 transition-transform {localSettings.audioEnabled
+									? 'translate-x-6'
+									: 'translate-x-1'}"
+							></div>
+						</button>
+					</div>
+
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="text-text-primary font-title font-bold">Voice cues</p>
+							<p class="text-text-secondary text-sm font-body">Spoken exercise names and transitions</p>
+						</div>
+					<button
+						onclick={() => (localSettings.voiceEnabled = !localSettings.voiceEnabled)}
+						aria-label="Toggle voice cues"
+						class="w-12 h-7 transition-colors {localSettings.voiceEnabled
+								? 'bg-accent-primary'
+								: 'bg-accent-track'} relative"
+						>
+							<div
+								class="w-5 h-5 bg-white absolute top-1 transition-transform {localSettings.voiceEnabled
 									? 'translate-x-6'
 									: 'translate-x-1'}"
 							></div>

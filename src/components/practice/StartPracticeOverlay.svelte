@@ -13,6 +13,7 @@
 		settings: {
 			autoPlay: boolean;
 			audioEnabled: boolean;
+			voiceEnabled?: boolean;
 			keepAwake: boolean;
 		};
 		equipment: string[];

@@ -35,6 +35,7 @@ export interface SetRecord {
 export interface PracticeSettings {
   autoPlay: boolean;
   audioEnabled: boolean;
+  voiceEnabled: boolean;
   keepAwake: boolean;
 }
 
@@ -55,7 +56,7 @@ export class PracticeSession {
   setRatings = $state<Map<string, number>>(new Map()); // movementId → rating
 
   currentMovementIndex = $state(0);
-  settings = $state<PracticeSettings>({ autoPlay: false, audioEnabled: true, keepAwake: true });
+  settings = $state<PracticeSettings>({ autoPlay: false, audioEnabled: true, voiceEnabled: true, keepAwake: true });
   notes = $state<Map<string, string>>(new Map());
 
   hasRoutineChanges = $state(false);
@@ -110,6 +111,7 @@ export class PracticeSession {
     this.settings = {
       autoPlay: userSettings?.autoPlay ?? false,
       audioEnabled: userSettings?.audioEnabled ?? true,
+      voiceEnabled: userSettings?.voiceEnabled ?? true,
       keepAwake: userSettings?.keepAwake ?? true,
     };
     this.completedSets = new Map();
@@ -159,6 +161,7 @@ export class PracticeSession {
 
   setAudio(audio: AudioController) {
     this.audio = audio;
+    this.audio.setVoiceEnabled(this.settings.voiceEnabled);
   }
 
   // ── Wake Lock lifecycle ──
@@ -191,6 +194,12 @@ export class PracticeSession {
     const isFreshPractice = this.completedSets.size === 0 && this.skippedSets.size === 0;
     if (this.settings.autoPlay && isFreshPractice) {
       this.audio?.play('restStart');
+      if (this.settings.voiceEnabled) {
+        this.audio?.playVoiceCue('get-ready', 500);
+        if (this.movements[0]?.name) {
+          this.audio?.playVoiceCue(this.movements[0].name, 1400);
+        }
+      }
       this.timer.startRest(
         15,
         'get-ready',
@@ -216,6 +225,9 @@ export class PracticeSession {
   completeWorkout() {
     this.isCompleted = true;
     this.audio?.play('practiceComplete');
+    if (this.settings.voiceEnabled) {
+      this.audio?.playVoiceCue('practice-complete', 700);
+    }
     this.releaseWakeLock();
     this.timer.cleanup();
     return this.#toServerData();
@@ -295,6 +307,9 @@ export class PracticeSession {
       if (!this.completedSets.has(rightKey) && !this.skippedSets.has(rightKey)) {
         if (movement.switchSidesDuration > 0) {
           this.audio?.play('switchSides');
+          if (this.settings.voiceEnabled) {
+            this.audio?.playVoiceCue('switch-sides', 200);
+          }
           this.timer.startRest(
             movement.switchSidesDuration,
             'switch-sides',
@@ -322,6 +337,9 @@ export class PracticeSession {
       // More sets in same movement — rest between sets
       if (this.restBetweenSets > 0) {
         this.audio?.play('restStart');
+        if (this.settings.voiceEnabled) {
+          this.audio?.playVoiceCue('rest', 600);
+        }
         this.timer.startRest(
           this.restBetweenSets,
           'between-sets',
@@ -347,6 +365,9 @@ export class PracticeSession {
       const nextMovement = this.movements[currentIdx + 1];
       if (this.restBetweenMovements > 0) {
         this.audio?.play('restStart');
+        if (this.settings.voiceEnabled && nextMovement?.name) {
+          this.audio?.playVoiceCue(nextMovement.name, 700);
+        }
         this.timer.startRest(
           this.restBetweenMovements,
           'between-movements',

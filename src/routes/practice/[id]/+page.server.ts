@@ -164,6 +164,7 @@ export const actions = {
     const formData = await request.formData();
     const autoPlay = formData.get("autoPlay") === "true";
     const audioEnabled = formData.get("audioEnabled") === "true";
+    const voiceEnabled = formData.get("voiceEnabled") === "true";
     const keepAwake = formData.get("keepAwake") === "true";
     const practiceId = formData.get("practiceId") as string;
 
@@ -191,6 +192,7 @@ export const actions = {
           ...(userData?.preferences || {}),
           autoAdvance: autoPlay,
           audioEnabled,
+          voiceEnabled,
           keepAwake,
         },
       }).where(eq(user.id, locals.user.id));
