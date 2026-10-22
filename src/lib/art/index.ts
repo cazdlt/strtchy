@@ -41,9 +41,25 @@ export function movementImage(m: MovementRef | null | undefined): string | null 
 	return movementArt(m)?.icon ?? m.illustrationPath ?? null;
 }
 
+const ROUTINE_ALIASES: Record<string, string> = {
+	'cuerpo-completo': '15-Minute Full Body',
+	'cuerpo completo': '15-Minute Full Body',
+	'rt_cuerpo-completo': '15-Minute Full Body',
+	'15-minute-full-body': '15-Minute Full Body',
+	'15-minute full body': '15-Minute Full Body',
+};
+
 /** Cover photo for a routine: a staged shot for built-ins, a calm backdrop otherwise. */
 export function routineCover(r: { id: string; name: string; isCustom?: boolean | null }): string | null {
-	if (!r.isCustom && routines[r.name]) return routines[r.name];
+	if (routines[r.name]) return routines[r.name];
+	const alias = ROUTINE_ALIASES[r.name.toLowerCase()] || ROUTINE_ALIASES[r.id.toLowerCase()];
+	if (alias && routines[alias]) return routines[alias];
+	if (!r.isCustom) {
+		const norm = r.name.toLowerCase();
+		for (const [key, path] of Object.entries(routines)) {
+			if (key.toLowerCase() === norm) return path;
+		}
+	}
 	if (!plates.length) return null;
 	let h = 0;
 	for (const c of r.id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
