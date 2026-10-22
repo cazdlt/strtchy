@@ -43,9 +43,9 @@ for (const cue of allCues) {
   try {
     // Generate AIFF with macOS say
     execSync(`say -v Samantha -r 170 "${cue.phrase}" -o "${aiffPath}"`, { stdio: 'ignore' });
-    // Convert to compressed mono MP3 (64k, 22.05kHz) with clean fade out to prevent clicks
+    // Normalize to standard broadcast loudness (-19 LUFS) via ffmpeg loudnorm
     execSync(
-      `ffmpeg -y -i "${aiffPath}" -af "afade=t=out:st=0:d=0.05" -codec:a libmp3lame -b:a 64k -ac 1 "${mp3Path}"`,
+      `ffmpeg -y -i "${aiffPath}" -af "loudnorm=I=-19:TP=-1.5:LRA=7" -codec:a libmp3lame -b:a 64k -ac 1 "${mp3Path}"`,
       { stdio: 'ignore' }
     );
     if (fs.existsSync(aiffPath)) fs.unlinkSync(aiffPath);
