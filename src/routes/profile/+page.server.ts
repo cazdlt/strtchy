@@ -111,12 +111,14 @@ export const actions = {
     // Parse form values
     const autoAdvance = formData.get("autoAdvance");
     const audioEnabled = formData.get("audioEnabled");
+    const voiceEnabled = formData.get("voiceEnabled");
     const keepAwake = formData.get("keepAwake");
 
     const newPrefs = {
       ...currentPrefs,
       autoAdvance: autoAdvance === "on",
       audioEnabled: audioEnabled === "on",
+      voiceEnabled: voiceEnabled === "on",
       keepAwake: keepAwake === "on",
     };
 

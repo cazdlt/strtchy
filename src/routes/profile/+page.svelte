@@ -39,6 +39,7 @@
 	let preferences = $state({
 		autoAdvance: data.user.preferences?.autoAdvance ?? true,
 		audioEnabled: data.user.preferences?.audioEnabled ?? true,
+		voiceEnabled: data.user.preferences?.voiceEnabled ?? true,
 		keepAwake: data.user.preferences?.keepAwake ?? true
 	});
 	
@@ -272,6 +273,16 @@
 								class="w-5 h-5 border-2 border-accent-track bg-inset text-accent-primary focus:border-accent-primary focus:outline-none"
 							/>
 							<span class="text-text-secondary group-hover:text-text-primary transition-colors font-body">Enable audio cues</span>
+						</label>
+						
+						<label class="flex items-center gap-4 cursor-pointer group">
+							<input
+								type="checkbox"
+								name="voiceEnabled"
+								bind:checked={preferences.voiceEnabled}
+								class="w-5 h-5 border-2 border-accent-track bg-inset text-accent-primary focus:border-accent-primary focus:outline-none"
+							/>
+							<span class="text-text-secondary group-hover:text-text-primary transition-colors font-body">Enable voice cues (spoken exercise names & transitions)</span>
 						</label>
 						
 						<label class="flex items-center gap-4 cursor-pointer group">
