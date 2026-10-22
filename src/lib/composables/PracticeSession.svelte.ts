@@ -162,6 +162,9 @@ export class PracticeSession {
   setAudio(audio: AudioController) {
     this.audio = audio;
     this.audio.setVoiceEnabled(this.settings.voiceEnabled);
+    if (this.movements.length > 0) {
+      this.audio.preloadRoutineCues(this.movements.map((m) => m.name));
+    }
   }
 
   // ── Wake Lock lifecycle ──
@@ -366,7 +369,8 @@ export class PracticeSession {
       if (this.restBetweenMovements > 0) {
         this.audio?.play('restStart');
         if (this.settings.voiceEnabled && nextMovement?.name) {
-          this.audio?.playVoiceCue(nextMovement.name, 700);
+          this.audio?.playVoiceCue('next-up', 700);
+          this.audio?.playVoiceCue(nextMovement.name, 1600);
         }
         this.timer.startRest(
           this.restBetweenMovements,

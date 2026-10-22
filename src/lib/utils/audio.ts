@@ -19,13 +19,13 @@ export function slugifyAudioName(text: string): string {
 
 export class AudioController {
   audioContext: AudioContext | null = null;
-  isEnabled = false;
+  isEnabled = true;
   isVoiceEnabled = true;
 
   private bufferCache = new Map<string, AudioBuffer>();
   private activeSources: AudioBufferSourceNode[] = [];
 
-  constructor(enabled = false, voiceEnabled = true) {
+  constructor(enabled = true, voiceEnabled = true) {
     this.isEnabled = enabled;
     this.isVoiceEnabled = voiceEnabled;
   }
@@ -42,7 +42,7 @@ export class AudioController {
     }
 
     if (this.audioContext?.state === "suspended") {
-      this.audioContext.resume();
+      this.audioContext.resume().catch(() => {});
     }
 
     return this.audioContext;
@@ -84,11 +84,32 @@ export class AudioController {
   }
 
   /**
+   * Preload routine cues and common phrases upfront for immediate playback.
+   */
+  preloadRoutineCues(movementNames: string[] = []): void {
+    const commonCues = [
+      'get-ready',
+      'switch-sides',
+      'rest',
+      'next-up',
+      'practice-complete',
+    ];
+    for (const cue of [...commonCues, ...movementNames]) {
+      this.preloadCue(cue).catch(() => {});
+    }
+  }
+
+  /**
    * Plays a pre-rendered MP3 voice cue (cue phrase or exercise name).
-   * Blends directly into the Web Audio graph with clean sub-millisecond timing.
+   * Blends directly into the Web Audio graph with normalized broadcast loudness.
    */
   async playVoiceCue(nameOrSlug: string, delayMs = 0): Promise<void> {
     if (!this.isEnabled || !this.isVoiceEnabled) return;
+
+    const ctx = this.ensureAudioContext();
+    if (ctx && ctx.state === "suspended") {
+      await ctx.resume().catch(() => {});
+    }
 
     const slug = slugifyAudioName(nameOrSlug);
     let audioBuffer = this.bufferCache.get(slug);
@@ -97,14 +118,14 @@ export class AudioController {
       audioBuffer = (await this.preloadCue(slug)) || undefined;
     }
 
-    const ctx = this.ensureAudioContext();
     if (ctx && audioBuffer) {
       const startTime = ctx.currentTime + Math.max(0, delayMs) / 1000;
       const source = ctx.createBufferSource();
       const gainNode = ctx.createGain();
 
       source.buffer = audioBuffer;
-      gainNode.gain.setValueAtTime(0.9, startTime);
+      // 0.45 gain aligns -19 LUFS speech with normalized synth tones
+      gainNode.gain.setValueAtTime(0.45, startTime);
 
       source.connect(gainNode);
       gainNode.connect(ctx.destination);
@@ -116,12 +137,19 @@ export class AudioController {
         if (idx !== -1) this.activeSources.splice(idx, 1);
       };
     } else if (typeof window !== "undefined") {
-      // Fallback via HTML5 Audio if decodeAudioData is unavailable
+      // Fallback: Web Speech API for custom movements or HTML5 Audio
       setTimeout(() => {
         try {
           const sound = new Audio(`/audio/cues/${slug}.mp3`);
-          sound.volume = 0.9;
-          sound.play().catch(() => {});
+          sound.volume = 0.45;
+          sound.play().catch(() => {
+            if ("speechSynthesis" in window) {
+              const utterance = new SpeechSynthesisUtterance(nameOrSlug);
+              utterance.volume = 0.45;
+              utterance.rate = 1.0;
+              window.speechSynthesis.speak(utterance);
+            }
+          });
         } catch {}
       }, delayMs);
     }
@@ -266,21 +294,21 @@ export class AudioController {
     switch (type) {
       case "countdown":
         // 3 tactile metronome ticks spaced 1s apart for 3, 2, 1
-        this.playPercussionClick(720, 0.06, 0, 0.12);
-        this.playPercussionClick(720, 0.06, 1.0, 0.12);
-        this.playPercussionClick(1020, 0.08, 2.0, 0.15);
+        this.playPercussionClick(720, 0.06, 0, 0.22);
+        this.playPercussionClick(720, 0.06, 1.0, 0.22);
+        this.playPercussionClick(1020, 0.08, 2.0, 0.26);
         break;
       case "setStart":
         // Warm dual-tone analog synth chime
         this.playWarmTone(523.25, 0.28, 0, {
           type: "triangle",
           filterFreq: 2200,
-          peakGain: 0.13,
+          peakGain: 0.22,
         });
         this.playWarmTone(783.99, 0.32, 0.06, {
           type: "triangle",
           filterFreq: 2400,
-          peakGain: 0.11,
+          peakGain: 0.19,
         });
         break;
       case "setComplete":
@@ -288,34 +316,34 @@ export class AudioController {
         this.playWarmTone(523.25, 0.22, 0, {
           type: "sine",
           filterFreq: 3000,
-          peakGain: 0.12,
+          peakGain: 0.20,
         });
         this.playWarmTone(659.25, 0.22, 0.08, {
           type: "sine",
           filterFreq: 3000,
-          peakGain: 0.12,
+          peakGain: 0.20,
         });
         this.playWarmTone(783.99, 0.35, 0.16, {
           type: "triangle",
           filterFreq: 2800,
-          peakGain: 0.14,
+          peakGain: 0.24,
         });
         break;
       case "restStart":
         // Resonant meditation singing bowl (G4 = 392Hz)
-        this.playBell(392.0, 1.8, 0, 0.18);
+        this.playBell(392.0, 1.8, 0, 0.22);
         break;
       case "restEnd":
         // Two soft rising warning chimes (G4 392Hz -> C5 523Hz)
         this.playWarmTone(392.0, 0.18, 0, {
           type: "sine",
           filterFreq: 2600,
-          peakGain: 0.11,
+          peakGain: 0.19,
         });
         this.playWarmTone(523.25, 0.25, 0.12, {
           type: "triangle",
           filterFreq: 2800,
-          peakGain: 0.13,
+          peakGain: 0.22,
         });
         break;
       case "switchSides":
@@ -323,12 +351,12 @@ export class AudioController {
         this.playWarmTone(587.33, 0.2, 0, {
           type: "triangle",
           filterFreq: 3000,
-          peakGain: 0.12,
+          peakGain: 0.20,
         });
         this.playWarmTone(880.0, 0.35, 0.12, {
           type: "triangle",
           filterFreq: 3200,
-          peakGain: 0.14,
+          peakGain: 0.22,
         });
         break;
       case "practiceComplete":
@@ -337,14 +365,14 @@ export class AudioController {
           this.playWarmTone(freq, 1.2, idx * 0.09, {
             type: idx >= 3 ? "triangle" : "sine",
             filterFreq: 2600,
-            peakGain: 0.1,
+            peakGain: 0.15,
             attack: 0.02,
           });
         });
         break;
       case "rep":
         // Crisp, subtle tactile click
-        this.playPercussionClick(650, 0.035, 0, 0.08);
+        this.playPercussionClick(650, 0.035, 0, 0.16);
         break;
     }
   }
@@ -356,7 +384,7 @@ export class AudioController {
 }
 
 export function createAudioController(
-  enabled = false,
+  enabled = true,
   voiceEnabled = true
 ): AudioController {
   return new AudioController(enabled, voiceEnabled);

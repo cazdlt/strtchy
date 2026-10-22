@@ -152,6 +152,7 @@
 
 	// ── Start practice ──
 	function handleStartPractice() {
+		audio.ensureAudioContext();
 		if (!session.hasStarted) {
 			session.start();
 		}
