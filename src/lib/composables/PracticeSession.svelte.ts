@@ -163,7 +163,7 @@ export class PracticeSession {
     this.audio = audio;
     this.audio.setVoiceEnabled(this.settings.voiceEnabled);
     if (this.movements.length > 0) {
-      this.audio.preloadRoutineCues(this.movements.map((m) => m.name));
+      this.audio.preloadRoutineCues(this.movements.map((m) => ({ name: m.name, id: m.movementId })));
     }
   }
 
@@ -200,7 +200,7 @@ export class PracticeSession {
       if (this.settings.voiceEnabled) {
         this.audio?.playVoiceCue('get-ready', 500);
         if (this.movements[0]?.name) {
-          this.audio?.playVoiceCue(this.movements[0].name, 1400);
+          this.audio?.playVoiceCue({ name: this.movements[0].name, id: this.movements[0].movementId }, 1400);
         }
       }
       this.timer.startRest(
@@ -370,7 +370,7 @@ export class PracticeSession {
         this.audio?.play('restStart');
         if (this.settings.voiceEnabled && nextMovement?.name) {
           this.audio?.playVoiceCue('next-up', 700);
-          this.audio?.playVoiceCue(nextMovement.name, 1600);
+          this.audio?.playVoiceCue({ name: nextMovement.name, id: nextMovement.movementId }, 1600);
         }
         this.timer.startRest(
           this.restBetweenMovements,

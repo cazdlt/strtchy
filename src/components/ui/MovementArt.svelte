@@ -11,7 +11,13 @@
 		mirrored = false,
 		class: className = ''
 	}: {
-		movement: { name: string; isCustom?: boolean | null; illustrationPath?: string | null };
+		movement: {
+			name: string;
+			isCustom?: boolean | null;
+			illustrationPath?: string | null;
+			id?: string | null;
+			movementId?: string | null;
+		};
 		animated?: boolean;
 		/** Flip horizontally, e.g. for the right side of a bilateral movement. */
 		mirrored?: boolean;

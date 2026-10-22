@@ -1,3 +1,5 @@
+import { resolveAudioCueSlug, isKnownAudioCue, type MovementInput } from '$lib/art/aliases';
+
 export type SoundType =
   | "countdown"
   | "setStart"
@@ -9,12 +11,7 @@ export type SoundType =
   | "rep";
 
 export function slugifyAudioName(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/\//g, "-")
-    .replace(/[^\w\s-]/g, "")
-    .trim()
-    .replace(/[\s_-]+/g, "-");
+  return resolveAudioCueSlug(text);
 }
 
 export class AudioController {
@@ -62,10 +59,17 @@ export class AudioController {
   /**
    * Preloads an audio cue buffer into memory for zero-latency playback.
    */
-  async preloadCue(nameOrSlug: string): Promise<AudioBuffer | null> {
-    const slug = slugifyAudioName(nameOrSlug);
+  async preloadCue(nameOrSlug: MovementInput): Promise<AudioBuffer | null> {
+    const slug = resolveAudioCueSlug(nameOrSlug);
+    if (!slug) return null;
+
     if (this.bufferCache.has(slug)) {
       return this.bufferCache.get(slug)!;
+    }
+
+    // Don't issue 404 network requests for custom/unknown movement cues
+    if (!isKnownAudioCue(slug)) {
+      return null;
     }
 
     const ctx = this.ensureAudioContext();
@@ -86,7 +90,7 @@ export class AudioController {
   /**
    * Preload routine cues and common phrases upfront for immediate playback.
    */
-  preloadRoutineCues(movementNames: string[] = []): void {
+  preloadRoutineCues(movementNamesOrRefs: (string | MovementInput)[] = []): void {
     const commonCues = [
       'get-ready',
       'switch-sides',
@@ -94,7 +98,7 @@ export class AudioController {
       'next-up',
       'practice-complete',
     ];
-    for (const cue of [...commonCues, ...movementNames]) {
+    for (const cue of [...commonCues, ...movementNamesOrRefs]) {
       this.preloadCue(cue).catch(() => {});
     }
   }
@@ -103,7 +107,7 @@ export class AudioController {
    * Plays a pre-rendered MP3 voice cue (cue phrase or exercise name).
    * Blends directly into the Web Audio graph with normalized broadcast loudness.
    */
-  async playVoiceCue(nameOrSlug: string, delayMs = 0): Promise<void> {
+  async playVoiceCue(nameOrSlug: MovementInput, delayMs = 0): Promise<void> {
     if (!this.isEnabled || !this.isVoiceEnabled) return;
 
     const ctx = this.ensureAudioContext();
@@ -111,9 +115,18 @@ export class AudioController {
       await ctx.resume().catch(() => {});
     }
 
-    const slug = slugifyAudioName(nameOrSlug);
-    let audioBuffer = this.bufferCache.get(slug);
+    const slug = resolveAudioCueSlug(nameOrSlug);
+    const isKnown = isKnownAudioCue(slug);
 
+    // If there is no pre-rendered MP3 cue for this exercise, skip playing a voice cue.
+    // NOTE: In the future, custom exercises can be auto-generated to high quality MP3s
+    // via a server-side TTS pipeline. We explicitly avoid browser speechSynthesis because
+    // system synthesizer voices sound robotic, inconsistent, and poor quality.
+    if (!isKnown || !slug) {
+      return;
+    }
+
+    let audioBuffer: AudioBuffer | undefined = this.bufferCache.get(slug);
     if (!audioBuffer) {
       audioBuffer = (await this.preloadCue(slug)) || undefined;
     }
@@ -136,20 +149,16 @@ export class AudioController {
         const idx = this.activeSources.indexOf(source);
         if (idx !== -1) this.activeSources.splice(idx, 1);
       };
-    } else if (typeof window !== "undefined") {
-      // Fallback: Web Speech API for custom movements or HTML5 Audio
+      return;
+    }
+
+    // Secondary fallback: HTML5 Audio for known MP3 cues if Web Audio buffer decode was bypassed
+    if (typeof window !== "undefined") {
       setTimeout(() => {
         try {
           const sound = new Audio(`/audio/cues/${slug}.mp3`);
           sound.volume = 0.45;
-          sound.play().catch(() => {
-            if ("speechSynthesis" in window) {
-              const utterance = new SpeechSynthesisUtterance(nameOrSlug);
-              utterance.volume = 0.45;
-              utterance.rate = 1.0;
-              window.speechSynthesis.speak(utterance);
-            }
-          });
+          sound.play().catch(() => {});
         } catch {}
       }, delayMs);
     }

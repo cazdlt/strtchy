@@ -15,6 +15,13 @@
       "when": 1784600000000,
       "tag": "0001_update_practice_data",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784650000000,
+      "tag": "0002_normalize_movement_names",
+      "breakpoints": true
     }
   ]
 }

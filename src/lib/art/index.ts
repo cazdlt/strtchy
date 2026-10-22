@@ -1,7 +1,10 @@
 // 3D movement art and routine covers, rendered by spikes/3d-figures/export-app.mjs.
-// Built-in movements are matched by name, so existing databases pick the art up
-// without a migration. Custom movements keep the user's own illustration.
+// Built-in movements are matched by canonical name or alias (including legacy
+// Spanish names and IDs), so existing databases pick the art up seamlessly.
 import manifest from './manifest.json';
+import { resolveCanonicalMovementName } from './aliases';
+
+export * from './aliases';
 
 export interface MovementArt {
 	/** Transparent webp still. */
@@ -12,17 +15,29 @@ export interface MovementArt {
 	light: string;
 }
 
+export interface MovementRef {
+	name?: string | null;
+	id?: string | null;
+	movementId?: string | null;
+	isCustom?: boolean | null;
+	illustrationPath?: string | null;
+}
+
 const movements = manifest.movements as Record<string, MovementArt>;
 const routines = manifest.routines as Record<string, string>;
 const plates = manifest.plates as string[];
 
-export function movementArt(m: { name: string; isCustom?: boolean | null }): MovementArt | null {
-	if (m.isCustom) return null;
-	return movements[m.name] ?? null;
+export function movementArt(m: MovementRef | null | undefined): MovementArt | null {
+	if (!m || m.isCustom) return null;
+	if (m.name && movements[m.name]) return movements[m.name];
+	const canonical = resolveCanonicalMovementName(m);
+	if (canonical && movements[canonical]) return movements[canonical];
+	return null;
 }
 
 /** Best still image for a movement: 3D art for built-ins, else the stored illustration. */
-export function movementImage(m: { name: string; isCustom?: boolean | null; illustrationPath?: string | null }): string | null {
+export function movementImage(m: MovementRef | null | undefined): string | null {
+	if (!m) return null;
 	return movementArt(m)?.icon ?? m.illustrationPath ?? null;
 }
 
