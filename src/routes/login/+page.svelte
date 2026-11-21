@@ -1,19 +1,10 @@
 <script lang="ts">
 	import PageHeader from '../../components/ui/PageHeader.svelte';
-	import { Key, Copy, Check, ArrowRight, UserCircle } from 'phosphor-svelte';
+	import { ArrowRight, UserCircle } from 'phosphor-svelte';
 	
 	let { data, form } = $props();
 	let email = $state('');
 	let password = $state('');
-	let copied = $state(false);
-	
-	function copyApiKey() {
-		if (data.apiKey) {
-			navigator.clipboard.writeText(data.apiKey);
-			copied = true;
-			setTimeout(() => copied = false, 2000);
-		}
-	}
 </script>
 
 <svelte:head>
@@ -51,46 +42,21 @@
 					</h1>
 				</div>
 
-				<!-- Success Message -->
+				<!-- Success Messages -->
 				{#if data.registered}
 					<div class="mb-6 bg-success/10 border border-success/20 px-4 py-3">
 						<p class="text-success text-sm font-body">Account created successfully! Please sign in.</p>
 					</div>
 				{/if}
-				
-				<!-- API Key Notice -->
-				{#if data.apiKey}
-					<div class="mb-6 bg-accent-primary/10 border-2 border-accent-primary/30 p-4">
-						<div class="flex items-start gap-3">
-							<Key weight="duotone" size={20} class="text-accent-primary mt-0.5 shrink-0" />
-							<div class="flex-1 min-w-0">
-								<p class="text-accent-primary font-title text-sm mb-1">
-									Your API Key
-								</p>
-								<p class="text-text-muted text-xs mb-3 font-body">
-									Copy it now — it won't be shown again!
-								</p>
-								<div class="bg-inset p-3 font-mono text-sm text-accent-primary-light break-all mb-2">
-									{data.apiKey}
-								</div>
-								<button
-									onclick={copyApiKey}
-									class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary border-2 border-accent-primary/50 transition-all duration-150 font-body text-sm"
-								>
-									{#if copied}
-										<Check weight="bold" size={16} />
-										Copied!
-									{:else}
-										<Copy weight="duotone" size={16} />
-										Copy to clipboard
-									{/if}
-								</button>
-							</div>
-						</div>
+
+				{#if data.reset}
+					<div class="mb-6 bg-success/10 border border-success/20 px-4 py-3">
+						<p class="text-success text-sm font-body">Password reset successfully! Please sign in with your new password.</p>
 					</div>
 				{/if}
 
 				<form method="POST" class="space-y-5">
+					<input type="hidden" name="redirectTo" value={data.redirectTo} />
 					<!-- Error Messages -->
 					{#if form?.missing}
 						<div class="bg-error/10 border border-error/20 px-4 py-3">
@@ -128,9 +94,14 @@
 
 					<!-- Password -->
 					<div>
-						<label for="password" class="block text-sm font-body text-text-secondary mb-2 uppercase tracking-wider">
-							Password
-						</label>
+						<div class="flex items-center justify-between mb-2">
+							<label for="password" class="block text-sm font-body text-text-secondary uppercase tracking-wider">
+								Password
+							</label>
+							<a href="/forgot-password" class="text-xs font-body text-accent-primary hover:text-accent-primary-light transition-colors">
+								Forgot password?
+							</a>
+						</div>
 						<input
 							id="password"
 							name="password"

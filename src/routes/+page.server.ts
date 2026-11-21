@@ -1,12 +1,17 @@
 import { db } from "$lib/db";
 import { routines, practiceLogs, movements, routineMovements } from "$lib/db/schema";
-import { desc, eq, count, sql } from "drizzle-orm";
+import { desc, eq, sql, or } from "drizzle-orm";
 import { formatDuration, getRelativeTime } from "$lib/utils/formatting";
-import { auth } from "$lib/auth";
 import { redirect } from "@sveltejs/kit";
 
 export async function load({ locals }: { locals: App.Locals }) {
-  // Get all routines with movement counts
+  const currentUserId = locals.user?.id;
+
+  const routineWhere = currentUserId
+    ? or(eq(routines.isCustom, false), eq(routines.userId, currentUserId))
+    : eq(routines.isCustom, false);
+
+  // Get routines with movement counts (built-in or user's own)
   const allRoutines = await db
     .select({
       id: routines.id,
@@ -24,28 +29,37 @@ export async function load({ locals }: { locals: App.Locals }) {
     })
     .from(routines)
     .leftJoin(routineMovements, eq(routines.id, routineMovements.routineId))
+    .where(routineWhere)
     .groupBy(routines.id)
     .orderBy(desc(routines.createdAt));
 
-  // Get movements for home page preview
+  const movementWhere = currentUserId
+    ? or(eq(movements.isCustom, false), eq(movements.userId, currentUserId))
+    : eq(movements.isCustom, false);
+
+  // Get movements for home page preview (built-in or user's own)
   const allMovements = await db
     .select()
     .from(movements)
+    .where(movementWhere)
     .orderBy(desc(movements.createdAt));
 
-  // Get recent practices
-  const recentPractices = await db
-    .select({
-      id: practiceLogs.id,
-      routineId: practiceLogs.routineId,
-      startedAt: practiceLogs.startedAt,
-      duration: practiceLogs.duration,
-      routineName: routines.name,
-    })
-    .from(practiceLogs)
-    .innerJoin(routines, eq(practiceLogs.routineId, routines.id))
-    .orderBy(desc(practiceLogs.startedAt))
-    .limit(5);
+  // Get recent practices only for the logged-in user
+  const recentPractices = currentUserId
+    ? await db
+        .select({
+          id: practiceLogs.id,
+          routineId: practiceLogs.routineId,
+          startedAt: practiceLogs.startedAt,
+          duration: practiceLogs.duration,
+          routineName: routines.name,
+        })
+        .from(practiceLogs)
+        .innerJoin(routines, eq(practiceLogs.routineId, routines.id))
+        .where(eq(practiceLogs.userId, currentUserId))
+        .orderBy(desc(practiceLogs.startedAt))
+        .limit(5)
+    : [];
 
   return {
     user: locals.user,

@@ -1,7 +1,7 @@
 import { redirect, fail } from "@sveltejs/kit";
 import { db } from "$lib/db";
 import { movements } from "$lib/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq, or } from "drizzle-orm";
 import { createRoutine } from "$lib/db/helpers/routines";
 import {
   routineSchema,
@@ -72,9 +72,16 @@ function validateMovementFields(movements: RoutineMovementConfig[]): {
 }
 
 export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.user) {
+    throw redirect(302, "/login?redirectTo=/routine/create");
+  }
+
   const allMovements = await db
     .select()
     .from(movements)
+    .where(
+      or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id)),
+    )
     .orderBy(desc(movements.createdAt));
 
   return {
@@ -85,6 +92,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
+    if (!locals.user) {
+      return fail(401, { unauthorized: true });
+    }
+
     const formData = await request.formData();
 
     // Parse movements_data early
@@ -227,7 +238,7 @@ export const actions: Actions = {
     }
 
     try {
-      const routineId = await createRoutine(parsed.data, locals.user?.id);
+      const routineId = await createRoutine(parsed.data, locals.user.id);
       throw redirect(303, `/routine/${routineId}`);
     } catch (error) {
       if (error && typeof error === "object" && "status" in error) {

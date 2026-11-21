@@ -2,19 +2,23 @@ import { redirect, fail } from "@sveltejs/kit";
 import { db } from "$lib/db";
 import { movements } from "$lib/db/schema";
 import { eq } from "drizzle-orm";
-import { updateMovement } from "$lib/db/helpers/movements";
+import { updateMovement, ForbiddenError } from "$lib/db/helpers/movements";
 import { movementUpdateSchema } from "$lib/validation/schemas/movement";
 import { checkboxParser } from "$lib/validation/helpers/parsers";
 import type { PageServerLoad, Actions } from "./$types";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
+  if (!locals.user) {
+    throw redirect(302, `/login?redirectTo=/movement/${params.id}/edit`);
+  }
+
   const movement = await db
     .select()
     .from(movements)
     .where(eq(movements.id, params.id))
     .get();
 
-  if (!movement) {
+  if (!movement || !movement.isCustom || movement.userId !== locals.user.id) {
     throw redirect(303, "/movements");
   }
 
@@ -38,6 +42,13 @@ export const actions: Actions = {
 
     if (!movement) {
       return fail(404, { not_found: true });
+    }
+
+    if (!movement.isCustom || movement.userId !== locals.user.id) {
+      return fail(403, {
+        forbidden: true,
+        error: "Not authorized to edit this movement",
+      });
     }
 
     const formData = await request.formData();
@@ -116,6 +127,14 @@ export const actions: Actions = {
     } catch (error) {
       if (error && typeof error === "object" && "status" in error) {
         throw error;
+      }
+
+      if (error instanceof ForbiddenError) {
+        return fail(403, {
+          forbidden: true,
+          error: error.message,
+          submittedData,
+        });
       }
 
       if (error instanceof Error) {

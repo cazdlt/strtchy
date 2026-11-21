@@ -15,8 +15,19 @@ import type {
   PracticeUpdateInput,
   PracticeDataEntryInput,
 } from "$lib/validation/schemas/practice";
+import { ForbiddenError } from "./routines";
+
+export { ForbiddenError };
+
+function requireValidUserId(userId: string | undefined): string {
+  if (!userId) {
+    throw new ForbiddenError("Forbidden: valid userId is required");
+  }
+  return userId;
+}
 
 export interface ListPracticesOptions {
+  userId?: string;
   limit?: number;
   offset?: number;
   routineId?: string;
@@ -26,10 +37,11 @@ export interface ListPracticesOptions {
 }
 
 export async function listPractices(options: ListPracticesOptions = {}) {
+  const validUserId = requireValidUserId(options.userId);
   const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
   const offset = Math.max(options.offset ?? 0, 0);
 
-  const conditions = [];
+  const conditions = [eq(practiceLogs.userId, validUserId)];
   if (options.routineId) {
     conditions.push(eq(practiceLogs.routineId, options.routineId));
   }
@@ -85,7 +97,9 @@ export async function listPractices(options: ListPracticesOptions = {}) {
   };
 }
 
-export async function getPracticeById(practiceId: string) {
+export async function getPracticeById(practiceId: string, userId?: string) {
+  const validUserId = requireValidUserId(userId);
+
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, practiceId),
     with: {
@@ -95,6 +109,10 @@ export async function getPracticeById(practiceId: string) {
 
   if (!practice) {
     return null;
+  }
+
+  if (practice.userId !== validUserId) {
+    throw new ForbiddenError("Forbidden: you do not own this practice");
   }
 
   const sets = await db.query.practiceData.findMany({
@@ -119,6 +137,8 @@ export async function createPractice(
   input: PracticeCreateInput,
   userId?: string,
 ) {
+  const validUserId = requireValidUserId(userId);
+
   const routine = await db.query.routines.findFirst({
     where: eq(routines.id, input.routineId),
     with: {
@@ -131,6 +151,10 @@ export async function createPractice(
 
   if (!routine) {
     throw new Error("Routine not found");
+  }
+
+  if (routine.isCustom && routine.userId !== validUserId) {
+    throw new ForbiddenError("Forbidden: you do not have access to this routine");
   }
 
   const estimatedDuration = calculateRoutineDuration(
@@ -172,7 +196,7 @@ export async function createPractice(
   await db.insert(practiceLogs).values({
     id: practiceLogId,
     routineId: routine.id,
-    userId,
+    userId: validUserId,
     startedAt,
     completedAt,
     duration,
@@ -293,13 +317,20 @@ async function insertPracticeDataEntries(
 export async function updatePractice(
   practiceId: string,
   input: PracticeUpdateInput,
+  userId?: string,
 ) {
+  const validUserId = requireValidUserId(userId);
+
   const existing = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, practiceId),
   });
 
   if (!existing) {
     throw new Error("Practice not found");
+  }
+
+  if (existing.userId !== validUserId) {
+    throw new ForbiddenError("Forbidden: you do not own this practice");
   }
 
   const completedAt =
@@ -317,7 +348,7 @@ export async function updatePractice(
       duration,
       notes,
     })
-    .where(eq(practiceLogs.id, practiceId));
+    .where(and(eq(practiceLogs.id, practiceId), eq(practiceLogs.userId, validUserId)));
 
   if (input.practiceData !== undefined) {
     await db
@@ -336,7 +367,9 @@ export async function updatePractice(
   return practiceId;
 }
 
-export async function deletePractice(practiceId: string) {
+export async function deletePractice(practiceId: string, userId?: string) {
+  const validUserId = requireValidUserId(userId);
+
   const existing = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, practiceId),
   });
@@ -345,10 +378,17 @@ export async function deletePractice(practiceId: string) {
     throw new Error("Practice not found");
   }
 
-  await db.delete(practiceLogs).where(eq(practiceLogs.id, practiceId));
+  if (existing.userId !== validUserId) {
+    throw new ForbiddenError("Forbidden: you do not own this practice");
+  }
+
+  await db
+    .delete(practiceLogs)
+    .where(and(eq(practiceLogs.id, practiceId), eq(practiceLogs.userId, validUserId)));
 }
 
-export async function getPracticeStats(days: number = 30) {
+export async function getPracticeStats(days: number = 30, userId?: string) {
+  const validUserId = requireValidUserId(userId);
   const now = new Date();
   const cutoffDate = new Date(now.getTime() - days * 86400000);
 
@@ -363,7 +403,12 @@ export async function getPracticeStats(days: number = 30) {
     })
     .from(practiceLogs)
     .leftJoin(routines, eq(practiceLogs.routineId, routines.id))
-    .where(isNotNull(practiceLogs.completedAt))
+    .where(
+      and(
+        isNotNull(practiceLogs.completedAt),
+        eq(practiceLogs.userId, validUserId),
+      ),
+    )
     .orderBy(desc(practiceLogs.startedAt));
 
   const recentPractices = allCompleted.filter(
@@ -419,6 +464,7 @@ export async function getPracticeStats(days: number = 30) {
       and(
         eq(practiceData.status, "completed"),
         gte(practiceLogs.startedAt, cutoffDate),
+        eq(practiceLogs.userId, validUserId),
       ),
     )
     .groupBy(practiceData.movementId, practiceData.movementName)

@@ -1,14 +1,21 @@
 import { db } from "$lib/db";
 import { movements } from "$lib/db/schema";
-import { desc, eq } from "drizzle-orm";
-import { redirect } from "@sveltejs/kit";
-import { fail } from "@sveltejs/kit";
+import { desc, eq, or } from "drizzle-orm";
+import { redirect, fail } from "@sveltejs/kit";
+import { deleteMovement, ForbiddenError } from "$lib/db/helpers/movements";
 import type { PageServerLoad, Actions } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.user) {
+    throw redirect(302, "/login?redirectTo=/movements");
+  }
+
   const allMovements = await db
     .select()
     .from(movements)
+    .where(
+      or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id)),
+    )
     .orderBy(desc(movements.createdAt));
 
   return {
@@ -30,17 +37,18 @@ export const actions: Actions = {
       return fail(400, { missing: true });
     }
 
-    const movement = await db
-      .select()
-      .from(movements)
-      .where(eq(movements.id, id))
-      .get();
-
-    if (!movement) {
-      return fail(404, { not_found: true });
+    try {
+      await deleteMovement(id, locals.user.id);
+    } catch (error) {
+      if (error instanceof ForbiddenError) {
+        return fail(403, { forbidden: true, error: error.message });
+      }
+      if (error instanceof Error && error.message.includes("not found")) {
+        return fail(404, { not_found: true });
+      }
+      return fail(500, { error: "Failed to delete movement" });
     }
 
-    await db.delete(movements).where(eq(movements.id, id));
     throw redirect(303, "/movements");
   },
 };

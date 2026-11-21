@@ -1,9 +1,14 @@
 import { db } from "$lib/db";
 import { practiceLogs, practiceData } from "$lib/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
+  if (!locals.user) {
+    throw redirect(302, `/login?redirectTo=/practice/${params.id}/summary`);
+  }
+
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, params.id),
     with: {
@@ -11,8 +16,8 @@ export const load: PageServerLoad = async ({ params }) => {
     },
   });
 
-  if (!practice) {
-    throw new Error("Practice not found");
+  if (!practice || practice.userId !== locals.user.id) {
+    throw error(404, "Practice not found");
   }
 
   // Self-contained practice data — no joins needed
@@ -24,5 +29,6 @@ export const load: PageServerLoad = async ({ params }) => {
   return {
     practice,
     practiceData: data,
+    user: locals.user,
   };
 };

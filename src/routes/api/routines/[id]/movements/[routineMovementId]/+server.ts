@@ -8,13 +8,22 @@ import { routineMovementConfigSchema } from "$lib/validation/schemas/routine";
 import {
   updateRoutineMovement,
   deleteRoutineMovement,
+  ForbiddenError,
 } from "$lib/db/helpers/routines";
 import type { RequestEvent } from "./$types";
+
+async function getAuthUser(event: RequestEvent) {
+  if (event.locals.user) {
+    return event.locals.user;
+  }
+  const { user } = await validateBearerToken(event);
+  return user;
+}
 
 // PATCH /api/routines/[id]/movements/[routineMovementId] - Update routine movement config (authenticated)
 export async function PATCH(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
     const body = await event.request.json();
@@ -28,6 +37,7 @@ export async function PATCH(event: RequestEvent) {
       event.params.id,
       event.params.routineMovementId,
       parsed.data,
+      user.id,
     );
 
     const updated = await db.query.routineMovements.findFirst({
@@ -40,6 +50,9 @@ export async function PATCH(event: RequestEvent) {
     if (err instanceof Error && err.message === "Unauthorized") {
       return json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
+    }
     if (err instanceof Error && err.message.includes("not found")) {
       return json({ success: false, error: err.message }, { status: 404 });
     }
@@ -50,17 +63,21 @@ export async function PATCH(event: RequestEvent) {
 // DELETE /api/routines/[id]/movements/[routineMovementId] - Remove movement from routine (authenticated)
 export async function DELETE(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
     await deleteRoutineMovement(
       event.params.id,
       event.params.routineMovementId,
+      user.id,
     );
     return json({ success: true, message: "Movement removed from routine" });
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") {
       return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
     }
     if (err instanceof Error && err.message.includes("not found")) {
       return json({ success: false, error: err.message }, { status: 404 });

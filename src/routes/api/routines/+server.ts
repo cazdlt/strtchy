@@ -1,19 +1,31 @@
 import { json } from "@sveltejs/kit";
 import { db } from "$lib/db";
 import { routines, routineMovements } from "$lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, or } from "drizzle-orm";
 import { validateBearerToken, requireAuth } from "$lib/api/auth";
 import { formatZodError, formatApiError } from "$lib/api/errors";
 import { routineSchema } from "$lib/validation/schemas/routine";
 import { createRoutine } from "$lib/db/helpers/routines";
 import type { RequestEvent } from "./$types";
 
-// GET /api/routines - List all routines (public)
+async function getAuthUser(event: RequestEvent) {
+  if (event.locals.user) {
+    return event.locals.user;
+  }
+  const { user } = await validateBearerToken(event);
+  return user;
+}
+
+// GET /api/routines - List routines (built-in or user's own)
 export async function GET(event: RequestEvent) {
   try {
+    const user = await getAuthUser(event);
+    requireAuth(user);
+
     const allRoutines = await db
       .select()
       .from(routines)
+      .where(or(eq(routines.isCustom, false), eq(routines.userId, user.id)))
       .orderBy(desc(routines.createdAt));
 
     const routinesWithCounts = await Promise.all(
@@ -32,6 +44,9 @@ export async function GET(event: RequestEvent) {
 
     return json({ success: true, routines: routinesWithCounts });
   } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
     return json(formatApiError(err), { status: 500 });
   }
 }
@@ -39,7 +54,7 @@ export async function GET(event: RequestEvent) {
 // POST /api/routines - Create routine (authenticated)
 export async function POST(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
     const body = await event.request.json();
@@ -49,7 +64,7 @@ export async function POST(event: RequestEvent) {
       return json(formatZodError(parsed.error), { status: 400 });
     }
 
-    const routineId = await createRoutine(parsed.data, user?.id);
+    const routineId = await createRoutine(parsed.data, user.id);
     const routine = await db.query.routines.findFirst({
       where: eq(routines.id, routineId),
       with: {

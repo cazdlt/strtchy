@@ -1,11 +1,20 @@
 <script lang="ts">
 	import PageHeader from '../../components/ui/PageHeader.svelte';
-	import { ArrowRight, UserCirclePlus } from 'phosphor-svelte';
+	import { ArrowRight, UserCirclePlus, Key, Copy, Check } from 'phosphor-svelte';
 	
-	let { data, form } = $props();
+	let { form } = $props();
 	let username = $state('');
 	let email = $state('');
 	let password = $state('');
+	let copied = $state(false);
+
+	function copyApiKey() {
+		if (form?.apiKey) {
+			navigator.clipboard.writeText(form.apiKey);
+			copied = true;
+			setTimeout(() => (copied = false), 2000);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -43,6 +52,55 @@
 					</h1>
 				</div>
 
+				{#if form?.success}
+					<div class="space-y-6">
+						<div class="bg-success/10 border border-success/20 px-4 py-3">
+							<p class="text-success text-sm font-body">
+								Account created successfully!
+							</p>
+						</div>
+
+						{#if form?.apiKey}
+							<div class="bg-accent-primary/10 border-2 border-accent-primary/30 p-4">
+								<div class="flex items-start gap-3">
+									<Key weight="duotone" size={20} class="text-accent-primary mt-0.5 shrink-0" />
+									<div class="flex-1 min-w-0">
+										<p class="text-accent-primary font-title text-sm mb-1">
+											Your API Key
+										</p>
+										<p class="text-text-muted text-xs mb-3 font-body">
+											Copy it now — it won't be shown again. You can rotate it anytime in your profile.
+										</p>
+										<div class="bg-inset p-3 font-mono text-sm text-accent-primary-light break-all mb-2">
+											{form.apiKey}
+										</div>
+										<button
+											type="button"
+											onclick={copyApiKey}
+											class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary border-2 border-accent-primary/50 transition-all duration-150 font-body text-sm"
+										>
+											{#if copied}
+												<Check weight="bold" size={16} />
+												Copied!
+											{:else}
+												<Copy weight="duotone" size={16} />
+												Copy to clipboard
+											{/if}
+										</button>
+									</div>
+								</div>
+							</div>
+						{/if}
+
+						<a
+							href="/login?registered=true"
+							class="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent-primary text-white hover:bg-accent-primary-light transition-all duration-150 font-display text-lg tracking-widest uppercase"
+						>
+							Continue to Sign In
+							<ArrowRight weight="bold" size={20} />
+						</a>
+					</div>
+				{:else}
 				<form method="POST" class="space-y-5">
 					<!-- Error Messages -->
 					{#if form?.missing}
@@ -129,6 +187,7 @@
 						<ArrowRight weight="bold" size={20} />
 					</button>
 				</form>
+				{/if}
 
 				<!-- Footer -->
 				<div class="mt-8 pt-6 border-t border-accent-track">

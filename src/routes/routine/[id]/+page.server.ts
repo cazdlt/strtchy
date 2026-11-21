@@ -6,17 +6,20 @@ import {
   practiceData,
   movements,
 } from "$lib/db/schema";
-import { eq, desc, and, isNull } from "drizzle-orm";
+import { eq, desc, and, or } from "drizzle-orm";
 import type { PageData, ActionsFailure, RequestEvent } from "./$types";
-import { fail, redirect } from "@sveltejs/kit";
+import { fail, redirect, error } from "@sveltejs/kit";
 import { nanoid } from "nanoid";
 import { calculateRoutineDuration } from "$lib/utils/formatting";
+import { deleteRoutine, ForbiddenError } from "$lib/db/helpers/routines";
 
 // Helper to get previous workout stats for a movement
 async function getPreviousStats(
   movementId: string,
   userId: string | null | undefined,
 ) {
+  if (!userId) return null;
+
   // Find the most recent practice log that has data for this movement
   const lastPracticeData = await db
     .select({
@@ -26,7 +29,7 @@ async function getPreviousStats(
     .innerJoin(practiceLogs, eq(practiceData.practiceLogId, practiceLogs.id))
     .where(
       and(
-        userId ? eq(practiceLogs.userId, userId) : isNull(practiceLogs.userId),
+        eq(practiceLogs.userId, userId),
         eq(practiceData.movementId, movementId),
       ),
     )
@@ -80,7 +83,11 @@ export async function load({
   });
 
   if (!routine) {
-    throw new Error("Routine not found");
+    throw error(404, "Routine not found");
+  }
+
+  if (routine.isCustom && (!locals.user || routine.userId !== locals.user.id)) {
+    throw error(404, "Routine not found");
   }
 
   const estimatedDuration = calculateRoutineDuration(
@@ -113,8 +120,16 @@ export async function load({
     }
   }
 
-  // All movements for add modal
-  const allMovements = await db.select().from(movements).orderBy(movements.name);
+  const movementWhere = locals.user
+    ? or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id))
+    : eq(movements.isCustom, false);
+
+  // All movements for add modal (built-in or user's own)
+  const allMovements = await db
+    .select()
+    .from(movements)
+    .where(movementWhere)
+    .orderBy(movements.name);
 
   // Group by type for add modal
   const groupedMovements: Record<string, typeof allMovements> = {
@@ -143,6 +158,18 @@ export async function load({
 
 export const actions = {
   startPractice: async ({ request, params, locals }: RequestEvent) => {
+    if (!locals.user) {
+      throw redirect(302, `/login?redirectTo=/routine/${params.id}`);
+    }
+
+    const routine = await db.query.routines.findFirst({
+      where: eq(routines.id, params.id),
+    });
+
+    if (!routine || (routine.isCustom && routine.userId !== locals.user.id)) {
+      throw error(404, "Routine not found");
+    }
+
     const formData = await request.formData();
     const customMovementsStr = formData.get("customMovements") as string | null;
 
@@ -165,7 +192,7 @@ export const actions = {
     await db.insert(practiceLogs).values({
       id: practiceLogId,
       routineId: params.id,
-      userId: locals.user?.id,
+      userId: locals.user.id,
       startedAt: now,
       notes,
     });
@@ -174,21 +201,21 @@ export const actions = {
   },
 
   deleteRoutine: async ({ params, locals }: RequestEvent) => {
-    // Check if user is authenticated and owns the routine
-    const routine = await db.query.routines.findFirst({
-      where: eq(routines.id, params.id),
-    });
-
-    if (!routine) {
-      return fail(404, { error: "Routine not found" });
+    if (!locals.user) {
+      return fail(401, { error: "Not authorized" });
     }
 
-    if (!locals.user || locals.user.id !== routine.userId) {
-      return fail(403, { error: "Not authorized to delete this routine" });
+    try {
+      await deleteRoutine(params.id, locals.user.id);
+    } catch (err) {
+      if (err instanceof ForbiddenError) {
+        return fail(403, { error: err.message });
+      }
+      if (err instanceof Error && err.message.includes("not found")) {
+        return fail(404, { error: "Routine not found" });
+      }
+      return fail(500, { error: "Failed to delete routine" });
     }
-
-    // Delete the routine (cascade will handle routine_movements)
-    await db.delete(routines).where(eq(routines.id, params.id));
 
     redirect(302, "/routines");
   },

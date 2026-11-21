@@ -7,13 +7,17 @@ import {
   movements,
   user,
 } from "$lib/db/schema";
-import { eq, desc, and, sql, isNull, ne } from "drizzle-orm";
-import { fail, redirect } from "@sveltejs/kit";
+import { eq, desc, and, sql, or } from "drizzle-orm";
+import { fail, redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad, RequestEvent } from "./$types";
 import { nanoid } from "nanoid";
 
 export const load: PageServerLoad = async ({ params, locals, depends }) => {
   depends("app:practice");
+
+  if (!locals.user) {
+    throw redirect(302, `/login?redirectTo=/practice/${params.id}`);
+  }
 
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, params.id),
@@ -22,8 +26,8 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     },
   });
 
-  if (!practice) {
-    throw new Error("Practice not found");
+  if (!practice || practice.userId !== locals.user.id) {
+    throw error(404, "Practice not found");
   }
 
   const isReadOnly = !!practice.completedAt;
@@ -55,8 +59,14 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
       })
     : [];
 
-  // All movements for add modal
-  const allMovements = await db.select().from(movements).orderBy(movements.name);
+  // All movements for add modal (built-in or user's own)
+  const allMovements = await db
+    .select()
+    .from(movements)
+    .where(
+      or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id)),
+    )
+    .orderBy(movements.name);
 
   // Group by type for add modal
   const groupedMovements: Record<string, typeof allMovements> = {
@@ -104,7 +114,9 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
 };
 
 export const actions = {
-  completePractice: async ({ request, params }: RequestEvent) => {
+  completePractice: async ({ request, params, locals }: RequestEvent) => {
+    if (!locals.user) return fail(401, { error: "Unauthorized" });
+
     const formData = await request.formData();
     const notes = formData.get("notes") as string;
     const dataJson = formData.get("practiceData") as string;
@@ -113,7 +125,9 @@ export const actions = {
     const practice = await db.query.practiceLogs.findFirst({
       where: eq(practiceLogs.id, params.id),
     });
-    if (!practice) return fail(404, { error: "Practice not found" });
+    if (!practice || practice.userId !== locals.user.id) {
+      return fail(404, { error: "Practice not found" });
+    }
 
     const duration = durationStr != null && durationStr !== ''
       ? parseInt(durationStr)
@@ -125,7 +139,7 @@ export const actions = {
       completedAt,
       duration,
       notes: notes || null,
-    }).where(eq(practiceLogs.id, params.id));
+    }).where(and(eq(practiceLogs.id, params.id), eq(practiceLogs.userId, locals.user.id)));
 
     // Batch insert all practice data
     if (dataJson) {
@@ -173,6 +187,8 @@ export const actions = {
   },
 
   updatePracticeSettings: async ({ request, locals }: RequestEvent) => {
+    if (!locals.user) return fail(401, { error: "Unauthorized" });
+
     const formData = await request.formData();
     const autoPlay = formData.get("autoPlay") === "true";
     const audioEnabled = formData.get("audioEnabled") === "true";
@@ -186,13 +202,18 @@ export const actions = {
       where: eq(practiceLogs.id, practiceId),
       with: { routine: true },
     });
-    if (!practice) return fail(404, { error: "Practice not found" });
+    if (!practice || practice.userId !== locals.user.id) {
+      return fail(404, { error: "Practice not found" });
+    }
 
-    await db.update(routines).set({
-      autoAdvance: autoPlay,
-      audioEnabled,
-      keepAwake,
-    }).where(eq(routines.id, practice.routineId));
+    // Only update routine settings if the routine is custom and owned by user
+    if (practice.routine.isCustom && practice.routine.userId === locals.user.id) {
+      await db.update(routines).set({
+        autoAdvance: autoPlay,
+        audioEnabled,
+        keepAwake,
+      }).where(and(eq(routines.id, practice.routineId), eq(routines.userId, locals.user.id)));
+    }
 
     if (locals.user?.id) {
       const userData = await db.query.user.findFirst({
@@ -213,7 +234,9 @@ export const actions = {
     return { success: true };
   },
 
-  saveRoutineChanges: async ({ request, params }: RequestEvent) => {
+  saveRoutineChanges: async ({ request, params, locals }: RequestEvent) => {
+    if (!locals.user) return fail(401, { error: "Unauthorized" });
+
     const formData = await request.formData();
     const movementsJson = formData.get("movements") as string;
 
@@ -221,8 +244,15 @@ export const actions = {
 
     const practice = await db.query.practiceLogs.findFirst({
       where: eq(practiceLogs.id, params.id),
+      with: { routine: true },
     });
-    if (!practice) return fail(404, { error: "Practice not found" });
+    if (!practice || practice.userId !== locals.user.id) {
+      return fail(404, { error: "Practice not found" });
+    }
+
+    if (!practice.routine.isCustom || practice.routine.userId !== locals.user.id) {
+      return fail(403, { error: "Cannot modify built-in or other users' routines" });
+    }
 
     const movementsData = JSON.parse(movementsJson) as Array<{
       id: string;

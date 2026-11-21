@@ -6,12 +6,24 @@ import {
   listPractices,
   createPractice,
   getPracticeById,
+  ForbiddenError,
 } from "$lib/db/helpers/practices";
 import type { RequestEvent } from "./$types";
 
-// GET /api/practices - List practice logs (public)
+async function getAuthUser(event: RequestEvent) {
+  if (event.locals.user) {
+    return event.locals.user;
+  }
+  const { user } = await validateBearerToken(event);
+  return user;
+}
+
+// GET /api/practices - List practice logs (authenticated, user's own)
 export async function GET(event: RequestEvent) {
   try {
+    const user = await getAuthUser(event);
+    requireAuth(user);
+
     const url = event.url;
     const limitParam = url.searchParams.get("limit");
     const offsetParam = url.searchParams.get("offset");
@@ -21,6 +33,7 @@ export async function GET(event: RequestEvent) {
     const toParam = url.searchParams.get("to");
 
     const result = await listPractices({
+      userId: user.id,
       limit: limitParam ? parseInt(limitParam, 10) : 20,
       offset: offsetParam ? parseInt(offsetParam, 10) : 0,
       routineId,
@@ -35,6 +48,12 @@ export async function GET(event: RequestEvent) {
       pagination: result.pagination,
     });
   } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
+    }
     return json(formatApiError(err), { status: 500 });
   }
 }
@@ -42,7 +61,7 @@ export async function GET(event: RequestEvent) {
 // POST /api/practices - Log a practice session (authenticated)
 export async function POST(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
     const body = await event.request.json();
@@ -51,13 +70,16 @@ export async function POST(event: RequestEvent) {
       return json(formatZodError(parsed.error), { status: 400 });
     }
 
-    const practiceId = await createPractice(parsed.data, user?.id);
-    const practice = await getPracticeById(practiceId);
+    const practiceId = await createPractice(parsed.data, user.id);
+    const practice = await getPracticeById(practiceId, user.id);
 
     return json({ success: true, practice }, { status: 201 });
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") {
       return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
     }
     if (err instanceof Error && err.message.includes("not found")) {
       return json({ success: false, error: err.message }, { status: 404 });

@@ -1,8 +1,8 @@
 import { redirect, fail } from "@sveltejs/kit";
 import { db } from "$lib/db";
 import { routines, routineMovements, movements } from "$lib/db/schema";
-import { eq } from "drizzle-orm";
-import { updateRoutine } from "$lib/db/helpers/routines";
+import { eq, or } from "drizzle-orm";
+import { updateRoutine, ForbiddenError } from "$lib/db/helpers/routines";
 import {
   routineUpdateSchema,
   routineMovementConfigSchema,
@@ -73,6 +73,10 @@ function validateMovementFields(movements: RoutineMovementConfig[]): {
 }
 
 export const load: PageServerLoad = async ({ params, locals }) => {
+  if (!locals.user) {
+    throw redirect(302, `/login?redirectTo=/routine/${params.id}/edit`);
+  }
+
   const routine = await db.query.routines.findFirst({
     where: eq(routines.id, params.id),
     with: {
@@ -85,13 +89,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     },
   });
 
-  if (!routine) {
+  if (!routine || !routine.isCustom || routine.userId !== locals.user.id) {
     throw redirect(303, "/routines");
   }
 
   const allMovements = await db
     .select()
     .from(movements)
+    .where(
+      or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id)),
+    )
     .orderBy(movements.createdAt);
 
   return {
@@ -113,6 +120,10 @@ export const actions: Actions = {
 
     if (!routine) {
       return fail(404, { not_found: true });
+    }
+
+    if (!routine.isCustom || routine.userId !== locals.user.id) {
+      return fail(403, { error: "Not authorized to edit this routine" });
     }
 
     const formData = await request.formData();
@@ -232,6 +243,10 @@ export const actions: Actions = {
     } catch (error) {
       if (error && typeof error === "object" && "status" in error) {
         throw error;
+      }
+
+      if (error instanceof ForbiddenError) {
+        return fail(403, { error: error.message, submittedData });
       }
 
       if (error instanceof Error) {

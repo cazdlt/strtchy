@@ -4,6 +4,15 @@ import { movementSchema } from "$lib/validation/schemas/movement";
 import { checkboxParser } from "$lib/validation/helpers/parsers";
 import type { RequestEvent } from "./$types";
 
+export const load = async ({ locals }: { locals: App.Locals }) => {
+  if (!locals.user) {
+    throw redirect(302, "/login?redirectTo=/movement/create");
+  }
+  return {
+    user: locals.user,
+  };
+};
+
 export const actions = {
   default: async ({ request, locals }: RequestEvent) => {
     if (!locals.user) {

@@ -1,6 +1,6 @@
 import { db } from "$lib/db";
-import { movements, routineMovements } from "$lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { movements } from "$lib/db/schema";
+import { eq, and, or, asc } from "drizzle-orm";
 import type {
   MovementInput,
   MovementUpdateInput,
@@ -9,12 +9,51 @@ import { checkDuplicateMovementName } from "$lib/validation/helpers/duplicates";
 import { handleIllustrationUpload, deleteIllustration } from "./files";
 import { getTargetTypeMap } from "$lib/validation/helpers/parsers";
 import { generateMovementId } from "$lib/utils/id";
+import { ForbiddenError } from "./routines";
+
+export { ForbiddenError };
+
+function requireValidUserId(userId: string | undefined): string {
+  if (!userId) {
+    throw new ForbiddenError("Forbidden: valid userId is required");
+  }
+  return userId;
+}
+
+export async function listMovements(userId?: string) {
+  const whereClause = userId
+    ? or(eq(movements.isCustom, false), eq(movements.userId, userId))
+    : eq(movements.isCustom, false);
+
+  return db.query.movements.findMany({
+    where: whereClause,
+    orderBy: [asc(movements.name)],
+  });
+}
+
+export async function getMovementById(movementId: string, userId?: string) {
+  const movement = await db.query.movements.findFirst({
+    where: eq(movements.id, movementId),
+  });
+
+  if (!movement) {
+    return null;
+  }
+
+  if (movement.isCustom && (!userId || movement.userId !== userId)) {
+    throw new ForbiddenError("Forbidden: you do not have access to this movement");
+  }
+
+  return movement;
+}
 
 export async function createMovement(
   data: MovementInput,
   userId: string,
   illustrationFile?: File,
 ) {
+  const validUserId = requireValidUserId(userId);
+
   // Check for duplicate name
   const duplicate = await checkDuplicateMovementName(data.name);
   if (duplicate.exists) {
@@ -46,7 +85,7 @@ export async function createMovement(
     type: data.type,
     illustrationPath,
     isCustom: true,
-    userId,
+    userId: validUserId,
     weightUnit:
       (data.type === "weighted" || data.type === "resistance_band") &&
       data.defaultUnit
@@ -71,12 +110,22 @@ export async function updateMovement(
   illustrationFile?: File,
   removeIllustration: boolean = false,
 ) {
+  const validUserId = requireValidUserId(userId);
+
   const existing = await db.query.movements.findFirst({
     where: eq(movements.id, movementId),
   });
 
   if (!existing) {
     throw new Error("Movement not found");
+  }
+
+  if (!existing.isCustom) {
+    throw new ForbiddenError("Forbidden: cannot modify built-in movement");
+  }
+
+  if (existing.userId !== validUserId) {
+    throw new ForbiddenError("Forbidden: you do not own this movement");
   }
 
   // Check for duplicate name if changing name
@@ -134,12 +183,14 @@ export async function updateMovement(
       equipment: data.equipment ?? existing.equipment,
       metadata,
     })
-    .where(eq(movements.id, movementId));
+    .where(and(eq(movements.id, movementId), eq(movements.userId, validUserId)));
 
   return movementId;
 }
 
 export async function deleteMovement(movementId: string, userId: string) {
+  const validUserId = requireValidUserId(userId);
+
   const existing = await db.query.movements.findFirst({
     where: eq(movements.id, movementId),
   });
@@ -148,10 +199,20 @@ export async function deleteMovement(movementId: string, userId: string) {
     throw new Error("Movement not found");
   }
 
+  if (!existing.isCustom) {
+    throw new ForbiddenError("Forbidden: cannot delete built-in movement");
+  }
+
+  if (existing.userId !== validUserId) {
+    throw new ForbiddenError("Forbidden: you do not own this movement");
+  }
+
   // Delete illustration if exists
   if (existing.illustrationPath) {
     await deleteIllustration(existing.illustrationPath);
   }
 
-  await db.delete(movements).where(eq(movements.id, movementId));
+  await db
+    .delete(movements)
+    .where(and(eq(movements.id, movementId), eq(movements.userId, validUserId)));
 }

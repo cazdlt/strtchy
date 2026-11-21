@@ -19,6 +19,10 @@ export async function load({
     throw error(404, "Movement not found");
   }
 
+  if (movement.isCustom && (!locals.user || movement.userId !== locals.user.id)) {
+    throw error(404, "Movement not found");
+  }
+
   return {
     movement,
     user: locals.user,

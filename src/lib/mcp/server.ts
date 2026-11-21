@@ -7,7 +7,7 @@ import {
   practiceData,
   practiceLogs,
 } from "$lib/db/schema";
-import { desc, eq, asc } from "drizzle-orm";
+import { desc, eq, asc, or } from "drizzle-orm";
 import {
   createMovement,
   updateMovement,
@@ -535,7 +535,7 @@ const tools: McpToolDefinition<any>[] = [
     name: "list_practices",
     description:
       "List practice session history (completed or in-progress stretching sessions) with pagination and optional filters.",
-    requiresAuth: false,
+    requiresAuth: true,
     annotations: { readOnlyHint: true },
     schema: z.object({
       limit: z
@@ -563,7 +563,8 @@ const tools: McpToolDefinition<any>[] = [
         .optional()
         .describe("ISO date string upper bound"),
     }),
-    handler: async (args) => {
+    handler: async (args, ctx) => {
+      const user = requireMcpUser(ctx);
       return await listPractices({
         limit: args.limit,
         offset: args.offset,
@@ -571,6 +572,7 @@ const tools: McpToolDefinition<any>[] = [
         completedOnly: args.completedOnly,
         fromDate: args.fromDate ? new Date(args.fromDate) : undefined,
         toDate: args.toDate ? new Date(args.toDate) : undefined,
+        userId: user.id,
       });
     },
   },
@@ -578,13 +580,14 @@ const tools: McpToolDefinition<any>[] = [
     name: "get_practice",
     description:
       "Get full details of a specific practice session by ID, including set-by-set performance data.",
-    requiresAuth: false,
+    requiresAuth: true,
     annotations: { readOnlyHint: true },
     schema: z.object({
       id: z.string().min(1).describe("Practice log ID"),
     }),
-    handler: async (args) => {
-      const practice = await getPracticeById(args.id);
+    handler: async (args, ctx) => {
+      const user = requireMcpUser(ctx);
+      const practice = await getPracticeById(args.id, user.id);
       if (!practice) {
         throw new Error(`Practice '${args.id}' not found`);
       }
@@ -662,7 +665,7 @@ const tools: McpToolDefinition<any>[] = [
         },
         user.id,
       );
-      const practice = await getPracticeById(practiceId);
+      const practice = await getPracticeById(practiceId, user.id);
       return { practice };
     },
   },
@@ -681,20 +684,24 @@ const tools: McpToolDefinition<any>[] = [
       practiceData: z.array(practiceDataEntrySchema).optional(),
     }),
     handler: async (args, ctx) => {
-      requireMcpUser(ctx);
-      await updatePractice(args.id, {
-        startedAt: args.startedAt ? new Date(args.startedAt) : undefined,
-        completedAt:
-          args.completedAt === null
-            ? null
-            : args.completedAt
-              ? new Date(args.completedAt)
-              : undefined,
-        duration: args.duration,
-        notes: args.notes,
-        practiceData: args.practiceData,
-      });
-      const practice = await getPracticeById(args.id);
+      const user = requireMcpUser(ctx);
+      await updatePractice(
+        args.id,
+        {
+          startedAt: args.startedAt ? new Date(args.startedAt) : undefined,
+          completedAt:
+            args.completedAt === null
+              ? null
+              : args.completedAt
+                ? new Date(args.completedAt)
+                : undefined,
+          duration: args.duration,
+          notes: args.notes,
+          practiceData: args.practiceData,
+        },
+        user.id,
+      );
+      const practice = await getPracticeById(args.id, user.id);
       return { practice };
     },
   },
@@ -707,8 +714,8 @@ const tools: McpToolDefinition<any>[] = [
       id: z.string().min(1).describe("Practice log ID to delete"),
     }),
     handler: async (args, ctx) => {
-      requireMcpUser(ctx);
-      await deletePractice(args.id);
+      const user = requireMcpUser(ctx);
+      await deletePractice(args.id, user.id);
       return { deleted: true, id: args.id };
     },
   },
@@ -716,7 +723,7 @@ const tools: McpToolDefinition<any>[] = [
     name: "get_practice_stats",
     description:
       "Get aggregated stretching and recovery statistics: total practices, total time stretched, days since last practice, top routines, and most practiced movements.",
-    requiresAuth: false,
+    requiresAuth: true,
     annotations: { readOnlyHint: true },
     schema: z.object({
       days: z
@@ -727,8 +734,9 @@ const tools: McpToolDefinition<any>[] = [
         .default(30)
         .describe("Number of days for the recent period breakdown (default 30)"),
     }),
-    handler: async (args) => {
-      return await getPracticeStats(args.days);
+    handler: async (args, ctx) => {
+      const user = requireMcpUser(ctx);
+      return await getPracticeStats(args.days, user.id);
     },
   },
 ];
@@ -933,6 +941,11 @@ export async function handleJsonRpcMessage(
           const allMovements = await db
             .select()
             .from(movements)
+            .where(
+              ctx.user
+                ? or(eq(movements.isCustom, false), eq(movements.userId, ctx.user.id))
+                : eq(movements.isCustom, false),
+            )
             .orderBy(asc(movements.name));
           return {
             jsonrpc: "2.0",
@@ -950,6 +963,9 @@ export async function handleJsonRpcMessage(
         }
         if (uri === "strtchy://catalog/routines") {
           const allRoutines = await db.query.routines.findMany({
+            where: ctx.user
+              ? or(eq(routines.isCustom, false), eq(routines.userId, ctx.user.id))
+              : eq(routines.isCustom, false),
             with: {
               movements: {
                 with: { movement: true },
@@ -972,7 +988,17 @@ export async function handleJsonRpcMessage(
           };
         }
         if (uri === "strtchy://stats/summary") {
-          const stats = await getPracticeStats(30);
+          if (!ctx.user) {
+            return {
+              jsonrpc: "2.0",
+              id,
+              error: {
+                code: -32602,
+                message: "Authentication required for strtchy://stats/summary",
+              },
+            };
+          }
+          const stats = await getPracticeStats(30, ctx.user.id);
           return {
             jsonrpc: "2.0",
             id,

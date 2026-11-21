@@ -1,15 +1,22 @@
 import { db } from "$lib/db";
 import { routines, routineMovements, movements } from "$lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, or } from "drizzle-orm";
 import { calculateRoutineDuration } from "$lib/utils/formatting";
-import { redirect } from "@sveltejs/kit";
-import { fail } from "@sveltejs/kit";
+import { redirect, fail } from "@sveltejs/kit";
+import { deleteRoutine, ForbiddenError } from "$lib/db/helpers/routines";
 import type { PageServerLoad, Actions } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.user) {
+    throw redirect(302, "/login?redirectTo=/routines");
+  }
+
   const allRoutines = await db
     .select()
     .from(routines)
+    .where(
+      or(eq(routines.isCustom, false), eq(routines.userId, locals.user.id)),
+    )
     .orderBy(desc(routines.createdAt));
 
   const routinesWithCounts = await Promise.all(
@@ -60,17 +67,18 @@ export const actions: Actions = {
       return fail(400, { missing: true });
     }
 
-    const routine = await db
-      .select()
-      .from(routines)
-      .where(eq(routines.id, id))
-      .get();
-
-    if (!routine) {
-      return fail(404, { not_found: true });
+    try {
+      await deleteRoutine(id, locals.user.id);
+    } catch (error) {
+      if (error instanceof ForbiddenError) {
+        return fail(403, { forbidden: true, error: error.message });
+      }
+      if (error instanceof Error && error.message.includes("not found")) {
+        return fail(404, { not_found: true });
+      }
+      return fail(500, { error: "Failed to delete routine" });
     }
 
-    await db.delete(routines).where(eq(routines.id, id));
     throw redirect(303, "/routines");
   },
 };

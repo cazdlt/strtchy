@@ -5,15 +5,29 @@ import { eq } from "drizzle-orm";
 import { validateBearerToken, requireAuth } from "$lib/api/auth";
 import { formatZodError, formatApiError } from "$lib/api/errors";
 import { movementUpdateSchema } from "$lib/validation/schemas/movement";
-import { updateMovement, deleteMovement } from "$lib/db/helpers/movements";
+import {
+  getMovementById,
+  updateMovement,
+  deleteMovement,
+  ForbiddenError,
+} from "$lib/db/helpers/movements";
 import type { RequestEvent } from "./$types";
 
-// GET /api/movements/[id] - Get single movement (public)
+async function getAuthUser(event: RequestEvent) {
+  if (event.locals.user) {
+    return event.locals.user;
+  }
+  const { user } = await validateBearerToken(event);
+  return user;
+}
+
+// GET /api/movements/[id] - Get single movement (authenticated)
 export async function GET(event: RequestEvent) {
   try {
-    const movement = await db.query.movements.findFirst({
-      where: eq(movements.id, event.params.id),
-    });
+    const user = await getAuthUser(event);
+    requireAuth(user);
+
+    const movement = await getMovementById(event.params.id, user.id);
 
     if (!movement) {
       return json(
@@ -24,6 +38,12 @@ export async function GET(event: RequestEvent) {
 
     return json({ success: true, movement });
   } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
+    }
     return json(formatApiError(err), { status: 500 });
   }
 }
@@ -31,7 +51,7 @@ export async function GET(event: RequestEvent) {
 // PATCH /api/movements/[id] - Update movement (authenticated)
 export async function PATCH(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
     const body = await event.request.json();
@@ -51,6 +71,9 @@ export async function PATCH(event: RequestEvent) {
     if (err instanceof Error && err.message === "Unauthorized") {
       return json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
+    }
     if (err instanceof Error && err.message.includes("already exists")) {
       return json({ success: false, error: err.message }, { status: 409 });
     }
@@ -64,7 +87,7 @@ export async function PATCH(event: RequestEvent) {
 // DELETE /api/movements/[id] - Delete movement (authenticated)
 export async function DELETE(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
     await deleteMovement(event.params.id, user.id);
@@ -72,6 +95,9 @@ export async function DELETE(event: RequestEvent) {
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") {
       return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
     }
     if (err instanceof Error && err.message.includes("not found")) {
       return json({ success: false, error: err.message }, { status: 404 });

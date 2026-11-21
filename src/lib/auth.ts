@@ -15,6 +15,42 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+    async sendResetPassword({ user, url }) {
+      const resendApiKey = process.env.RESEND_API_KEY;
+      if (resendApiKey) {
+        const fromEmail =
+          process.env.RESEND_FROM_EMAIL || "Strtchy <noreply@strtchy.app>";
+        const response = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: [user.email],
+            subject: "Reset your Strtchy password",
+            html: `<p>Click the link below to reset your password:</p><p><a href="${url}">${url}</a></p><p>If you did not request this, you can safely ignore this email.</p>`,
+          }),
+        });
+        if (!response.ok) {
+          const errorBody = await response.text();
+          console.error(
+            "[auth] Failed to send reset password email via Resend:",
+            response.status,
+            errorBody,
+          );
+        }
+      } else {
+        console.info(
+          JSON.stringify({
+            event: "password_reset_requested",
+            email: user.email,
+            resetUrl: url,
+          }),
+        );
+      }
+    },
   },
   user: {
     additionalFields: {
@@ -32,8 +68,8 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    useSecureCookies: false,
-    disableCSRFCheck: true,
+    useSecureCookies: process.env.NODE_ENV === "production",
+    disableCSRFCheck: false,
   },
   session: {
     cookieCache: {

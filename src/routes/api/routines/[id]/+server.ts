@@ -8,21 +8,29 @@ import {
   routineUpdateSchema,
   movementsDataInputSchema,
 } from "$lib/validation/schemas/routine";
-import { updateRoutine, deleteRoutine } from "$lib/db/helpers/routines";
+import {
+  getRoutineById,
+  updateRoutine,
+  deleteRoutine,
+  ForbiddenError,
+} from "$lib/db/helpers/routines";
 import type { RequestEvent } from "./$types";
 
-// GET /api/routines/[id] - Get single routine with movements (public)
+async function getAuthUser(event: RequestEvent) {
+  if (event.locals.user) {
+    return event.locals.user;
+  }
+  const { user } = await validateBearerToken(event);
+  return user;
+}
+
+// GET /api/routines/[id] - Get single routine with movements (authenticated)
 export async function GET(event: RequestEvent) {
   try {
-    const routine = await db.query.routines.findFirst({
-      where: eq(routines.id, event.params.id),
-      with: {
-        movements: {
-          with: { movement: true },
-          orderBy: routineMovements.order,
-        },
-      },
-    });
+    const user = await getAuthUser(event);
+    requireAuth(user);
+
+    const routine = await getRoutineById(event.params.id, user.id);
 
     if (!routine) {
       return json(
@@ -33,6 +41,12 @@ export async function GET(event: RequestEvent) {
 
     return json({ success: true, routine });
   } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
+    }
     return json(formatApiError(err), { status: 500 });
   }
 }
@@ -40,7 +54,7 @@ export async function GET(event: RequestEvent) {
 // PATCH /api/routines/[id] - Update routine (authenticated)
 export async function PATCH(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
     const body = await event.request.json();
@@ -67,7 +81,7 @@ export async function PATCH(event: RequestEvent) {
       event.params.id,
       routineParsed.data,
       movementsData,
-      user?.id,
+      user.id,
     );
 
     const updated = await db.query.routines.findFirst({
@@ -85,6 +99,9 @@ export async function PATCH(event: RequestEvent) {
     if (err instanceof Error && err.message === "Unauthorized") {
       return json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
+    }
     if (err instanceof Error && err.message.includes("already exists")) {
       return json({ success: false, error: err.message }, { status: 409 });
     }
@@ -98,14 +115,17 @@ export async function PATCH(event: RequestEvent) {
 // DELETE /api/routines/[id] - Delete routine (authenticated)
 export async function DELETE(event: RequestEvent) {
   try {
-    const { user } = await validateBearerToken(event);
+    const user = await getAuthUser(event);
     requireAuth(user);
 
-    await deleteRoutine(event.params.id, user?.id);
+    await deleteRoutine(event.params.id, user.id);
     return json({ success: true, message: "Routine deleted" });
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") {
       return json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (err instanceof ForbiddenError) {
+      return json({ success: false, error: err.message }, { status: 403 });
     }
     if (err instanceof Error && err.message.includes("not found")) {
       return json({ success: false, error: err.message }, { status: 404 });
