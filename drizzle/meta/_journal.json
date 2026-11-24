@@ -22,6 +22,13 @@
       "when": 1784650000000,
       "tag": "0002_normalize_movement_names",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784700000000,
+      "tag": "0003_add_guest_id_to_practice_logs",
+      "breakpoints": true
     }
   ]
 }

@@ -115,6 +115,7 @@
 	let isReordering = $state(false);
 	let isAdjustingSets = $state(false);
 	let showSaveChangesModal = $state(false);
+	let showGuestCompleteModal = $state(false);
 	let isSavingRoutineChanges = $state(false);
 
 	// Movement detail modal state
@@ -226,8 +227,12 @@
 	}
 
 	async function handleCompleteWorkout() {
-		if (session.hasRoutineChanges) {
+		if (session.hasRoutineChanges && !data.isGuest) {
 			showSaveChangesModal = true;
+			return;
+		}
+		if (data.isGuest) {
+			showGuestCompleteModal = true;
 			return;
 		}
 		if (!confirm('Complete workout?')) return;
@@ -605,6 +610,43 @@
 						class="w-full py-3 px-4 border border-accent-track text-text-muted font-title uppercase tracking-wider text-sm hover:text-text-primary transition-colors disabled:opacity-50"
 					>
 						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	{#if showGuestCompleteModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+			<div class="bg-surface p-6 max-w-md w-full border-t-4 border-t-accent-warm border-x border-b border-accent-track" style="box-shadow: var(--shadow-elevated);">
+				<span class="font-mono text-xs uppercase tracking-widest text-accent-warm block mb-1">Guest Practice</span>
+				<h3 class="font-display text-3xl text-text-primary tracking-wider mb-3">FINISH PRACTICE</h3>
+				<p class="text-text-secondary font-body text-sm mb-6 leading-relaxed">
+					Create a free account to save this practice, track your streak, and build custom routines.
+				</p>
+				<div class="flex flex-col gap-3">
+					<a
+						href="/register"
+						class="w-full py-3 px-4 bg-accent-primary hover:bg-accent-primary-light text-white font-display text-lg uppercase tracking-widest text-center transition-colors"
+					>
+						Create Free Account
+					</a>
+					<button
+						onclick={() => {
+							showGuestCompleteModal = false;
+							doCompleteWorkout();
+						}}
+						disabled={isCompleting}
+						class="w-full py-3 px-4 bg-surface-elevated hover:bg-accent-track text-text-primary font-title uppercase tracking-wider text-sm transition-colors disabled:opacity-50"
+					>
+						{isCompleting ? 'Finishing...' : 'Finish & View Summary'}
+					</button>
+					<button
+						onclick={() => (showGuestCompleteModal = false)}
+						disabled={isCompleting}
+						class="w-full py-3 px-4 border border-accent-track text-text-muted font-title uppercase tracking-wider text-sm hover:text-text-primary transition-colors disabled:opacity-50"
+					>
+						Keep Practicing
 					</button>
 				</div>
 			</div>

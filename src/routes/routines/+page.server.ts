@@ -7,16 +7,14 @@ import { deleteRoutine, ForbiddenError } from "$lib/db/helpers/routines";
 import type { PageServerLoad, Actions } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.user) {
-    throw redirect(302, "/login?redirectTo=/routines");
-  }
+  const routineWhere = locals.user
+    ? or(eq(routines.isCustom, false), eq(routines.userId, locals.user.id))
+    : eq(routines.isCustom, false);
 
   const allRoutines = await db
     .select()
     .from(routines)
-    .where(
-      or(eq(routines.isCustom, false), eq(routines.userId, locals.user.id)),
-    )
+    .where(routineWhere)
     .orderBy(desc(routines.createdAt));
 
   const routinesWithCounts = await Promise.all(

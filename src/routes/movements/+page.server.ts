@@ -6,16 +6,14 @@ import { deleteMovement, ForbiddenError } from "$lib/db/helpers/movements";
 import type { PageServerLoad, Actions } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.user) {
-    throw redirect(302, "/login?redirectTo=/movements");
-  }
+  const movementWhere = locals.user
+    ? or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id))
+    : eq(movements.isCustom, false);
 
   const allMovements = await db
     .select()
     .from(movements)
-    .where(
-      or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id)),
-    )
+    .where(movementWhere)
     .orderBy(desc(movements.createdAt));
 
   return {

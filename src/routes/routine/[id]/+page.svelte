@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import PageHeader from '../../../components/ui/PageHeader.svelte';
+	import GuestBanner from '$lib/components/GuestBanner.svelte';
 	import { goto } from '$app/navigation';
 	import { nanoid } from 'nanoid';
 	import {
@@ -292,6 +293,10 @@
 			</button>
 		</div>
 	</PageHeader>
+
+	{#if !data.user}
+		<GuestBanner />
+	{/if}
 
 	<main class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
 		<!-- Hero Section -->

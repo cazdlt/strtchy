@@ -111,6 +111,39 @@ for (const entry of journal.entries) {
     }
   }
 
+  // --- Special handling: guest_id migration (0003) ---
+  if (entry.tag === "0003_add_guest_id_to_practice_logs") {
+    const tableExists = sqlite
+      .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'practice_logs'")
+      .get();
+    if (!tableExists) {
+      console.log(
+        `${YELLOW}[Skip] ${entry.tag} - practice_logs table does not exist yet${NC}`
+      );
+      sqlite
+        .prepare("INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)")
+        .run(entry.tag, Date.now());
+      skipped++;
+      continue;
+    }
+
+    const guestCol = sqlite
+      .prepare(
+        "SELECT name FROM pragma_table_info('practice_logs') WHERE name = 'guest_id'"
+      )
+      .get();
+    if (guestCol) {
+      console.log(
+        `${YELLOW}[Skip] ${entry.tag} - guest_id column already exists${NC}`
+      );
+      sqlite
+        .prepare("INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)")
+        .run(entry.tag, Date.now());
+      skipped++;
+      continue;
+    }
+  }
+
   // --- Run migration ---
   console.log(`${GREEN}[Apply] ${entry.tag}...${NC}`);
 

@@ -12,6 +12,7 @@ import { fail, redirect, error } from "@sveltejs/kit";
 import { nanoid } from "nanoid";
 import { calculateRoutineDuration } from "$lib/utils/formatting";
 import { deleteRoutine, ForbiddenError } from "$lib/db/helpers/routines";
+import { getOrCreateGuestId } from "$lib/server/guest";
 
 // Helper to get previous workout stats for a movement
 async function getPreviousStats(
@@ -157,17 +158,17 @@ export async function load({
 }
 
 export const actions = {
-  startPractice: async ({ request, params, locals }: RequestEvent) => {
-    if (!locals.user) {
-      throw redirect(302, `/login?redirectTo=/routine/${params.id}`);
-    }
-
+  startPractice: async ({ request, params, locals, cookies }: RequestEvent) => {
     const routine = await db.query.routines.findFirst({
       where: eq(routines.id, params.id),
     });
 
-    if (!routine || (routine.isCustom && routine.userId !== locals.user.id)) {
+    if (!routine) {
       throw error(404, "Routine not found");
+    }
+
+    if (routine.isCustom && (!locals.user || routine.userId !== locals.user.id)) {
+      throw error(locals.user ? 404 : 403, "Routine not found");
     }
 
     const formData = await request.formData();
@@ -189,10 +190,13 @@ export const actions = {
       }
     }
 
+    const guestId = locals.user ? null : getOrCreateGuestId(cookies);
+
     await db.insert(practiceLogs).values({
       id: practiceLogId,
       routineId: params.id,
-      userId: locals.user.id,
+      userId: locals.user ? locals.user.id : null,
+      guestId,
       startedAt: now,
       notes,
     });

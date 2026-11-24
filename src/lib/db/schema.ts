@@ -151,6 +151,7 @@ export const practiceLogs = sqliteTable("practice_logs", {
     .references(() => routines.id)
     .notNull(),
   userId: text("user_id").references(() => users.id),
+  guestId: text("guest_id"),
   startedAt: integer("started_at", { mode: "timestamp" }).notNull(),
   completedAt: integer("completed_at", { mode: "timestamp" }),
   duration: integer("duration"), // in seconds

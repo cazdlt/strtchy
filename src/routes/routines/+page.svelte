@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import PageHeader from '../../components/ui/PageHeader.svelte';
 	import RoutineCard from '../../components/ui/RoutineCard.svelte';
+	import GuestBanner from '$lib/components/GuestBanner.svelte';
 	import { ListChecks, Plus, ArrowRight } from 'phosphor-svelte';
 
 	let { data, form }: { data: PageData; form?: { error?: string } } = $props();
@@ -36,6 +37,10 @@
 		backUrl="/"
 		backText="Home"
 	/>
+
+	{#if !data.user}
+		<GuestBanner />
+	{/if}
 
 	<main class="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
 		<!-- Hero Section -->

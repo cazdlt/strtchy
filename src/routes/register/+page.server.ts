@@ -5,9 +5,10 @@ import { eq } from "drizzle-orm";
 import { fail } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 import { generateApiKey } from "$lib/api/apiKey";
+import { claimGuestPractices } from "$lib/server/guest";
 
 export const actions = {
-  default: async ({ request }: RequestEvent) => {
+  default: async ({ request, cookies }: RequestEvent) => {
     const formData = await request.formData();
     const username = formData.get("username");
     const email = formData.get("email");
@@ -65,6 +66,8 @@ export const actions = {
             apiKeyCreatedAt: new Date(),
           })
           .where(eq(user.id, userId));
+
+        await claimGuestPractices(cookies, userId);
       }
 
       return {

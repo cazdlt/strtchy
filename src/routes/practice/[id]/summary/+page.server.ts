@@ -3,12 +3,9 @@ import { practiceLogs, practiceData } from "$lib/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { canAccessPractice } from "$lib/server/guest";
 
-export const load: PageServerLoad = async ({ params, locals }) => {
-  if (!locals.user) {
-    throw redirect(302, `/login?redirectTo=/practice/${params.id}/summary`);
-  }
-
+export const load: PageServerLoad = async ({ params, locals, cookies }) => {
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, params.id),
     with: {
@@ -16,7 +13,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     },
   });
 
-  if (!practice || practice.userId !== locals.user.id) {
+  if (!practice || !canAccessPractice(practice, locals.user?.id, cookies)) {
+    if (!locals.user) {
+      throw redirect(302, `/login?redirectTo=/practice/${params.id}/summary`);
+    }
     throw error(404, "Practice not found");
   }
 
@@ -30,5 +30,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     practice,
     practiceData: data,
     user: locals.user,
+    isGuest: !locals.user,
   };
 };

@@ -11,13 +11,15 @@ import { eq, desc, and, sql, or } from "drizzle-orm";
 import { fail, redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad, RequestEvent } from "./$types";
 import { nanoid } from "nanoid";
+import { canAccessPractice } from "$lib/server/guest";
 
-export const load: PageServerLoad = async ({ params, locals, depends }) => {
+export const load: PageServerLoad = async ({
+  params,
+  locals,
+  cookies,
+  depends,
+}) => {
   depends("app:practice");
-
-  if (!locals.user) {
-    throw redirect(302, `/login?redirectTo=/practice/${params.id}`);
-  }
 
   const practice = await db.query.practiceLogs.findFirst({
     where: eq(practiceLogs.id, params.id),
@@ -26,7 +28,10 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     },
   });
 
-  if (!practice || practice.userId !== locals.user.id) {
+  if (!practice || !canAccessPractice(practice, locals.user?.id, cookies)) {
+    if (!locals.user) {
+      throw redirect(302, `/login?redirectTo=/practice/${params.id}`);
+    }
     throw error(404, "Practice not found");
   }
 
@@ -60,12 +65,14 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     : [];
 
   // All movements for add modal (built-in or user's own)
+  const movementWhere = locals.user
+    ? or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id))
+    : eq(movements.isCustom, false);
+
   const allMovements = await db
     .select()
     .from(movements)
-    .where(
-      or(eq(movements.isCustom, false), eq(movements.userId, locals.user.id)),
-    )
+    .where(movementWhere)
     .orderBy(movements.name);
 
   // Group by type for add modal
@@ -108,15 +115,14 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     existingPracticeData,
     userPrefs,
     isReadOnly,
+    isGuest: !locals.user,
     groupedMovements,
     equipment: Array.from(allEquipment).sort(),
   };
 };
 
 export const actions = {
-  completePractice: async ({ request, params, locals }: RequestEvent) => {
-    if (!locals.user) return fail(401, { error: "Unauthorized" });
-
+  completePractice: async ({ request, params, locals, cookies }: RequestEvent) => {
     const formData = await request.formData();
     const notes = formData.get("notes") as string;
     const dataJson = formData.get("practiceData") as string;
@@ -125,7 +131,8 @@ export const actions = {
     const practice = await db.query.practiceLogs.findFirst({
       where: eq(practiceLogs.id, params.id),
     });
-    if (!practice || practice.userId !== locals.user.id) {
+    if (!practice || !canAccessPractice(practice, locals.user?.id, cookies)) {
+      if (!locals.user) return fail(401, { error: "Unauthorized" });
       return fail(404, { error: "Practice not found" });
     }
 
@@ -139,7 +146,7 @@ export const actions = {
       completedAt,
       duration,
       notes: notes || null,
-    }).where(and(eq(practiceLogs.id, params.id), eq(practiceLogs.userId, locals.user.id)));
+    }).where(eq(practiceLogs.id, params.id));
 
     // Batch insert all practice data
     if (dataJson) {
@@ -186,9 +193,7 @@ export const actions = {
     redirect(302, `/practice/${params.id}/summary`);
   },
 
-  updatePracticeSettings: async ({ request, locals }: RequestEvent) => {
-    if (!locals.user) return fail(401, { error: "Unauthorized" });
-
+  updatePracticeSettings: async ({ request, locals, cookies }: RequestEvent) => {
     const formData = await request.formData();
     const autoPlay = formData.get("autoPlay") === "true";
     const audioEnabled = formData.get("audioEnabled") === "true";
@@ -202,12 +207,17 @@ export const actions = {
       where: eq(practiceLogs.id, practiceId),
       with: { routine: true },
     });
-    if (!practice || practice.userId !== locals.user.id) {
+    if (!practice || !canAccessPractice(practice, locals.user?.id, cookies)) {
+      if (!locals.user) return fail(401, { error: "Unauthorized" });
       return fail(404, { error: "Practice not found" });
     }
 
     // Only update routine settings if the routine is custom and owned by user
-    if (practice.routine.isCustom && practice.routine.userId === locals.user.id) {
+    if (
+      locals.user &&
+      practice.routine.isCustom &&
+      practice.routine.userId === locals.user.id
+    ) {
       await db.update(routines).set({
         autoAdvance: autoPlay,
         audioEnabled,

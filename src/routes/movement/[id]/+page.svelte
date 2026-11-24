@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import PageHeader from '../../../components/ui/PageHeader.svelte';
+	import GuestBanner from '$lib/components/GuestBanner.svelte';
 	import { goto } from '$app/navigation';
 	import { PersonSimple, ArrowsLeftRight, Timer, Barbell, ArrowLeft, PencilSimple, Stack } from 'phosphor-svelte';
 	import MovementArt from '../../../components/ui/MovementArt.svelte';
@@ -51,6 +52,10 @@
 			</button>
 		</div>
 	</PageHeader>
+
+	{#if !data.user}
+		<GuestBanner />
+	{/if}
 
 	<main class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
 		<!-- Header Section -->

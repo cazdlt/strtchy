@@ -53,6 +53,31 @@
 	</header>
 
 	<main class="max-w-4xl mx-auto p-6">
+		{#if data.isGuest}
+			<div class="bg-surface border-t-4 border-t-accent-warm border-x border-b border-accent-track p-6 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="box-shadow: var(--shadow-elevated);">
+				<div>
+					<span class="font-mono text-xs uppercase tracking-widest text-accent-warm block mb-1">Guest Session</span>
+					<p class="font-body text-sm text-text-primary">
+						Create a free account to save this practice, track your streak, and build custom routines.
+					</p>
+				</div>
+				<div class="flex items-center gap-3 shrink-0">
+					<a
+						href="/register"
+						class="bg-accent-primary hover:bg-accent-primary-light text-white px-5 py-2.5 font-display text-base tracking-widest uppercase transition-colors"
+					>
+						Create Free Account
+					</a>
+					<a
+						href="/login"
+						class="border border-accent-track hover:border-accent-primary text-text-secondary hover:text-text-primary px-4 py-2.5 font-display text-base tracking-widest uppercase transition-colors"
+					>
+						Log In
+					</a>
+				</div>
+			</div>
+		{/if}
+
 		<!-- Stats -->
 		<div class="grid grid-cols-2 gap-4 mb-8">
 			<div class="bg-surface border-t-4 border-t-accent-primary p-6" style="box-shadow: var(--shadow-elevated);">

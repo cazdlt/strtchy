@@ -1,6 +1,7 @@
 import { auth } from "$lib/auth";
 import { fail, redirect } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
+import { claimGuestPractices } from "$lib/server/guest";
 
 function getSafeRedirectTo(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
@@ -17,7 +18,7 @@ export const load = async ({ url }: { url: URL }) => {
 };
 
 export const actions = {
-  default: async ({ request, url }: RequestEvent) => {
+  default: async ({ request, url, cookies }: RequestEvent) => {
     const formData = await request.formData();
     const email = formData.get("email");
     const password = formData.get("password");
@@ -45,6 +46,15 @@ export const actions = {
 
       if (!result) {
         return fail(400, { credentials: true });
+      }
+
+      if (
+        typeof result === "object" &&
+        "user" in result &&
+        result.user &&
+        result.user.id
+      ) {
+        await claimGuestPractices(cookies, result.user.id);
       }
     } catch (e) {
       console.error("Login error:", e);

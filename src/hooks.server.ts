@@ -13,7 +13,6 @@ const PROTECTED_ROUTE_PATTERNS = [
   /^\/routine\/[^/]+\/edit(\/.*)?$/,
   /^\/movement\/create(\/.*)?$/,
   /^\/movement\/[^/]+\/edit(\/.*)?$/,
-  /^\/practice(\/.*)?$/,
   /^\/practices(\/.*)?$/,
   /^\/profile(\/.*)?$/,
 ];
