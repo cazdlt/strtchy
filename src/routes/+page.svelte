@@ -4,6 +4,7 @@
 	import PageHeader from '../components/ui/PageHeader.svelte';
 	import { ListChecks, Plus, Clock, PersonSimple, Barbell, ArrowRight, Play } from 'phosphor-svelte';
 	import { routineCover, movementArt } from '$lib/art';
+	import LandingPage from '$lib/components/LandingPage.svelte';
 
 	// Empty-state illustration: a cast member resting in a calm seated stretch.
 	const restingArt = movementArt({ name: 'Butterfly Stretch' });
@@ -22,6 +23,9 @@
 	<title>Strtchy — Your stretching practice</title>
 </svelte:head>
 
+{#if !data.user}
+	<LandingPage routines={data.routines} />
+{:else}
 <div class="min-h-screen bg-base">
 	<PageHeader user={data.user} showNav={false} />
 
@@ -281,3 +285,4 @@
 		</div>
 	</footer>
 </div>
+{/if}

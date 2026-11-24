@@ -190,12 +190,18 @@
 				{/if}
 
 				<!-- Footer -->
-				<div class="mt-8 pt-6 border-t border-accent-track">
+				<div class="mt-8 pt-6 border-t border-accent-track space-y-3">
 					<p class="text-center text-text-muted text-sm font-body">
 						Already have an account?
 						<a href="/login" class="text-accent-primary hover:text-accent-primary-light transition-colors font-semibold">
 							Sign in
 						</a>
+					</p>
+					<p class="text-center text-text-muted text-xs font-body">
+						By continuing, you agree to our
+						<a href="/terms" class="text-text-secondary hover:text-accent-primary underline transition-colors">Terms of Service</a>
+						and
+						<a href="/privacy" class="text-text-secondary hover:text-accent-primary underline transition-colors">Privacy Policy</a>.
 					</p>
 				</div>
 			</div>
