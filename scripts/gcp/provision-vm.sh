@@ -112,7 +112,9 @@ Next steps:
        git clone https://github.com/cazdlt/strtchy.git && cd strtchy
        cp .env.example .env.production && chmod 600 .env.production
 
-  3. Pull prebuilt image from GHCR and start app + Cloudflare Tunnel (+ Litestream backup):
-       docker compose --profile tunnel --profile backup pull
-       docker compose --profile tunnel --profile backup up -d
+  3. Pull prebuilt image from GHCR, start stack, run migrations + initial seed:
+       ./scripts/docker/deploy.sh --seed
+
+  4. Subsequent upgrades:
+       git pull && ./scripts/docker/deploy.sh
 EOF

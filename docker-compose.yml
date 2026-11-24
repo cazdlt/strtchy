@@ -26,7 +26,9 @@ services:
     container_name: strtchy-tunnel
     profiles: ["tunnel"]
     restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    env_file:
+      - .env.production
+    command: tunnel --no-autoupdate run
     depends_on:
       - strtchy
 
@@ -41,10 +43,5 @@ services:
       - ./litestream.yml:/etc/litestream.yml:ro
     env_file:
       - .env.production
-    environment:
-      - LITESTREAM_B2_BUCKET=${LITESTREAM_B2_BUCKET:-}
-      - LITESTREAM_B2_ENDPOINT=${LITESTREAM_B2_ENDPOINT:-}
-      - LITESTREAM_B2_ACCESS_KEY_ID=${LITESTREAM_B2_ACCESS_KEY_ID:-}
-      - LITESTREAM_B2_SECRET_ACCESS_KEY=${LITESTREAM_B2_SECRET_ACCESS_KEY:-}
     depends_on:
       - strtchy

@@ -25,16 +25,21 @@ The core multi-tenancy, authentication, onboarding, and container persistence bl
 - **Compute**: GCP Compute Engine `e2-micro` (1 GB RAM) in **`us-east1`** (South Carolina — lowest latency to Colombia among the 3 Always Free regions `us-east1`, `us-central1`, `us-west1`).
 - **Storage & IP**: `30 GB pd-standard` boot disk (included in Always Free) + ephemeral IPv4 (no reserved static IP).
 - **Memory Headroom**: `2 GB` swapfile (`vm.swappiness=10`) configured on boot. No Dokploy or in-VM `docker build` so RAM stays free for the runtime containers.
-- **CI/CD Container Builds**: [`.github/workflows/docker-ghcr.yml`](../.github/workflows/docker-ghcr.yml) builds the production Docker image on GitHub Actions and pushes `ghcr.io/cazdlt/strtchy:latest` to GHCR (without committing any build artifacts to Git). The VM only runs `docker compose pull && docker compose up -d`.
+- **CI/CD Container Builds**: [`.github/workflows/docker-ghcr.yml`](../.github/workflows/docker-ghcr.yml) builds the production Docker image on GitHub Actions and pushes `ghcr.io/cazdlt/strtchy:latest` to GHCR (without committing any build artifacts to Git). The VM runs [`scripts/docker/deploy.sh`](../scripts/docker/deploy.sh) (pull, restart, migrate, healthcheck — never `docker build`).
 - **Ingress & TLS**: **Cloudflare Tunnel** (`cloudflared` sidecar via `--profile tunnel`) connects outbound to Cloudflare and routes `https://yourdomain.com` → `http://strtchy:4173`. Zero public inbound ports (`80`, `443`, `3000`) are opened, and ephemeral IP changes never break DNS.
 - **Provisioning**: Reproducible one-shot script at [`scripts/gcp/provision-vm.sh`](../scripts/gcp/provision-vm.sh).
+
+### Secrets Management (`.env.production`)
+
+- **Phase 1 (VM-based — GCP Always Free / Hetzner)**: Secrets live exclusively in `.env.production` on the VM (`chmod 600`, gitignored), backed up in a personal password manager. All Compose services (`strtchy`, `cloudflared`, `litestream`) read directly from `env_file: [.env.production]`, and [`scripts/docker/deploy.sh`](../scripts/docker/deploy.sh) enforces `chmod 600`, validates `BETTER_AUTH_SECRET`, and automatically enables `--profile tunnel` (when `TUNNEL_TOKEN` is set) and `--profile backup` (when `LITESTREAM_B2_BUCKET` is set). Keeping secrets in `.env.production` avoids GCP IAM coupling so the exact same stack migrates cleanly to Hetzner/Dokploy if needed.
+- **Phase 2 (Cloud Run)**: Migrate secrets to **GCP Secret Manager** mounted natively as environment variables when moving to stateless containers.
 
 ### VM Security Checklist
 
 - [ ] **Zero Public Inbound Ports**: `strtchy` binds to `127.0.0.1:4173`; all public traffic enters via Cloudflare Tunnel (`cloudflared`).
 - [ ] **SSH via IAP Only**: GCP firewall + UFW restrict port `22` to Google Cloud IAP (`35.235.240.0/20`) — not open to `0.0.0.0/0`.
 - [ ] **Automatic OS Patching**: `unattended-upgrades` enabled automatically by `provision-vm.sh`.
-- [ ] **Secrets**: Store `.env.production` on the VM with `chmod 600` (`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CLOUDFLARE_TUNNEL_TOKEN`, `LITESTREAM_B2_*`), never committed to git.
+- [ ] **Secrets**: Store `.env.production` on the VM with `chmod 600` (`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `TUNNEL_TOKEN`, `LITESTREAM_B2_*`), never committed to git.
 
 ---
 
@@ -46,10 +51,9 @@ Strtchy uses SQLite (`better-sqlite3` in WAL mode) stored at `/app/data/prod/loc
 - **Enabling in Production**:
   1. Create a private Backblaze B2 bucket and an Application Key restricted to that bucket (read/write).
   2. Set `LITESTREAM_B2_BUCKET`, `LITESTREAM_B2_ENDPOINT`, `LITESTREAM_B2_ACCESS_KEY_ID`, and `LITESTREAM_B2_SECRET_ACCESS_KEY` in `.env.production`.
-  3. Start the full production stack:
+  3. Deploy/restart the stack (auto-enables `--profile backup` when `LITESTREAM_B2_BUCKET` is set):
      ```bash
-     docker compose --profile tunnel --profile backup pull
-     docker compose --profile tunnel --profile backup up -d
+     ./scripts/docker/deploy.sh
      ```
 - **Restore**: Run `litestream restore -o /app/data/prod/local.db s3://$LITESTREAM_B2_BUCKET/strtchy/local.db` (with `-config /etc/litestream.yml`) before starting the app container on a fresh host.
 
