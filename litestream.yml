@@ -1,0 +1,10 @@
+dbs:
+  - path: /app/data/prod/local.db
+    replicas:
+      - type: s3
+        bucket: ${LITESTREAM_B2_BUCKET}
+        path: strtchy/local.db
+        endpoint: ${LITESTREAM_B2_ENDPOINT}
+        access-key-id: ${LITESTREAM_B2_ACCESS_KEY_ID}
+        secret-access-key: ${LITESTREAM_B2_SECRET_ACCESS_KEY}
+        force-path-style: true

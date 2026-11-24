@@ -1,13 +1,20 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { sveltekitCookies } from "better-auth/svelte-kit";
+import { building } from "$app/environment";
 import { getRequestEvent } from "$app/server";
 import { db } from "$lib/db";
 import * as schema from "$lib/db/schema";
 
+const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
+if (!betterAuthSecret && !building && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "BETTER_AUTH_SECRET environment variable is required in production",
+  );
+}
+
 export const auth = betterAuth({
-  secret:
-    import.meta.env.BETTER_AUTH_SECRET || "dev-secret-change-in-production",
+  secret: betterAuthSecret || "dev-secret-change-in-production",
   database: drizzleAdapter(db, {
     schema,
     provider: "sqlite",
