@@ -20,21 +20,21 @@ The core multi-tenancy, authentication, onboarding, and container persistence bl
 
 ---
 
-## GCP Compute Engine Provisioning & VM Security
+## Phase 1 Infrastructure ($0/mo GCP Always Free `e2-micro`)
 
-### Phase 1 Infrastructure (Single-VM + Dokploy)
-
-- **Compute**: GCP Compute Engine `e2-small` (Ubuntu 24.04 LTS, 30 GB `pd-balanced` disk, static external IP).
-- **Provisioning**: Reproducible one-shot script at [`scripts/gcp/provision-vm.sh`](../scripts/gcp/provision-vm.sh) using `gcloud` CLI + startup script to configure `unattended-upgrades`, `ufw`, and install **Dokploy**.
-- **App Deployment & TLS**: **Dokploy** runs on the VM (Docker + Traefik) to handle GitHub auto-deploys, `.env` secrets, multi-app Docker Compose stacks, and automatic Let's Encrypt HTTPS certificates. **Cloudflare** sits in front for DNS and optional CDN/WAF.
+- **Compute**: GCP Compute Engine `e2-micro` (1 GB RAM) in **`us-east1`** (South Carolina — lowest latency to Colombia among the 3 Always Free regions `us-east1`, `us-central1`, `us-west1`).
+- **Storage & IP**: `30 GB pd-standard` boot disk (included in Always Free) + ephemeral IPv4 (no reserved static IP).
+- **Memory Headroom**: `2 GB` swapfile (`vm.swappiness=10`) configured on boot. No Dokploy or in-VM `docker build` so RAM stays free for the runtime containers.
+- **CI/CD Container Builds**: [`.github/workflows/docker-ghcr.yml`](../.github/workflows/docker-ghcr.yml) builds the production Docker image on GitHub Actions and pushes `ghcr.io/cazdlt/strtchy:latest` to GHCR (without committing any build artifacts to Git). The VM only runs `docker compose pull && docker compose up -d`.
+- **Ingress & TLS**: **Cloudflare Tunnel** (`cloudflared` sidecar via `--profile tunnel`) connects outbound to Cloudflare and routes `https://yourdomain.com` → `http://strtchy:4173`. Zero public inbound ports (`80`, `443`, `3000`) are opened, and ephemeral IP changes never break DNS.
+- **Provisioning**: Reproducible one-shot script at [`scripts/gcp/provision-vm.sh`](../scripts/gcp/provision-vm.sh).
 
 ### VM Security Checklist
 
-- [ ] **GCP Firewall + UFW**: Only ports `80` and `443` exposed publicly; port `4173` is never exposed directly.
-- [ ] **Close Dokploy Setup Port**: Delete `allow-strtchy-dokploy-setup` (port `3000`) immediately after binding Dokploy to an HTTPS domain.
-- [ ] **SSH via IAP Only**: Port `22` is restricted to Google Cloud IAP (`35.235.240.0/20`) — not open to `0.0.0.0/0`.
+- [ ] **Zero Public Inbound Ports**: `strtchy` binds to `127.0.0.1:4173`; all public traffic enters via Cloudflare Tunnel (`cloudflared`).
+- [ ] **SSH via IAP Only**: GCP firewall + UFW restrict port `22` to Google Cloud IAP (`35.235.240.0/20`) — not open to `0.0.0.0/0`.
 - [ ] **Automatic OS Patching**: `unattended-upgrades` enabled automatically by `provision-vm.sh`.
-- [ ] **Secrets**: Set `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `LITESTREAM_B2_*` in Dokploy's environment settings (never committed to git).
+- [ ] **Secrets**: Store `.env.production` on the VM with `chmod 600` (`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CLOUDFLARE_TUNNEL_TOKEN`, `LITESTREAM_B2_*`), never committed to git.
 
 ---
 
@@ -45,10 +45,11 @@ Strtchy uses SQLite (`better-sqlite3` in WAL mode) stored at `/app/data/prod/loc
 - **Replication**: `docker-compose.yml` includes a `litestream` sidecar (`litestream/litestream:0.3`) under `profiles: ["backup"]`, configured by `litestream.yml` to continuously stream WAL changes to **Backblaze B2** (S3-compatible API).
 - **Enabling in Production**:
   1. Create a private Backblaze B2 bucket and an Application Key restricted to that bucket (read/write).
-  2. Set `LITESTREAM_B2_BUCKET`, `LITESTREAM_B2_ENDPOINT`, `LITESTREAM_B2_ACCESS_KEY_ID`, and `LITESTREAM_B2_SECRET_ACCESS_KEY` in Dokploy / `.env.production`.
-  3. Start the stack with the backup profile:
+  2. Set `LITESTREAM_B2_BUCKET`, `LITESTREAM_B2_ENDPOINT`, `LITESTREAM_B2_ACCESS_KEY_ID`, and `LITESTREAM_B2_SECRET_ACCESS_KEY` in `.env.production`.
+  3. Start the full production stack:
      ```bash
-     docker compose --profile backup up -d
+     docker compose --profile tunnel --profile backup pull
+     docker compose --profile tunnel --profile backup up -d
      ```
 - **Restore**: Run `litestream restore -o /app/data/prod/local.db s3://$LITESTREAM_B2_BUCKET/strtchy/local.db` (with `-config /etc/litestream.yml`) before starting the app container on a fresh host.
 
@@ -72,6 +73,6 @@ Ordered by priority after initial production launch:
 
 ## Long-Term Architecture Evolution
 
-- **Vertical Scale (2 minutes)**: Stop the GCP VM, resize from `e2-small` to `e2-medium` or `e2-standard-2`, and restart — disk, Dokploy, and containers remain intact.
+- **Multi-App / Higher-RAM Scale-Up**: Move Docker Compose + Litestream + Cloudflare Tunnel to **Hetzner Cloud `CX22`** (2 vCPU, 4 GB RAM, ~\$4.50/mo) with **Dokploy** when running multiple apps or needing more RAM, or resize the GCP VM in-place.
 - **Phase 2 (Decoupled Backend & Cloud Run)**: Triggered before mobile store launch — migrate SQLite (`better-sqlite3`) to managed PostgreSQL (Supabase, Neon, or GCP Cloud SQL) and move the container to stateless **GCP Cloud Run**.
 - **Phase 3 (Mobile App via Capacitor)**: Package the SvelteKit app with Capacitor for **Google Play Store** distribution, using bearer token auth against `/api/*` and native hardware APIs (haptics, background audio, local notifications).
