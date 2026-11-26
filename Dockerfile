@@ -51,6 +51,7 @@ COPY drizzle ./drizzle
 COPY src/lib/db ./src/lib/db
 COPY src/lib/seed ./src/lib/seed
 COPY src/lib/utils ./src/lib/utils
+COPY src/lib/art ./src/lib/art
 
 # Create data directory
 RUN mkdir -p /app/data/prod
